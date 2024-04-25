@@ -1,0 +1,5 @@
+UserFunctionalService
+--------------------
+1. Show my pills
+2. Make reminder
+3. Add new pill -->> In future talk to the other service that use the API.
