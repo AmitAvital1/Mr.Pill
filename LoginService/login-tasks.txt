@@ -1,3 +1,0 @@
-Login Service
--------------
-1. Register/Login

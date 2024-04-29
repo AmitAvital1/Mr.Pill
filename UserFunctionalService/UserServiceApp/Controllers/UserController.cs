@@ -4,24 +4,24 @@ public class UserController : Controller
 {
     private readonly ILogger<UserController> _logger;
     private readonly IUserService _userService;
-    
+
     public UserController(ILogger<UserController> logger, IUserService userService)
     {
         _logger = logger;
         _userService = userService;
-        
+
         // Task task = Task.Run(() =>
         // {
         //     sendRequestToGateway();
         // });
-    }   
+    }
 
     private void sendRequestToGateway()
     {
-        try 
-        {   
-             var port = HttpContext.Connection.LocalPort;
-        
+        try
+        {
+            var port = HttpContext.Connection.LocalPort;
+
             // if i have some instances of the server i need to suffly the name of the server
             // need to add a token to the server 
             HttpRequestMessage requestMessage = new HttpRequestMessage

@@ -76,6 +76,11 @@ nCrunchTemp_*
 */UserServiceApp/wwwroot
 */UserServiceApp/appsettings.Development.json
 */UserServiceApp/appsettings.json
+*LoginService/appsettings.json
+*LoginService/appsettings.Development.json
+*LoginService/Properties
+*LoginService/wwwroot
+*LoginService/views
 
 # AxoCover
 .axoCover/*

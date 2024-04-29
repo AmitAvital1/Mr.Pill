@@ -5,13 +5,13 @@ using UserServiceApp.Models;
 public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
-    
+
     public DbSet<User>? Users { get; set; }
     public DbSet<Medication> Medications { get; set; }
     public DbSet<MedicationRepo> MedicationRepos { get; set; }
     public DbSet<House> Houses { get; set; }
     public DbSet<UserHouse> UserHouses { get; set; }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<UserHouse>()
@@ -45,6 +45,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(user => user.PhoneNumber)
             .IsUnique();
-        
+
     }
 }
