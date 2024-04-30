@@ -76,11 +76,17 @@ nCrunchTemp_*
 */UserServiceApp/wwwroot
 */UserServiceApp/appsettings.Development.json
 */UserServiceApp/appsettings.json
+
 *LoginService/Login/appsettings.json
 *LoginService/Login/appsettings.Development.json
 *LoginService/Login/Properties
 *LoginService/Login/wwwroot
 *LoginService/Login/views
+
+
+*/MinistryOfHealthService/Properties
+*/MinistryOfHealthService/appsettings.Development.json
+*/MinistryOfHealthService/appsettings.json
 
 # AxoCover
 .axoCover/*
