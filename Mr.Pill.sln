@@ -5,6 +5,10 @@ VisualStudioVersion = 17.5.002.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinistryOfHealthService", "MinistryOfHealthService\MinistryOfHealthService.csproj", "{1ABBB161-1107-40C7-A456-AAE0255AA8BC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UserFunctionalService", "UserFunctionalService", "{B755AC03-227F-4440-B7AD-8201418D3A21}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserServiceApp", "UserFunctionalService\UserServiceApp\UserServiceApp.csproj", "{505A48C2-8D14-4DFA-B6DB-5E475ACDE10F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,11 +19,18 @@ Global
 		{1ABBB161-1107-40C7-A456-AAE0255AA8BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1ABBB161-1107-40C7-A456-AAE0255AA8BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1ABBB161-1107-40C7-A456-AAE0255AA8BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{505A48C2-8D14-4DFA-B6DB-5E475ACDE10F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{505A48C2-8D14-4DFA-B6DB-5E475ACDE10F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{505A48C2-8D14-4DFA-B6DB-5E475ACDE10F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{505A48C2-8D14-4DFA-B6DB-5E475ACDE10F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A3600BB3-F974-4E87-A804-4AE88BBC6888}
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{505A48C2-8D14-4DFA-B6DB-5E475ACDE10F} = {B755AC03-227F-4440-B7AD-8201418D3A21}
 	EndGlobalSection
 EndGlobal
