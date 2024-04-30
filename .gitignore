@@ -6,6 +6,8 @@
 *.user
 *.userosscache
 *.sln.docstates
+/appsettings.json
+
 
 # Build results
 [Dd]ebug/
@@ -68,6 +70,12 @@ nCrunchTemp_*
 
 # dotCover
 *.dotCover
+*/UserServiceApp/views
+*/UserServiceApp/obj
+*/UserServiceApp/Properties
+*/UserServiceApp/wwwroot
+*/UserServiceApp/appsettings.Development.json
+*/UserServiceApp/appsettings.json
 
 # AxoCover
 .axoCover/*
