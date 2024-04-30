@@ -1,10 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using UserServiceApp.Models.UserService;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddHttpClient();
+
+builder.Services.AddSingleton<ILogger>(provider =>
+{
+    var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
+    return loggerFactory.CreateLogger("MyLogger");
+});
+
 
 builder.Services.AddDbContext<AppDbContext>( options=>{
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 namespace UserServiceApp.Controllers;
+using UserServiceApp.Models.UserService;
 public class UserController : Controller
 {
     private readonly ILogger<UserController> _logger;
