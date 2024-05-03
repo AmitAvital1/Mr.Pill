@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
+using UserServiceApp.Controllers;
 using UserServiceApp.Models.UserService;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSingleton<HomeController>();
+builder.Services.AddSingleton<UserController>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddHttpClient();
 
@@ -13,6 +17,8 @@ builder.Services.AddSingleton<ILogger>(provider =>
     var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
     return loggerFactory.CreateLogger("MyLogger");
 });
+
+//builder.Services.AddHostedService<RabbitMQHostedService>();
 
 
 builder.Services.AddDbContext<AppDbContext>( options=>{

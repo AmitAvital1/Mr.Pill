@@ -8,4 +8,5 @@ public interface IUserService
     public void UpdateMedication();
     public void DeleteMedication();
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int userId);
+    public MedicationDTO GetMedicationByName(string medicationName);
 }

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 namespace UserServiceApp.Controllers;
 using UserServiceApp.Models.UserService;
+using MrPill.DTOs.DTOs;
+
 public class UserController : Controller
 {
     private readonly ILogger<UserController> _logger;
@@ -21,7 +23,7 @@ public class UserController : Controller
     {
         try
         {
-            var port = HttpContext.Connection.LocalPort;
+            int port = HttpContext.Connection.LocalPort;
 
             // if i have some instances of the server i need to suffly the name of the server
             // need to add a token to the server 
@@ -50,4 +52,41 @@ public class UserController : Controller
             _logger.LogError($"An error occurred while sending request to API gateway: {ex.Message}");
         }
     }
+
+    [HttpPost("medications")]
+    public ActionResult CreateNewMedication([FromBody] string medicationName)
+    {
+        bool success = _userService.CreateNewMedication(medicationName);
+        return success ? Ok() : StatusCode(500);
+    }
+
+    [HttpPut("medications/{medicationId}")]
+    public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
+    {
+        // Update logic
+        return Ok();
+    }
+
+    [HttpDelete("medications/{medicationId}")]
+    public ActionResult DeleteMedication(int medicationId)
+    {
+        // Delete logic
+        return Ok();
+    }
+
+    [HttpGet("users/{userId}/medications")]
+    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId(int userId)
+    {
+        IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userId);
+        return Ok(medications);
+    }
+
+    [HttpGet("medications")]
+    public ActionResult<MedicationDTO> GetMedicationByName([FromQuery] string medicationName)
+    {
+        // need to authorize the endpoint and check what is the id of the user that send the request
+        MedicationDTO medication = _userService.GetMedicationByName(medicationName);
+        return Ok(medication);
+    }
+
 }
