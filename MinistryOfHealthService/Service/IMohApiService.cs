@@ -1,7 +1,8 @@
+using MrPill.DTOs.DTOs;
 namespace MOHService.service
 {
     public interface IMohApiService
     {
-        Task<string> GetPillDetailsAPI(string barcode);
+        Task<MohPillDetailsDTO> GetPillDetailsAPI(string barcode);
     }
 }

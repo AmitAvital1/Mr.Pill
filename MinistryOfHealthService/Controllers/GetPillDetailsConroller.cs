@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using MOHService.service;
-
+using MrPill.DTOs.DTOs;
 namespace MOHService.Controllers
 {
     [Route("moh-service")]
@@ -14,7 +14,7 @@ namespace MOHService.Controllers
         }
 
         [HttpGet("pill-details/{barcode}")]
-        public Task<string> GetPillDetailsFromApiById(string barcode)
+        public Task<MohPillDetailsDTO> GetPillDetailsFromApiById(string barcode)
         {
             return _mohApiService.GetPillDetailsAPI(barcode);
         }

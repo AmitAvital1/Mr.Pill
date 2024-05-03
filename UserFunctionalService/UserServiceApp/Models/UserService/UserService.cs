@@ -58,7 +58,7 @@ public class UserService : IUserService
 
     public void DeleteMedication()
     {
-
+        
     }
 
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int userId)
