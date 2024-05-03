@@ -88,5 +88,4 @@ public class UserController : Controller
         MedicationDTO medication = _userService.GetMedicationByName(medicationName);
         return Ok(medication);
     }
-
 }

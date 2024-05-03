@@ -7,7 +7,7 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<User>? Users { get; set; }
-    public DbSet<Medication> Medications { get; set; }
+    public DbSet<UserMedications> UserMedications { get; set; }
     public DbSet<MedicationRepo> MedicationRepos { get; set; }
     public DbSet<House> Houses { get; set; }
     public DbSet<UserHouse> UserHouses { get; set; }
@@ -30,13 +30,13 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.NoAction);
 
 
-        modelBuilder.Entity<Medication>()
+        modelBuilder.Entity<UserMedications>()
             .HasOne(medication => medication.MedicationRepo)
             .WithMany(medicationRepo => medicationRepo.Medications)
             .HasForeignKey(medication => medication.MedicationRepoId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<Medication>()
+        modelBuilder.Entity<UserMedications>()
             .HasOne(medication => medication.User)
             .WithMany(user => user.Medications)
             .HasForeignKey(medication => medication.UserId)
