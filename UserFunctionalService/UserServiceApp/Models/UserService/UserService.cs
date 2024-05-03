@@ -1,4 +1,6 @@
 using MrPill.DTOs.DTOs;
+using RabbitMQ.Client;
+using System.Text;
 
 namespace UserServiceApp.Models.UserService;
 
@@ -66,4 +68,9 @@ public class UserService : IUserService
         return null;
     }
 
+    public MedicationDTO GetMedicationByName(string medicationName)
+    {
+        return null;
+    }
+    
 }
