@@ -1,5 +1,7 @@
 using Newtonsoft.Json.Linq;
 using System.Text;
+using MrPill.DTOs.DTOs;
+using static MrPill.MOHService.Constants.Constants;
 
 namespace MOHService.service
 {
@@ -12,9 +14,9 @@ namespace MOHService.service
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        public async Task<string> GetPillDetailsAPI(string barcode)
+        public async Task<MohPillDetailsDTO> GetPillDetailsAPI(string barcode)
         {
-                string apiUrl = "https://israeldrugs.health.gov.il/GovServiceList/IDRServer/SearchByAdv";
+                string apiUrl = MOH_API_URL;
 
                 var content = new StringContent(createJsonBodyToMohWithBarcode(barcode), Encoding.UTF8, "application/json");
             
@@ -23,14 +25,28 @@ namespace MOHService.service
                 if (response.IsSuccessStatusCode)
                 {
                     string pillDetails = await response.Content.ReadAsStringAsync();
-                    JArray jsonArray = JArray.Parse(pillDetails);
-                    return jsonArray.ToString();
-
+                    JToken pillJsonDetails = JArray.Parse(pillDetails)[0];
+                    MohPillDetailsDTO dtoToReturn = createPillDetailsDtoFromJson(pillJsonDetails);
+                    return dtoToReturn;
                 }
                 else
                 {
                     throw new HttpRequestException($"Failed to post data to the API. Status code: {response.StatusCode}");
                 }
+        }
+
+        private MohPillDetailsDTO createPillDetailsDtoFromJson(JToken pillJsonDetails)
+        {
+            return 
+                new MohPillDetailsDTO.Builder()
+                    .SetBarcode(pillJsonDetails[MOH_JSON_BARCODES_KEY]?.ToString())
+                    .SetDrugHebrewName(pillJsonDetails[MOH_JSON_DRAG_HEB_NAME_KEY]?.ToString())
+                    .SetDrugEnglishName(pillJsonDetails[MOH_JSON_DRAG_ENG_NAME_KEY]?.ToString())
+                    .SetEnglishDescription(pillJsonDetails[MOH_JSON_DRAG_ENG_DESC_KEY]?.ToString())
+                    .SetHebrewDescription(pillJsonDetails[MOH_JSON_DRAG_HEB_DESC_KEY]?.ToString())
+                    .SetImagePath(MOH_IMAGE_BASE_URL + pillJsonDetails[MOH_JSON_DRAG_IMG_PATH_KEY][0]["url"].ToString())
+                    .Build();
+                    
         }
 
         private string createJsonBodyToMohWithBarcode(string barcode)
