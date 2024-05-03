@@ -1,12 +1,19 @@
 namespace MrPill.DTOs.DTOs;
 
 using System;
+using System.ComponentModel.DataAnnotations;
 
 public class MedicationDTO
 {
     public int Id { get; set; }
+    
+    [Required(ErrorMessage = "Please enter a name.")]
+    [StringLength(50, ErrorMessage = "Name should not exceed 50 characters.")]
     public string? Name { get; set; }
+
+    [StringLength(100, ErrorMessage = "Description should not exceed 100 characters.")]
     public string? Description { get; set; }
+    
     public DateTime? Validity { get; set; }
     public int UserId { get; set; }
     public int MedicationRepoId { get; set; }

@@ -1,13 +1,21 @@
-﻿namespace MrPill.DTOs.DTOs;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MrPill.DTOs.DTOs;
 
 public class UserDTO
 {
-    public int UserId { get; set; }
+    [Required(ErrorMessage = "Please enter a name.")]
+    [StringLength(50, ErrorMessage = "First Name should not exceed 50 characters.")]
     public string? FirstName { get; set; }
+    
+    [Required(ErrorMessage = "Please enter a name.")]
+    [StringLength(50, ErrorMessage = "Last Name should not exceed 50 characters.")]
     public string? LastName { get; set; }
+    
+    [Required(ErrorMessage = "Please enter a phone number.")]
+    [Phone(ErrorMessage = "Please enter a valid phone number.")]
     public int PhoneNumber { get; set; }
-    public int HouseId { get; set; }
-
+    
     public class UserDTOBuilder
     {
         private UserDTO _userDTO;
@@ -15,12 +23,6 @@ public class UserDTO
         public UserDTOBuilder()
         {
             _userDTO = new UserDTO();
-        }
-
-        public UserDTOBuilder WithUserId(int userId)
-        {
-            _userDTO.UserId = userId;
-            return this;
         }
 
         public UserDTOBuilder WithFirstName(string firstName)
@@ -38,12 +40,6 @@ public class UserDTO
         public UserDTOBuilder WithPhoneNumber(int phoneNumber)
         {
             _userDTO.PhoneNumber = phoneNumber;
-            return this;
-        }
-
-        public UserDTOBuilder WithHouseId(int houseId)
-        {
-            _userDTO.HouseId = houseId;
             return this;
         }
 
