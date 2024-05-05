@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Login.Models.LoginService;
+using Login.Models.DB;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +34,9 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddDbContext<AppDbContext>( options=>{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
+}, ServiceLifetime.Singleton);
 
 var app = builder.Build();
 

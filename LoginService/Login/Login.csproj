@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.4" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
      <ProjectReference Include="..\..\Dto\Dtos.csproj" />
   </ItemGroup>
 
