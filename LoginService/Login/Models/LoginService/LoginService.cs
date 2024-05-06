@@ -31,7 +31,10 @@ public class LoginService : ILoginService
         {
             try
             {
-                if (PhoneNumberExistInDb(userDTORegister.PhoneNumber))
+                string phoneNumberString = userDTORegister.PhoneNumber !;
+                int phoneNumberValue = int.Parse(phoneNumberString);
+
+                if (!PhoneNumberExistInDb(phoneNumberValue))
                 {
                     var newHouse = new House
                     {
@@ -40,27 +43,39 @@ public class LoginService : ILoginService
                         {
                             FirstName = userDTORegister.FirstName !,
                             LastName = userDTORegister.LastName !,
-                            PhoneNumber = userDTORegister.PhoneNumber
+                            PhoneNumber = phoneNumberValue
                         }
                     };
 
                     _dbContext.Houses.Add(newHouse);
 
-                    _dbContext.SaveChanges();
-
                     newHouse.Manager.HouseId = newHouse.Id;
 
                     _dbContext?.Users?.Add(newHouse.Manager);
 
-                    _dbContext?.SaveChanges();
+                    var userHouse = new UserHouse
+                    {
+                        UserId = newHouse.Manager.UserId,
+                        User = newHouse.Manager,  
+                        HouseId = newHouse.Id,
+                        House = newHouse          
+                    };
 
-                    return true;
+                    if (_dbContext != null)
+                    {
+                        _dbContext.UserHouses.Add(userHouse);
+                        _dbContext.SaveChanges();
+                        return true;
+                    }
+
+                    return false;
                 }
 
               return false;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while trying to register and save in db.");
                 return false;
             }
         }
@@ -90,10 +105,8 @@ public class LoginService : ILoginService
 
     private string GenereateTokenByClaim(Claim[] claims)
     {
-
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
 
         var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Audience"],
             claims: claims,
@@ -101,7 +114,6 @@ public class LoginService : ILoginService
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
-
     }
 
     private string getPhoneNumberFromToken(string token)

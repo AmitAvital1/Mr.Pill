@@ -14,7 +14,7 @@ public class UserDTO
     
     [Required(ErrorMessage = "Please enter a phone number.")]
     [Phone(ErrorMessage = "Please enter a valid phone number.")]
-    public int PhoneNumber { get; set; }
+    public string? PhoneNumber { get; set; }
     
     public class UserDTOBuilder
     {
@@ -37,7 +37,7 @@ public class UserDTO
             return this;
         }
 
-        public UserDTOBuilder WithPhoneNumber(int phoneNumber)
+        public UserDTOBuilder WithPhoneNumber(string phoneNumber)
         {
             _userDTO.PhoneNumber = phoneNumber;
             return this;

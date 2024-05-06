@@ -53,6 +53,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UsePathBase("/Mr-Pill");
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

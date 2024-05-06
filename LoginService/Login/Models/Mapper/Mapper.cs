@@ -34,7 +34,7 @@ public class Mapper
         return UserDTO.Builder()
                 .WithFirstName(user.FirstName)
                 .WithLastName(user.LastName)
-                .WithPhoneNumber(user.PhoneNumber)
+                .WithPhoneNumber(user.PhoneNumber.ToString())
                 .Build();
 
     }

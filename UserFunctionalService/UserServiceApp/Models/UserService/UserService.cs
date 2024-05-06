@@ -9,12 +9,15 @@ public class UserService : IUserService
      private readonly HttpClient _httpClient;
      private readonly AppDbContext _dbContext;
      private readonly ILogger _logger;
+     private readonly RabbitMQHostedService _rabbitMQHostedService;
 
-     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService>logger)
+     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger,
+             RabbitMQHostedService rabbitMQHostedService)
      {
         _httpClient = httpClientFactory.CreateClient();
         _dbContext = dbContext;
         _logger = logger;
+        _rabbitMQHostedService = rabbitMQHostedService;
      }
 
     public bool CreateNewMedication(string medicationName)

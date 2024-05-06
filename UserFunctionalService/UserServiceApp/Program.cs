@@ -14,15 +14,13 @@ builder.Services.AddSingleton<HomeController>();
 builder.Services.AddSingleton<UserController>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddHttpClient();
+builder.Services.AddHostedService<RabbitMQHostedService>();
 
 builder.Services.AddSingleton<ILogger>(provider =>
 {
     var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
     return loggerFactory.CreateLogger("MyLogger");
 });
-
-//builder.Services.AddHostedService<RabbitMQHostedService>();
-
 
 builder.Services.AddDbContext<AppDbContext>( options=>{
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));

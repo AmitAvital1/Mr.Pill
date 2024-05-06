@@ -1,8 +1,6 @@
-using Login.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Login.Models.LoginService;
-using MrPill.DTOs;
 using MrPill.DTOs.DTOs;
 
 [Authorize]
@@ -26,9 +24,12 @@ public class LoginController : Controller
         {
             if (ModelState.IsValid)
             {
-                if (_loginService.PhoneNumberExistInDb(UserLogin.PhoneNumber))
+                string phoneNumberString = UserLogin.PhoneNumber !;
+                int phoneNumberValue = int.Parse(phoneNumberString);
+
+                if (_loginService.PhoneNumberExistInDb(phoneNumberValue))
                 {
-                    string UserToken = _loginService.GenerateUserToken(UserLogin.PhoneNumber.ToString());
+                    string UserToken = _loginService.GenerateUserToken(UserLogin.PhoneNumber!.ToString());
                     return Ok(new { token = UserToken });
                 }
                 else
@@ -59,11 +60,14 @@ public class LoginController : Controller
         {
             if (ModelState.IsValid)
             {
-                if(!_loginService.PhoneNumberExistInDb(userDTORegister.PhoneNumber))
+                string phoneNumberString = userDTORegister.PhoneNumber !;
+                int phoneNumberValue = int.Parse(phoneNumberString);
+
+                if (!_loginService.PhoneNumberExistInDb(phoneNumberValue))
                 {
                     if (_loginService.RegisterUser(userDTORegister))
                     {
-                        string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber.ToString());
+                        string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber!.ToString());
                         
                         return Ok(new { token = UserToken });
                     }
@@ -111,7 +115,7 @@ public class LoginController : Controller
 
         if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse,managerPhone))
         {
-            return Ok(new { Massage = "joined to another house succsesfuly" });
+            return Ok(new { Massage = "request to joined to another house succsesfuly" });
         }
         else
         {
