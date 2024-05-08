@@ -9,15 +9,17 @@ public class UserService : IUserService
      private readonly HttpClient _httpClient;
      private readonly AppDbContext _dbContext;
      private readonly ILogger _logger;
-     private readonly RabbitMQHostedService _rabbitMQHostedService;
-
-     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger,
-             RabbitMQHostedService rabbitMQHostedService)
+     
+    public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger)
      {
         _httpClient = httpClientFactory.CreateClient();
         _dbContext = dbContext;
         _logger = logger;
-        _rabbitMQHostedService = rabbitMQHostedService;
+     }
+
+     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
+     {
+        Console.WriteLine("Arrive!!");
      }
 
     public bool CreateNewMedication(string medicationName)

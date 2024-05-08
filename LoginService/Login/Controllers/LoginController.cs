@@ -22,27 +22,24 @@ public class LoginController : Controller
     {
         try
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                string phoneNumberString = UserLogin.PhoneNumber !;
-                int phoneNumberValue = int.Parse(phoneNumberString);
-
-                if (_loginService.PhoneNumberExistInDb(phoneNumberValue))
-                {
-                    string UserToken = _loginService.GenerateUserToken(UserLogin.PhoneNumber!.ToString());
-                    return Ok(new { token = UserToken });
-                }
-                else
-                {
-                    _logger.LogInformation("User with phone Number {PhoneNumber} does not exist", UserLogin.PhoneNumber);
-                    return NotFound(new { message = "User not found", PhoneNumber = UserLogin.PhoneNumber });
-                }
-            }
-            else
-            {
-                return BadRequest(new { Message = "User not authenticated" });
+                return BadRequest(new { Message = "Invalid model state in login" });
             }
 
+            if (!int.TryParse(UserLogin.PhoneNumber, out int phoneNumberValue))
+            {
+                return BadRequest(new { Message = "Invalid phone number format" });
+            }
+
+            if (_loginService.PhoneNumberExistInDb(phoneNumberValue))
+            {
+                string UserToken = _loginService.GenerateUserToken(UserLogin.PhoneNumber);
+                return Ok(new { token = UserToken });
+            }
+
+            _logger.LogInformation("User with phone number {PhoneNumber} does not exist", UserLogin.PhoneNumber);
+            return NotFound(new { message = "User not found", PhoneNumber = UserLogin.PhoneNumber });
         }
         catch (Exception ex)
         {
@@ -58,35 +55,32 @@ public class LoginController : Controller
     {
         try
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                string phoneNumberString = userDTORegister.PhoneNumber !;
-                int phoneNumberValue = int.Parse(phoneNumberString);
+                return BadRequest(new { Message = "Invalid model state In register" });
+            }
 
-                if (!_loginService.PhoneNumberExistInDb(phoneNumberValue))
+            if (!int.TryParse(userDTORegister.PhoneNumber, out int phoneNumberValue))
+            {
+                return BadRequest(new { Message = "Invalid phone number format" });
+            }
+
+            if (!_loginService.PhoneNumberExistInDb(phoneNumberValue))
+            {
+                if (_loginService.RegisterUser(userDTORegister))
                 {
-                    if (_loginService.RegisterUser(userDTORegister))
-                    {
-                        string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber!.ToString());
-                        
-                        return Ok(new { token = UserToken });
-                    }
-                    else
-                    {
-                        throw new Exception("Failed to register user");
-                    }
+                    string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber);
+                    
+                    return Ok(new { token = UserToken });
                 }
                 else
                 {
-                    _logger.LogInformation("User with phone Number {PhoneNumber} exist in the system", userDTORegister.PhoneNumber);
-                    return NotFound(new { message = "User found", PhoneNumber = userDTORegister.PhoneNumber });
+                    throw new Exception("Failed to register user");
                 }
             }
-            else
-            {
-                return BadRequest(new { Message = "User not authenticated" });
-            }
 
+            _logger.LogInformation("User with phone number {PhoneNumber} exists in the system", userDTORegister.PhoneNumber);
+            return Conflict(new { message = "User already exists", PhoneNumber = userDTORegister.PhoneNumber });
         }
         catch (Exception ex)
         {

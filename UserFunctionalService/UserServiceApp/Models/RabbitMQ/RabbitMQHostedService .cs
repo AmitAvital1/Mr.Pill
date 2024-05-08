@@ -1,64 +1,66 @@
 using System.Text;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using MrPill.DTOs.DTOs;
+using System.Text.Json;
+using UserServiceApp.Models.UserService;
 
 public class RabbitMQHostedService : IHostedService
 {
-    private readonly IConnection _connection;
-    private readonly IModel _channel;
+    private IConnection? cnn;
+    private IModel? channel;
+    private readonly IUserService _userService;
+    private readonly ILogger<IUserService> _logger;
 
-    public RabbitMQHostedService()
+    public RabbitMQHostedService(IUserService userService, ILogger<IUserService> logger) 
     {
-        bool example = false;
-        
-        if (example)
-        {
-               var factory = new ConnectionFactory() { HostName = "localhost" };
-                _connection = factory.CreateConnection();
-                _channel = _connection.CreateModel();
-                _channel.QueueDeclare(queue: "my_queue",
-                                    durable: false,
-                                    exclusive: false,
-                                    autoDelete: false,
-                                    arguments: null);
-        }
-     
+        _userService = userService;
+        _logger = logger;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        bool example = false;
+        ConnectionFactory factory = new();
+        factory.Uri = new Uri(RabbitMqConstants.Uri);
+        factory.ClientProvidedName = RabbitMqConstants.GerResponseFromServerQueueName;
 
-        if (example)
+         cnn = factory.CreateConnection();
+         channel = cnn.CreateModel();
+
+        channel.ExchangeDeclare(RabbitMqConstants.ExchangeName, ExchangeType.Direct);
+        channel.QueueDeclare(RabbitMqConstants.QueueName, false, false,false, null);
+        channel.QueueBind(RabbitMqConstants.QueueName, RabbitMqConstants.ExchangeName, RabbitMqConstants.RoutingKey, null);
+        channel.BasicQos(0,1,false); // prefetchSize, prefetchCount, global 
+
+        var consumer = new EventingBasicConsumer(channel);
+        consumer.Received += (sender, args) =>
         {
-              var consumer = new EventingBasicConsumer(_channel);
-            consumer.Received += (sender, eventArgs) =>
+            var body = args.Body.ToArray();
+            string json = Encoding.UTF8.GetString(body);
+            
+            LoginComunicationDWrapper wrapper = JsonSerializer.Deserialize<LoginComunicationDWrapper>(json);
+
+            if (wrapper != null)
             {
-                var body = eventArgs.Body.ToArray();
-                var message = Encoding.UTF8.GetString(body);
-                Console.WriteLine("Received message: {0}", message);
-                // here i need to save the massage to the db !!
-            };
+                _userService.SaveMassageToManagerHouseToAddNewUser(wrapper);
+                channel.BasicAck(args.DeliveryTag, false);
+            }
+            else
+            {
+                _logger.LogWarning("Failed to deserialize JSON into LoginComunicationDWrapper object");
+            } 
 
-            _channel.BasicConsume(queue: "my_queue",
-                                autoAck: true,
-                                consumer: consumer);
+        };
 
-        }
+        string consumeTag = channel.BasicConsume(RabbitMqConstants.QueueName, false, consumer);
 
         return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        bool example = false;
-
-        if (example)
-        {
-            _channel.Close();
-            _connection.Close();
-        }
-
+        channel.Close();
+        cnn.Close();
         return Task.CompletedTask;
     }
 }
