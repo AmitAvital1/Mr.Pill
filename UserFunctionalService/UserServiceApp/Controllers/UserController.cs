@@ -2,7 +2,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace UserServiceApp.Controllers;
 using UserServiceApp.Models.UserService;
 using MrPill.DTOs.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
+[Authorize]
 public class UserController : Controller
 {
     private readonly ILogger<UserController> _logger;
@@ -77,6 +79,15 @@ public class UserController : Controller
     [HttpGet("users/{userId}/medications")]
     public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId(int userId)
     {
+        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        
+        if (token == null)
+        {
+            return BadRequest(new { message = "Authorization token not provided" });
+        }
+
+        int UserPhoneNumer = _userService.GetUserPhoneNumber(token);
+        
         IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userId);
         return Ok(medications);
     }

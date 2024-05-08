@@ -10,4 +10,5 @@ public interface IUserService
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int userId);
     public MedicationDTO GetMedicationByName(string medicationName);
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper);
+    public int GetUserPhoneNumber(string token);
 }

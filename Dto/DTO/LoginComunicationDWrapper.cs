@@ -8,12 +8,14 @@ public class LoginComunicationDWrapper
     private readonly UserDTO _userDTO;
     private readonly bool _mergeToNewHouse;
     private readonly int _managerPhone;
+    private readonly int _senderPhone;
     
-    public LoginComunicationDWrapper(UserDTO userDTO, bool mergeToNewHouse, int managerPhone)
+    public LoginComunicationDWrapper(UserDTO userDTO, bool mergeToNewHouse, int managerPhone, int senderPhone)
     {
         _userDTO = userDTO;
         _mergeToNewHouse = mergeToNewHouse;
         _managerPhone = managerPhone;
+        _senderPhone = senderPhone;
     }
 
     public UserDTO UserDTO
@@ -29,6 +31,11 @@ public class LoginComunicationDWrapper
     public int ManagerPhone
     {
         get { return _managerPhone; }
+    }
+
+    public int SenderPhoneNumber
+    {
+        get {return _senderPhone; }
     }
     
     public byte[] GetBytes()

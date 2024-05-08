@@ -16,8 +16,6 @@ public class LoginService : ILoginService
     private readonly AppDbContext _dbContext;
     private static readonly object _lockObject = new();
 
-    // todo => support the fanctionality that add a user to another houses  
-
     public LoginService(ILogger<LoginService> logger,  IConfiguration configuration, AppDbContext appDbContext)
     {
         _logger = logger;
@@ -142,7 +140,7 @@ public class LoginService : ILoginService
                 return false;
             }
 
-           await sendRequestToRabbitMQ(user, mergeToNewHouse, managerPhone);
+           await sendRequestToRabbitMQ(user, mergeToNewHouse, managerPhone,int.Parse(phoneNumber));
 
             return true;
         }
@@ -154,11 +152,11 @@ public class LoginService : ILoginService
         }
     }
 
-    private Task sendRequestToRabbitMQ(User user, bool mergeToNewHouse, int managerPhone)
+    private Task sendRequestToRabbitMQ(User user, bool mergeToNewHouse, int managerPhone, int phoneNumber)
     {
         Mapper mapper = Mapper.Instance;
         UserDTO userDTO = mapper.CreateAUserDtoFromUserObject(user);
-        LoginComunicationDWrapper loginComunicationDWrapper = new(userDTO, mergeToNewHouse, managerPhone);
+        LoginComunicationDWrapper loginComunicationDWrapper = new(userDTO, mergeToNewHouse, managerPhone, phoneNumber);
 
         RabbitMqHandler rabbitMqHandler = RabbitMqHandler.Instance;
         rabbitMqHandler.SendMassage(loginComunicationDWrapper);

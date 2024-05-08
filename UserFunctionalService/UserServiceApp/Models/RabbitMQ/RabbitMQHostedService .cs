@@ -20,12 +20,14 @@ public class RabbitMQHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        ConnectionFactory factory = new();
-        factory.Uri = new Uri(RabbitMqConstants.Uri);
-        factory.ClientProvidedName = RabbitMqConstants.GerResponseFromServerQueueName;
+        ConnectionFactory factory = new()
+        {
+            Uri = new Uri(RabbitMqConstants.Uri),
+            ClientProvidedName = RabbitMqConstants.GerResponseFromServerQueueName
+        };
 
-         cnn = factory.CreateConnection();
-         channel = cnn.CreateModel();
+        cnn = factory.CreateConnection();
+        channel = cnn.CreateModel();
 
         channel.ExchangeDeclare(RabbitMqConstants.ExchangeName, ExchangeType.Direct);
         channel.QueueDeclare(RabbitMqConstants.QueueName, false, false,false, null);
@@ -37,8 +39,8 @@ public class RabbitMQHostedService : IHostedService
         {
             var body = args.Body.ToArray();
             string json = Encoding.UTF8.GetString(body);
-            
-            LoginComunicationDWrapper wrapper = JsonSerializer.Deserialize<LoginComunicationDWrapper>(json);
+          
+            LoginComunicationDWrapper wrapper = JsonSerializer.Deserialize<LoginComunicationDWrapper>(json)!;
 
             if (wrapper != null)
             {
@@ -49,7 +51,6 @@ public class RabbitMQHostedService : IHostedService
             {
                 _logger.LogWarning("Failed to deserialize JSON into LoginComunicationDWrapper object");
             } 
-
         };
 
         string consumeTag = channel.BasicConsume(RabbitMqConstants.QueueName, false, consumer);
@@ -59,8 +60,8 @@ public class RabbitMQHostedService : IHostedService
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        channel.Close();
-        cnn.Close();
+        channel?.Close();
+        cnn?.Close();
         return Task.CompletedTask;
     }
 }

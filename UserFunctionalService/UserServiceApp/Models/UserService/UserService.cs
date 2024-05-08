@@ -1,6 +1,5 @@
 using MrPill.DTOs.DTOs;
-using RabbitMQ.Client;
-using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace UserServiceApp.Models.UserService;
 
@@ -19,8 +18,45 @@ public class UserService : IUserService
 
      public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
      {
-        Console.WriteLine("Arrive!!");
+        // the login service ensure that the phone number is a phone number of the manager
+        int HouseId = getTheHouseIdByTheManagerPhoneNumber(loginComunicationDWrapper.ManagerPhone);
+        int SenderPhoneNumber = loginComunicationDWrapper.SenderPhoneNumber;
+        bool IsHandle = false;
+
+        addNewRequestToTheDb(HouseId,SenderPhoneNumber,IsHandle, loginComunicationDWrapper.MergeToNewHouse);
      }
+
+     private void addNewRequestToTheDb(int i_HouseId, int i_SenderPhoneNumber, bool i_IsHandle, bool i_MergeToNewHouse)
+     {
+        var request = new HouseRequest
+        {
+            HouseId = i_HouseId,
+            SenderPhoneNumber = i_SenderPhoneNumber.ToString(),
+            IsHandle = i_IsHandle,
+            MergeToNewHouse = i_MergeToNewHouse,
+            DateStart = DateTime.Now
+        };
+
+        _dbContext.HouseRequests.Add(request);
+        _dbContext.SaveChanges();
+     }
+
+    private int getTheHouseIdByTheManagerPhoneNumber(int managerPhone)
+    {
+        var manager = _dbContext?.Users?.FirstOrDefault(u => u.PhoneNumber == managerPhone);
+        if (manager != null)
+        {
+            return manager.HouseId;
+        }
+
+        return -1;
+    }
+
+    public int GetUserPhoneNumber(string token)
+    {
+        string phoneNumber = getPhoneNumberFromToken(token);
+        return int.Parse(phoneNumber);
+    }
 
     public bool CreateNewMedication(string medicationName)
     {
@@ -47,6 +83,21 @@ public class UserService : IUserService
 
         return isAddSuccess;
     }
+
+    private string getPhoneNumberFromToken(string token)
+    {
+        var jwtHandler = new JwtSecurityTokenHandler();
+        var jwtToken = jwtHandler.ReadToken(token) as JwtSecurityToken;
+        var phoneNumberClaim = jwtToken?.Claims.FirstOrDefault(claim => claim.Type == "PhoneNumber");
+       
+        if (phoneNumberClaim == null || string.IsNullOrEmpty(phoneNumberClaim.Value))
+        {
+            throw new InvalidOperationException("Phone number claim not found in token");
+        }
+
+        return phoneNumberClaim?.Value!;
+    }
+    
 
     private MedicationDTO sendARequestToMinistryOfHealthService(ref bool isAddSuccess)
     {
@@ -77,5 +128,5 @@ public class UserService : IUserService
     {
         return null;
     }
-    
+
 }
