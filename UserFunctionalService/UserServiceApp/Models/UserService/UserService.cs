@@ -1,4 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using MrPill.DTOs.DTOs;
+using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
 
 namespace UserServiceApp.Models.UserService;
@@ -8,12 +10,14 @@ public class UserService : IUserService
      private readonly HttpClient _httpClient;
      private readonly AppDbContext _dbContext;
      private readonly ILogger _logger;
+     private readonly string _baseUrlMOHservice;
      
     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger)
      {
         _httpClient = httpClientFactory.CreateClient();
         _dbContext = dbContext;
         _logger = logger;
+        _baseUrlMOHservice = "http://localhost:5032/pill-details";
      }
 
      public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
@@ -52,7 +56,7 @@ public class UserService : IUserService
         return -1;
     }
 
-     public bool isUserExistInDb(int PhoneNumber)
+     public bool IsUserExistInDb(int PhoneNumber)
     {
         if (_dbContext.Users != null)
         {
@@ -68,44 +72,43 @@ public class UserService : IUserService
         return int.Parse(phoneNumber);
     }
 
-    public bool CreateNewMedication(string medicationName, int phoneNumber)
+    public async Task<bool> CreateNewMedication(string medicationBarcode, int phoneNumber, bool privatcy)
     {
-        // this function need to get the userId
-        // if the medication exist we add to user db
-        // else we need to send a request to the service of the medication
-        bool isMedicationExist = checkIfTheMedicationExistInDb(medicationName);
-        bool isAddSuccess = false;
-
+        bool isMedicationExist = checkIfTheMedicationExistInDb(medicationBarcode);
+        
         if (isMedicationExist)
         {
-            addToUserNewMedication(phoneNumber, medicationName);
+            addToUserNewMedication(phoneNumber, medicationBarcode, privatcy);
         }
         else
         {
-           MedicationDTO medicationDto  = sendARequestToMinistryOfHealthService(ref isAddSuccess);
+           MedicationDTO? medicationDto  = await sendARequestToMinistryOfHealthService(medicationBarcode);
 
-           if (isAddSuccess)
+           if (medicationDto != null)
            {
-            //same function like the first if
+                addToUserNewMedication(phoneNumber, medicationBarcode, privatcy);
+                return true;
            }
+
+           return false;
         }
 
-        return isAddSuccess;
+        return true;
     }
 
-    private void addToUserNewMedication (int phoneNumber, string medicationName)   
+    private void addToUserNewMedication (int phoneNumber, string medicationBarcode, bool privatcy)   
     {
-        var user = _dbContext.Users.SingleOrDefault(u => u.PhoneNumber == phoneNumber);
+        var user = _dbContext?.Users?.SingleOrDefault(u => u.PhoneNumber == phoneNumber);
         if (user == null)
         {
             _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService)", phoneNumber);
              return;
         }
 
-        var medication = _dbContext.MedicationRepos.SingleOrDefault(m => m.DrugEnglishName == medicationName);
+        var medication = _dbContext?.MedicationRepos.SingleOrDefault(m => m.Barcode == medicationBarcode);
         if (medication == null)
         {
-            _logger.LogInformation("The medication {medicationName} does not exist in the database", medicationName);
+            _logger.LogInformation("The medication with the barcode {medicationBarcode} does not exist in the database", medicationBarcode);
             return;
         }
 
@@ -114,11 +117,26 @@ public class UserService : IUserService
             Barcode = medication.Barcode,
             Validity = DateTime.Now,
             User = user,
+            IsPrivate = convertBooleanToPrivacyStatus(privatcy),
             MedicationRepo = medication
         };
 
-        _dbContext.UserMedications.Add(userMedication);
-        _dbContext.SaveChanges();
+        _dbContext?.UserMedications.Add(userMedication);
+        _dbContext?.SaveChanges();
+    }
+
+    private PrivacyStatus convertBooleanToPrivacyStatus(bool isPrivate)
+    {
+        return isPrivate ? PrivacyStatus.PrivateMedications : PrivacyStatus.PublicMedications;
+    }
+
+    public int GetPhoneNumberFromToken(string? token)
+    {
+        if (token == null)
+        {
+            return -1;
+        }
+        return int.Parse(getPhoneNumberFromToken(token));
     }
 
     private string getPhoneNumberFromToken(string token)
@@ -133,17 +151,123 @@ public class UserService : IUserService
         }
 
         return phoneNumberClaim?.Value!;
-    }
-    
+    }    
 
-    private MedicationDTO sendARequestToMinistryOfHealthService(ref bool isAddSuccess)
+    private async Task<MedicationDTO?> sendARequestToMinistryOfHealthService(string medicationBarcode)
     {
-        throw new NotImplementedException();
+        MedicationDTO? medicationDTO = null;
+
+        try
+        {
+           HttpResponseMessage response = await _httpClient.GetAsync($"{_baseUrlMOHservice}/{medicationBarcode}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                string responseContent = await response.Content.ReadAsStringAsync();
+                medicationDTO = JsonConvert.DeserializeObject<MedicationDTO>(responseContent);
+
+                if (medicationDTO != null)
+                {
+                    insertMedicationToMedicationRepositoryTable(medicationDTO, medicationBarcode);
+                }
+                else
+                {
+                    _logger.LogError("Failed to fetch medication information. MedicationDTO is null.");
+                }
+             }
+            else
+            {
+                _logger.LogError("Failed to fetch medication information. HTTP status code: {StatusCode}", response.StatusCode);
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "An error occurred while sending the HTTP request.");
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogError(ex, "An error occurred while deserializing the JSON response.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred.");
+        }
+
+        return medicationDTO;
     }
 
-    private bool checkIfTheMedicationExistInDb(string medicationName)
+    private void insertMedicationToMedicationRepositoryTable(MedicationDTO medicationDTO, string medicationBarcode)
     {
+           var medicationRepo = new MedicationRepo
+           {
+                Barcode = medicationBarcode,
+                DrugEnglishName = medicationDTO.EnglishName ?? "DefaultEnglishName",
+                DrugHebrewName = medicationDTO.HebrewName ?? "DefaultHebrewName",
+                EnglishDescription = medicationDTO.EnglishDescription,
+                HebrewDescription = medicationDTO.HebrewDescription,
+                ImagePath = medicationDTO.ImagePath
+           };
+
+           _dbContext.MedicationRepos.Add(medicationRepo);
+           _dbContext.SaveChanges();
+    }
+
+    private bool checkIfTheMedicationExistInDb(string medicationBarcode)
+    {
+        var medication = _dbContext?.MedicationRepos.FirstOrDefault(m => m.Barcode == medicationBarcode);
+        
+        if (medication == null)
+        {
+            return false;
+        }
+
         return true;
+    }
+
+    public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int phoneNumber, PrivacyStatus privacyStatus)
+    {
+
+       try
+       {
+            var user = _dbContext?.Users
+            ?.Include(u => u.Medications)
+            .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+
+            if (user == null)
+            {
+                _logger.LogError("User with phone number {PhoneNumber} not found.", phoneNumber);
+                throw new Exception("User not found");
+            }
+            user.Medications = user?.Medications?.Where(m => m.IsPrivate == privacyStatus).ToList();
+            
+            return user?.Medications?.Select(m =>
+            {
+                var medicationDTOBuilder = MedicationDTO.Builder()
+                    .WithId(m.Id)
+                    .WithEnglishName(m.MedicationRepo.DrugEnglishName)
+                    .WithHebrewName(m.MedicationRepo.DrugHebrewName)
+                    .WithEnglishDescription(m.MedicationRepo.EnglishDescription)
+                    .WithHebrewDescription(m.MedicationRepo.HebrewDescription)
+                    .WithValidity(m.Validity)
+                    .WithUserId(m.UserId)
+                    .WithMedicationRepoId(m.MedicationRepoId)
+                    .WithImagePath(m.MedicationRepo.ImagePath)
+                    .WithIsPrivate(convertEnumToEnumDto(m.IsPrivate));
+
+                return medicationDTOBuilder.Build();
+            }) ?? Enumerable.Empty<MedicationDTO>();
+       }
+       catch (Exception ex)
+       {
+        _logger.LogError(ex, "An error occurred while fetching user.");
+        return Enumerable.Empty<MedicationDTO>();
+       }
+       
+    }
+
+    private PrivacyStatusDTO convertEnumToEnumDto(PrivacyStatus privacyStatus)
+    {
+        return (PrivacyStatusDTO)privacyStatus;
     }
 
     public void UpdateMedication()
@@ -154,11 +278,6 @@ public class UserService : IUserService
     public void DeleteMedication()
     {
         
-    }
-
-    public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int userId)
-    {
-        return null;
     }
 
     public MedicationDTO GetMedicationByName(string medicationName)

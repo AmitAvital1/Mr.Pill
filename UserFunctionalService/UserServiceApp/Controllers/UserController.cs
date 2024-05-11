@@ -3,6 +3,7 @@ namespace UserServiceApp.Controllers;
 using UserServiceApp.Models.UserService;
 using MrPill.DTOs.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using UserServiceApp.Models;
 
 [Authorize]
 public class UserController : Controller
@@ -35,7 +36,7 @@ public class UserController : Controller
                 RequestUri = new Uri($"https://api-gateway-url.com/endpoint?port={port}")
             };
 
-            using (HttpClient client = new HttpClient())
+            using (HttpClient client = new())
             {
                 HttpResponseMessage response = client.SendAsync(requestMessage).Result;
 
@@ -56,19 +57,43 @@ public class UserController : Controller
     }
 
     [HttpPost("medications")]
-    public ActionResult CreateNewMedication([FromBody] string medicationName)
+    public async Task<ActionResult> CreateNewMedication([FromBody] string medicationBarcode, bool privatcy)
     {
         string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-        int phoneNumber = _userService.getPhoneNumberFromToken(token);
+        int phoneNumber = _userService.GetPhoneNumberFromToken(token);
 
-        if (!_userService.isUserExistInDb(phoneNumber))
+        if (!_userService.IsUserExistInDb(phoneNumber))
         {
             _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService)", phoneNumber);
             return NotFound("Phone number does not exist");
         }
 
-        bool success = _userService.CreateNewMedication(medicationName, phoneNumber);
+        bool success = await _userService.CreateNewMedication(medicationBarcode, phoneNumber, privatcy);
         return success ? Ok() : StatusCode(500);
+    }
+
+    [HttpGet("user/medications")]
+    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] PrivacyStatus  privacyStatus)
+    {
+        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        
+        if (token == null)
+        {
+            return BadRequest(new { message = "Authorization token not provided" });
+        }
+
+        int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+        
+        IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, privacyStatus);
+        return Ok(medications);
+    }
+
+    [HttpGet("medications")]
+    public ActionResult<MedicationDTO> GetMedicationByName([FromQuery] string medicationName)
+    {
+        // need to authorize the endpoint and check what is the id of the user that send the request
+        MedicationDTO medication = _userService.GetMedicationByName(medicationName);
+        return Ok(medication);
     }
 
     [HttpPut("medications/{medicationId}")]
@@ -83,29 +108,5 @@ public class UserController : Controller
     {
         // Delete logic
         return Ok();
-    }
-
-    [HttpGet("users/{userId}/medications")]
-    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId(int userId)
-    {
-        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-        
-        if (token == null)
-        {
-            return BadRequest(new { message = "Authorization token not provided" });
-        }
-
-        int UserPhoneNumer = _userService.GetUserPhoneNumber(token);
-        
-        IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userId);
-        return Ok(medications);
-    }
-
-    [HttpGet("medications")]
-    public ActionResult<MedicationDTO> GetMedicationByName([FromQuery] string medicationName)
-    {
-        // need to authorize the endpoint and check what is the id of the user that send the request
-        MedicationDTO medication = _userService.GetMedicationByName(medicationName);
-        return Ok(medication);
     }
 }

@@ -9,14 +9,17 @@ public class MedicationDTO
     
     [Required(ErrorMessage = "Please enter a name.")]
     [StringLength(50, ErrorMessage = "Name should not exceed 50 characters.")]
-    public string? Name { get; set; }
+    public string? EnglishName { get; set; }
+    public string? HebrewName { get; set; }
 
     [StringLength(100, ErrorMessage = "Description should not exceed 100 characters.")]
-    public string? Description { get; set; }
-    
+    public string? EnglishDescription { get; set; }
+    public string? HebrewDescription { get; set; }
     public DateTime? Validity { get; set; }
     public int UserId { get; set; }
     public int MedicationRepoId { get; set; }
+    public string? ImagePath { get; set; }
+    public PrivacyStatusDTO? IsPrivate { get; set; }
 
     public class MedicationDTOBuilder
     {
@@ -33,15 +36,39 @@ public class MedicationDTO
             return this;
         }
 
-        public MedicationDTOBuilder WithName(string? name)
+        public MedicationDTOBuilder WithEnglishName(string? name)
         {
-            _medicationDTO.Name = name;
+            _medicationDTO.EnglishName = name;
             return this;
         }
 
-        public MedicationDTOBuilder WithDescription(string? description)
+        public MedicationDTOBuilder WithHebrewName(string? name)
         {
-            _medicationDTO.Description = description;
+            _medicationDTO.HebrewName = name;
+            return this;
+        }
+
+        public MedicationDTOBuilder WithIsPrivate(PrivacyStatusDTO? privatcy)
+        {
+            _medicationDTO.IsPrivate = privatcy;
+            return this;
+        }
+
+        public MedicationDTOBuilder WithEnglishDescription(string? description)
+        {
+            _medicationDTO.EnglishDescription = description;
+            return this;
+        }
+
+        public MedicationDTOBuilder WithHebrewDescription(string? description)
+        {
+            _medicationDTO.HebrewDescription = description;
+            return this;
+        }
+
+        public MedicationDTOBuilder WithImagePath(string? ImagePath)
+        {
+            _medicationDTO.ImagePath = ImagePath;
             return this;
         }
 
