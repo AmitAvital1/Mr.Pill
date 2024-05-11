@@ -28,7 +28,7 @@ public class UserController : Controller
             int port = HttpContext.Connection.LocalPort;
 
             // if i have some instances of the server i need to suffly the name of the server
-            // need to add a token to the server 
+           
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {
                 Method = HttpMethod.Get,
@@ -58,7 +58,16 @@ public class UserController : Controller
     [HttpPost("medications")]
     public ActionResult CreateNewMedication([FromBody] string medicationName)
     {
-        bool success = _userService.CreateNewMedication(medicationName);
+        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        int phoneNumber = _userService.getPhoneNumberFromToken(token);
+
+        if (!_userService.isUserExistInDb(phoneNumber))
+        {
+            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService)", phoneNumber);
+            return NotFound("Phone number does not exist");
+        }
+
+        bool success = _userService.CreateNewMedication(medicationName, phoneNumber);
         return success ? Ok() : StatusCode(500);
     }
 

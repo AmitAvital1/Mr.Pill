@@ -52,13 +52,23 @@ public class UserService : IUserService
         return -1;
     }
 
+     public bool isUserExistInDb(int PhoneNumber)
+    {
+        if (_dbContext.Users != null)
+        {
+            return _dbContext.Users.Any(user => user.PhoneNumber == PhoneNumber);
+        }
+
+        return false;
+    }
+
     public int GetUserPhoneNumber(string token)
     {
         string phoneNumber = getPhoneNumberFromToken(token);
         return int.Parse(phoneNumber);
     }
 
-    public bool CreateNewMedication(string medicationName)
+    public bool CreateNewMedication(string medicationName, int phoneNumber)
     {
         // this function need to get the userId
         // if the medication exist we add to user db
@@ -68,8 +78,7 @@ public class UserService : IUserService
 
         if (isMedicationExist)
         {
-            // insert medication to the db
-            /// if i secussees to insert the medication 
+            addToUserNewMedication(phoneNumber, medicationName);
         }
         else
         {
@@ -82,6 +91,34 @@ public class UserService : IUserService
         }
 
         return isAddSuccess;
+    }
+
+    private void addToUserNewMedication (int phoneNumber, string medicationName)   
+    {
+        var user = _dbContext.Users.SingleOrDefault(u => u.PhoneNumber == phoneNumber);
+        if (user == null)
+        {
+            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService)", phoneNumber);
+             return;
+        }
+
+        var medication = _dbContext.MedicationRepos.SingleOrDefault(m => m.DrugEnglishName == medicationName);
+        if (medication == null)
+        {
+            _logger.LogInformation("The medication {medicationName} does not exist in the database", medicationName);
+            return;
+        }
+
+        var userMedication = new UserMedications
+        {
+            Barcode = medication.Barcode,
+            Validity = DateTime.Now,
+            User = user,
+            MedicationRepo = medication
+        };
+
+        _dbContext.UserMedications.Add(userMedication);
+        _dbContext.SaveChanges();
     }
 
     private string getPhoneNumberFromToken(string token)

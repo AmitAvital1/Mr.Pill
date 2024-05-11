@@ -2,6 +2,7 @@ using RabbitMQ.Client;
 using MrPill.DTOs.DTOs;
 
 namespace Login.Models.RabbitMq;
+
 public class RabbitMqHandler : IHostedService
 {
     private static RabbitMqHandler? instance;

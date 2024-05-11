@@ -113,7 +113,7 @@ public class LoginService : ILoginService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
+    
     private string getPhoneNumberFromToken(string token)
     {
         var jwtHandler = new JwtSecurityTokenHandler();
