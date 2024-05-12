@@ -226,7 +226,6 @@ public class UserService : IUserService
 
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int phoneNumber, PrivacyStatus privacyStatus)
     {
-
        try
        {
             var user = _dbContext?.Users
@@ -262,12 +261,88 @@ public class UserService : IUserService
         _logger.LogError(ex, "An error occurred while fetching user.");
         return Enumerable.Empty<MedicationDTO>();
        }
-       
+    }
+
+    public async Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode)
+    {
+        var medication = _dbContext.MedicationRepos.FirstOrDefault(r => r.Barcode == medicationBarcode);
+        if (medication == null)
+        {
+           MedicationDTO? medicationDTO = await sendARequestToMinistryOfHealthService(medicationBarcode)!;
+           return medicationDTO!;
+        }
+        var medicationDTOBuilder = MedicationDTO.Builder()
+                                .WithId(medication.Id)
+                                .WithEnglishName(medication.DrugEnglishName)
+                                .WithHebrewName(medication.DrugHebrewName)
+                                .WithEnglishDescription(medication.EnglishDescription)
+                                .WithHebrewDescription(medication.HebrewDescription)
+                                .Build();
+
+        return medicationDTOBuilder;
     }
 
     private PrivacyStatusDTO convertEnumToEnumDto(PrivacyStatus privacyStatus)
     {
         return (PrivacyStatusDTO)privacyStatus;
+    }
+
+    public IEnumerable<UserDTO> GetAllUsersThatWantToBePartOfMyHome(int userPhoneNumer)
+    {
+        var House = _dbContext.Houses.FirstOrDefault(r => r.Manager!.PhoneNumber == userPhoneNumer);
+        
+        if (House == null)
+        {
+            _logger.LogError("An error occurred while fetching Notification.");
+            return Enumerable.Empty<UserDTO>();
+        }
+
+        var houseRequests = getHouseRequests(House.Id);
+
+        var phoneNumbers = houseRequests.Select(hr => hr.SenderPhoneNumber).ToList();
+
+        var users = getUsersForHouseRequests(houseRequests);
+
+        return users ?? Enumerable.Empty<UserDTO>();
+    }
+
+    private IEnumerable<HouseRequestDTO> getHouseRequests(int houseId)
+    {
+        return _dbContext.HouseRequests
+            .Where(houseRequest => houseRequest.Id == houseId && houseRequest.IsHandle == false)
+            .Select(houseRequest => HouseRequestDTO.Builder()
+                .WithId(houseRequest.Id)
+                .WithHouseId(houseRequest.HouseId)
+                .WithSenderPhoneNumber(houseRequest.SenderPhoneNumber)
+                .WithIsHandled(houseRequest.IsHandle)
+                .WithIsApproved(houseRequest.IsApprove)
+                .WithIsSenderSeen(houseRequest.IsSenderSeen)
+                .WithMergeToNewHouse(houseRequest.MergeToNewHouse)
+                .WithDateStart(houseRequest.DateStart)
+                .WithDateEnd(houseRequest.DateEnd)
+                .Build()
+            );
+    }
+
+    public bool IsManager(int phoneNumber)
+    {
+         var isManager = _dbContext.Houses.Any(house => house.Manager != null && house.Manager.PhoneNumber == phoneNumber);
+         return isManager;
+    }
+
+    private IEnumerable<UserDTO> getUsersForHouseRequests(IEnumerable<HouseRequestDTO> houseRequests)
+    {
+        var phoneNumbers = houseRequests.Select(hr => hr.SenderPhoneNumber).ToList();
+
+        return _dbContext.Users
+            ?.Where(user => phoneNumbers.Contains(user.PhoneNumber.ToString()))
+            .Select(user => UserDTO.Builder()
+                .WithFirstName(user.FirstName)
+                .WithLastName(user.LastName)
+                .WithPhoneNumber(user.PhoneNumber.ToString())
+                .Build()
+            )
+            ?? Enumerable.Empty<UserDTO>();
     }
 
     public void UpdateMedication()
@@ -278,11 +353,6 @@ public class UserService : IUserService
     public void DeleteMedication()
     {
         
-    }
-
-    public MedicationDTO GetMedicationByName(string medicationName)
-    {
-        return null;
     }
 
 }

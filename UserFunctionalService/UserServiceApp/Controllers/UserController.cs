@@ -88,12 +88,32 @@ public class UserController : Controller
         return Ok(medications);
     }
 
-    [HttpGet("medications")]
-    public ActionResult<MedicationDTO> GetMedicationByName([FromQuery] string medicationName)
+    [HttpGet("medication/barcode")]
+    public async Task<ActionResult<MedicationDTO>> GetMedicationByBarcode([FromQuery] string medicationBarcode)
     {
         // need to authorize the endpoint and check what is the id of the user that send the request
-        MedicationDTO medication = _userService.GetMedicationByName(medicationName);
+        MedicationDTO medication = await _userService.GetMedicationByBarcode(medicationBarcode);
         return Ok(medication);
+    }
+
+    [HttpGet("notifications")]
+    public ActionResult GetMyNotification()
+    {
+        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        
+        if (token == null)
+        {
+            return BadRequest(new { message = "Authorization token not provided" });
+        }
+
+        int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+        if (_userService.IsManager(userPhoneNumer))
+        {
+              IEnumerable<UserDTO> userDTOs = _userService.GetAllUsersThatWantToBePartOfMyHome(userPhoneNumer);
+            return Ok(userDTOs);
+        }
+
+         return BadRequest(new { message = @"This User With Phone {userPhoneNumer} is not a manager",userPhoneNumer });
     }
 
     [HttpPut("medications/{medicationId}")]
