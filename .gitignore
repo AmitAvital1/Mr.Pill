@@ -84,9 +84,16 @@ nCrunchTemp_*
 *LoginService/Login/views
 
 
-*/MinistryOfHealthService/Properties
-*/MinistryOfHealthService/appsettings.Development.json
-*/MinistryOfHealthService/appsettings.json
+*MinistryOfHealthService/Properties
+*MinistryOfHealthService/appsettings.Development.json
+*MinistryOfHealthService/appsettings.json
+
+*PushNotificationService/appsettings.json
+*PushNotificationService/appsettings.Development.json
+*PushNotificationService/Properties
+*PushNotificationService/obj
+*PushNotificationService/views
+*PushNotificationService/mrpill-pushnotification-firebase-adminsdk-xx2h6-733f35800d.json
 
 # AxoCover
 .axoCover/*

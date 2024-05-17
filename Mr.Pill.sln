@@ -13,6 +13,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "LoginService", "LoginServic
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Login", "LoginService\Login\Login.csproj", "{494F8F1F-B0A9-4D9F-A123-B42AE9E4DCE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PushNotificationService", "PushNotificationService\PushNotificationService.csproj", "{28D94AB3-C29C-48C0-9AB0-70C493D9EE41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{494F8F1F-B0A9-4D9F-A123-B42AE9E4DCE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{494F8F1F-B0A9-4D9F-A123-B42AE9E4DCE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{494F8F1F-B0A9-4D9F-A123-B42AE9E4DCE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28D94AB3-C29C-48C0-9AB0-70C493D9EE41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28D94AB3-C29C-48C0-9AB0-70C493D9EE41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28D94AB3-C29C-48C0-9AB0-70C493D9EE41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28D94AB3-C29C-48C0-9AB0-70C493D9EE41}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
