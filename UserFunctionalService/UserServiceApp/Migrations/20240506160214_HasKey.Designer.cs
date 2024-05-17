@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserServiceApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240506160214_HasKey")]
+    partial class HasKey
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,44 +39,6 @@ namespace UserServiceApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Houses");
-                });
-
-            modelBuilder.Entity("UserServiceApp.Models.HouseRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DateEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateStart")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("HouseId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsApprove")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsHandle")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSenderSeen")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("MergeToNewHouse")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SenderPhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("HouseRequests");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.MedicationRepo", b =>
@@ -172,9 +137,6 @@ namespace UserServiceApp.Migrations
                     b.Property<string>("Barcode")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("bit");
 
                     b.Property<int>("MedicationRepoId")
                         .HasColumnType("int");

@@ -11,6 +11,7 @@ public class AppDbContext : DbContext
     public DbSet<MedicationRepo> MedicationRepos { get; set; }
     public DbSet<House> Houses { get; set; }
     public DbSet<UserHouse> UserHouses { get; set; }
+    public DbSet<HouseRequest> HouseRequests{ get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

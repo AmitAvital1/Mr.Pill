@@ -9,5 +9,6 @@ public class UserMedications
     public int UserId { get; set; }
     public required User User { get; set; }
      public int MedicationRepoId { get; set; }
+     public PrivacyStatus IsPrivate  { get; set; }
     public  required MedicationRepo MedicationRepo { get; set; }
 }

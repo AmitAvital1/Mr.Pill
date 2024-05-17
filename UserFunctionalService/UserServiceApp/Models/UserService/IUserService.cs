@@ -4,9 +4,15 @@ namespace UserServiceApp.Models.UserService;
 
 public interface IUserService
 {
-    public bool CreateNewMedication(string medicationName);
+    public Task<bool> CreateNewMedication(string medicationBarcode, int phoneNumber, bool privatcy);
     public void UpdateMedication();
     public void DeleteMedication();
-    public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int userId);
-    public MedicationDTO GetMedicationByName(string medicationName);
+    public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int phoneNumber, PrivacyStatus privacyStatus);
+     public  Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode);
+    public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper);
+    public int GetUserPhoneNumber(string token);
+     public bool IsUserExistInDb(int PhoneNumber);
+    public int GetPhoneNumberFromToken(string? token);
+    public IEnumerable<UserDTO> GetAllUsersThatWantToBePartOfMyHome(int userPhoneNumer);
+    public bool IsManager(int phoneNumber);
 }
