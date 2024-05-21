@@ -103,7 +103,7 @@ public class LoginService : ILoginService
 
     private string GenereateTokenByClaim(Claim[] claims)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Audience"],

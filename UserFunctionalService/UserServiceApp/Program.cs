@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UserServiceApp.Controllers;
+using UserServiceApp.Models.ManagerService;
 using UserServiceApp.Models.UserService;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<HomeController>();
 builder.Services.AddSingleton<UserController>();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IManagerService, ManagerService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<RabbitMQHostedService>();
 

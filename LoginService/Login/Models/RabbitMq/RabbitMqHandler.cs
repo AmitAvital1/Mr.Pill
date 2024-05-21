@@ -3,7 +3,7 @@ using MrPill.DTOs.DTOs;
 
 namespace Login.Models.RabbitMq;
 
-public class RabbitMqHandler : IHostedService
+public sealed class RabbitMqHandler : IHostedService
 {
     private static RabbitMqHandler? instance;
     private static readonly object lockObject = new();

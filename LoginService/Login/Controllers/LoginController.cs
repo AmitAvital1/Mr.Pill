@@ -7,9 +7,10 @@ using MrPill.DTOs.DTOs;
 public class LoginController : Controller
 {
     private readonly ILogger<LoginController> _logger;
-    private readonly ILoginService _loginService;  
+    private readonly ILoginService _loginService;
+    private readonly object _locker = new();
 
-    public LoginController(ILogger <LoginController> logger, ILoginService loginService) 
+    public LoginController(ILogger<LoginController> logger, ILoginService loginService)
     {
         _logger = logger;
         _loginService = loginService;
@@ -64,13 +65,20 @@ public class LoginController : Controller
             {
                 return BadRequest(new { Message = "Invalid phone number format" });
             }
+            
+            bool phoneNumberExistInDb;
+            
+            lock (_locker)
+            {
+                phoneNumberExistInDb = _loginService.PhoneNumberExistInDb(phoneNumberValue);
+            }
 
-            if (!_loginService.PhoneNumberExistInDb(phoneNumberValue))
+            if (!phoneNumberExistInDb)
             {
                 if (_loginService.RegisterUser(userDTORegister))
                 {
                     string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber);
-                    
+
                     return Ok(new { token = UserToken });
                 }
                 else
@@ -107,13 +115,14 @@ public class LoginController : Controller
             return NotFound("Phone number does not exist");
         }
 
-        if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse,managerPhone))
+        if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse, managerPhone))
         {
             return Ok(new { Massage = "request to joined to another house succsesfuly" });
         }
+        
         else
         {
-             return StatusCode(500, "Internal Server Error");
+            return StatusCode(500, "Internal Server Error");
         }
     }
 }

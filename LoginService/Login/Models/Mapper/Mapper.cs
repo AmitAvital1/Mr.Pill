@@ -3,7 +3,7 @@ using Login.Models.LoginService;
 
 namespace Login.Models.MapperObject;
 
-public class Mapper
+public sealed class Mapper
 {
     private static Mapper? instance;
     private static readonly object lockObject = new();

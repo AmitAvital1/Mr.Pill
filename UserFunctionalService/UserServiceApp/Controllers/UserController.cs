@@ -4,17 +4,20 @@ using UserServiceApp.Models.UserService;
 using MrPill.DTOs.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using UserServiceApp.Models;
+using UserServiceApp.Models.ManagerService;
 
 [Authorize]
 public class UserController : Controller
 {
     private readonly ILogger<UserController> _logger;
     private readonly IUserService _userService;
+    private readonly IManagerService _managerService;
 
-    public UserController(ILogger<UserController> logger, IUserService userService)
+    public UserController(ILogger<UserController> logger, IUserService userService, IManagerService managerService)
     {
         _logger = logger;
         _userService = userService;
+        _managerService = managerService;
 
         // Task task = Task.Run(() =>
         // {

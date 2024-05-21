@@ -4,7 +4,7 @@ using Google.Apis.Auth.OAuth2;
 
 public class FirebaseManager
 {
-    private static FirebaseApp _firebaseApp;
+    private static FirebaseApp? _firebaseApp;
     public FirebaseManager()
     {
 
@@ -32,7 +32,7 @@ public class FirebaseManager
             };
 
             // Send the message asynchronously
-            var response = await FirebaseMessaging.DefaultInstance.SendAsync(message);
+            var response = await FirebaseMessaging.DefaultInstance.SendAsync(message).ConfigureAwait(false);
             
             // Return the response if successful
             return response;

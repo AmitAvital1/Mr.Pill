@@ -1,6 +1,4 @@
-using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using MrPill.DTOs.DTOs;
 
