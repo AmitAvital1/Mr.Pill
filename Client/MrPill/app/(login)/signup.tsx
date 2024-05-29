@@ -1,12 +1,12 @@
-
 import React from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
 
-const TextInputExample = () => {
-  const [text, onChangeText] = React.useState('');
+const SignUpScreen = () => {
+  const [firstname, onChangeLastName] = React.useState('');
+  const [lastname, onChangeFirstName] = React.useState('');
   const [number, onChangeNumber] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(true);
-  const updateButton = () => setDisabled(text == '' || number == '')
+  const updateButton = () => setDisabled(firstname == '' || lastname == '' || number == '')
 
   return (
     <SafeAreaView>
@@ -29,21 +29,29 @@ const TextInputExample = () => {
 
       <TextInput
         style={styles.input}
-        onChangeText={onChangeText}
+        onChangeText={onChangeFirstName}
         placeholder="שם פרטי ומשפחה"
-        value={text}
+        value={firstname}
+        textAlign='right'
+        onEndEditing={updateButton}
+      />
+
+      <TextInput
+        style={styles.input}
+        onChangeText={onChangeLastName}
+        placeholder="שם פרטי ומשפחה"
+        value={lastname}
         textAlign='right'
         onEndEditing={updateButton}
       />
 
       <Button 
         title="הרשמה" 
-        onPress={() => {console.log(text, number)}} 
+        onPress={() => {console.log(firstname, lastname, number)}} 
         disabled={isDisabled}
       />
       
-      
-
+    
     </SafeAreaView>
   );
 };
@@ -63,4 +71,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TextInputExample;
+export default SignUpScreen;
