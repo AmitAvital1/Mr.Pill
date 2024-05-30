@@ -30,7 +30,7 @@ const SignUpScreen = () => {
       <TextInput
         style={styles.input}
         onChangeText={onChangeFirstName}
-        placeholder="שם פרטי ומשפחה"
+        placeholder="שם פרטי"
         value={firstname}
         textAlign='right'
         onEndEditing={updateButton}
@@ -39,7 +39,7 @@ const SignUpScreen = () => {
       <TextInput
         style={styles.input}
         onChangeText={onChangeLastName}
-        placeholder="שם פרטי ומשפחה"
+        placeholder="שם משפחה"
         value={lastname}
         textAlign='right'
         onEndEditing={updateButton}
