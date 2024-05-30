@@ -12,6 +12,19 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<ILoginService, LoginService>();
 
+builder.Services.AddCors(options => {
+
+    options.AddPolicy("AllowOrigin", builder => {
+
+        builder.WithOrigins("http://localhost:8081")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .WithExposedHeaders("X-Total-Count")
+        .AllowCredentials();
+    });
+});
+
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -62,4 +75,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+
+app.UseCors("AllowOrigin");
 app.Run();

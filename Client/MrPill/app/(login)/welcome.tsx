@@ -1,76 +1,81 @@
-import React from 'react';
-import {Link} from 'expo-router'
+import React from "react";
+import { Link } from "expo-router";
 
-import {Pressable, SafeAreaView, StyleSheet, Image, View, Text} from 'react-native';
-import { PopButton } from '@/components/PopButton';
+import {
+  Pressable,
+  SafeAreaView,
+  StyleSheet,
+  Image,
+  View,
+  Text,
+} from "react-native";
+import { PopButton } from "@/components/PopButton";
 
 const WelcomeScreen = () => {
   //const [text, onChangeText] = React.useState('');
 
-  const mrpilllogo = <Image source={require('@/assets/images/icon.png')} style={{alignSelf: 'center', marginTop: 20}}/>
+  const mrpilllogo = (
+    <Image
+      source={require("@/assets/images/icon.png")}
+      style={{ alignSelf: "center", marginTop: 20 }}
+    />
+  );
 
   return (
-    <SafeAreaView style={{backgroundColor: 'lavender', flex: 1}}>
-
-      <PopButton ButtonContent={() => {return mrpilllogo}} BackgroundColor='white'/>
+    <SafeAreaView style={{ backgroundColor: "lavender", flex: 1 }}>
+      <PopButton
+        ButtonContent={() => {
+          return mrpilllogo;
+        }}
+        BackgroundColor="white"
+      />
 
       <View style={styles.pagetop}>
-        <Text style={styles.title}>
-          ברוכים הבאים למר. פיל
-        </Text>
+        <Text style={styles.title}>ברוכים הבאים למר. פיל</Text>
       </View>
 
       <View style={styles.button}>
         <Link href="/signup">
-          <Text style={styles.buttontext}>
-            משתמש חדש 🤗
-          </Text>
+          <Text style={styles.buttontext}>משתמש חדש 🤗</Text>
         </Link>
       </View>
 
       <View style={styles.button}>
         <Link href="/login">
-          <Text style={styles.buttontext}>
-          משתמש קיים 😎
-          </Text>
+          <Text style={styles.buttontext}>משתמש קיים 😎</Text>
         </Link>
       </View>
-
-      
     </SafeAreaView>
   );
 };
 
-
 const styles = StyleSheet.create({
   button: {
-    backgroundColor: '#6666FC',
+    backgroundColor: "#6666FC",
     flex: 1,
     borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     margin: 10,
-    borderColor: 'black'
-    
+    borderColor: "black",
   },
   buttontext: {
     fontSize: 32,
-    color: 'white'
+    color: "white",
   },
   pagetop: {
     height: 180,
-    flex: 1, 
+    flex: 1,
     padding: 10,
-    backgroundColor: 'lavender',
-    justifyContent: 'center',
-    alignContent: 'center',
-
+    backgroundColor: "lavender",
+    justifyContent: "center",
+    alignContent: "center",
   },
   title: {
     fontSize: 48,
     flex: 1,
     margin: 10,
-    textAlign: 'center'
+    textAlign: "center",
   },
 });
 

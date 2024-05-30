@@ -1,20 +1,25 @@
-import React from 'react';
-import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
+import React from "react";
+import {
+  SafeAreaView,
+  StyleSheet,
+  TextInput,
+  View,
+  Text,
+  Button,
+} from "react-native";
 
 const SignUpScreen = () => {
-  const [firstname, onChangeLastName] = React.useState('');
-  const [lastname, onChangeFirstName] = React.useState('');
-  const [number, onChangeNumber] = React.useState('');
+  const [firstname, onChangeLastName] = React.useState("");
+  const [lastname, onChangeFirstName] = React.useState("");
+  const [number, onChangeNumber] = React.useState("");
   const [isDisabled, setDisabled] = React.useState(true);
-  const updateButton = () => setDisabled(firstname == '' || lastname == '' || number == '')
+  const updateButton = () =>
+    setDisabled(firstname == "" || lastname == "" || number == "");
 
   return (
     <SafeAreaView>
-
       <View style={styles.pagetop}>
-        <Text style={{fontSize: 32, flex:1}}>
-          הרשמה למר. פיל
-        </Text>
+        <Text style={{ fontSize: 32, flex: 1 }}>הרשמה למר. פיל</Text>
       </View>
 
       <TextInput
@@ -23,7 +28,7 @@ const SignUpScreen = () => {
         value={number}
         placeholder="מספר טלפון"
         keyboardType="numeric"
-        textAlign='right'
+        textAlign="right"
         onEndEditing={updateButton}
       />
 
@@ -32,7 +37,7 @@ const SignUpScreen = () => {
         onChangeText={onChangeFirstName}
         placeholder="שם פרטי"
         value={firstname}
-        textAlign='right'
+        textAlign="right"
         onEndEditing={updateButton}
       />
 
@@ -41,21 +46,20 @@ const SignUpScreen = () => {
         onChangeText={onChangeLastName}
         placeholder="שם משפחה"
         value={lastname}
-        textAlign='right'
+        textAlign="right"
         onEndEditing={updateButton}
       />
 
-      <Button 
-        title="הרשמה" 
-        onPress={() => {console.log(firstname, lastname, number)}} 
+      <Button
+        title="הרשמה"
+        onPress={() => {
+          console.log(firstname, lastname, number);
+        }}
         disabled={isDisabled}
       />
-      
-    
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   input: {
@@ -65,9 +69,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   pagetop: {
-    height: 100, 
+    height: 100,
     padding: 10,
-    backgroundColor: 'lavender'
+    backgroundColor: "lavender",
   },
 });
 

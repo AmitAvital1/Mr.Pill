@@ -18,6 +18,15 @@ public class LoginController : Controller
 
     [AllowAnonymous]
     [HttpPost]
+    [Route("Health")]
+
+    public IActionResult Health()
+    {
+        return Ok("arrive!");
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
     [Route("Login")]
     public IActionResult Login([FromBody] UserDTO UserLogin)
     {

@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios'; 
 import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
 
 const LogInScreen = () => {
@@ -6,6 +7,28 @@ const LogInScreen = () => {
   const [number, onChangeNumber] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(true);
   const updateButton = () => setDisabled(number == '')
+
+  function handleLogin() {
+   sendLoginRequest();
+  }
+
+  const sendLoginRequest = async () => {
+    try {
+      const UserDTO = {
+        PhoneNumber: number
+      }
+      
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      const response = await axios.post("http://localhost:5181/Login",UserDTO ,{ headers });
+      
+    } catch (error) {
+
+      console.error("Error fetching data:", error);
+    }
+
 
   return (
     <SafeAreaView>
@@ -28,14 +51,13 @@ const LogInScreen = () => {
 
       <Button 
         title="התחברות" 
-        onPress={() => {console.log(number)}} 
+        onPress={handleLogin} 
         disabled={isDisabled}
       />
       
     </SafeAreaView>
   );
 };
-
 
 const styles = StyleSheet.create({
   input: {
@@ -50,5 +72,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'lavender'
   },
 });
-
+}
 export default LogInScreen;
