@@ -375,7 +375,7 @@ public class UserService : IUserService
 
     }
 
-    public void DeleteMedication()
+    public void DeleteMedication(int userPhoneNumer, int medicationId)
     {
 
     }

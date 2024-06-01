@@ -18,14 +18,17 @@ public class UserController : Controller
         _logger = logger;
         _userService = userService;
         _managerService = managerService;
+        
+        // the _managerService charge on the job how run in the background
+        // _managerService.StartAsync();
 
         // Task task = Task.Run(() =>
         // {
-        //     sendRequestToGateway();
+        //     SendRequestToGateway();
         // });
     }
 
-    private void sendRequestToGateway()
+    private void SendRequestToGateway()
     {
         try
         {
@@ -86,8 +89,8 @@ public class UserController : Controller
         }
 
         int userPhoneNumer = _userService.GetUserPhoneNumber(token);
-        
         IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, privacyStatus);
+        
         return Ok(medications);
     }
 
@@ -110,13 +113,14 @@ public class UserController : Controller
         }
 
         int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+
         if (_userService.IsManager(userPhoneNumer))
         {
-              IEnumerable<UserDTO> userDTOs = _userService.GetAllUsersThatWantToBePartOfMyHome(userPhoneNumer);
+            IEnumerable<UserDTO> userDTOs = _userService.GetAllUsersThatWantToBePartOfMyHome(userPhoneNumer);
             return Ok(userDTOs);
         }
 
-         return BadRequest(new { message = @"This User With Phone {userPhoneNumer} is not a manager",userPhoneNumer });
+        return BadRequest(new { message = @"This User With Phone {userPhoneNumer} is not a manager",userPhoneNumer });
     }
 
     [HttpPut("medications/{medicationId}")]
@@ -130,6 +134,18 @@ public class UserController : Controller
     public ActionResult DeleteMedication(int medicationId)
     {
         // Delete logic
+
+        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        
+        if (token == null)
+        {
+            return BadRequest(new { message = "Authorization token not provided" });
+        }
+
+        int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+
+        _userService.DeleteMedication(userPhoneNumer, medicationId);
+
         return Ok();
     }
 }

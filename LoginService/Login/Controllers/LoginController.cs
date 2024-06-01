@@ -17,9 +17,8 @@ public class LoginController : Controller
     }
 
     [AllowAnonymous]
-    [HttpPost]
+    [HttpGet]
     [Route("Health")]
-
     public IActionResult Health()
     {
         return Ok("arrive!");

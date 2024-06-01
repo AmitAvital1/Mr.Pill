@@ -1,0 +1,4 @@
+UserService
+--------------------
+1. add a new medication 
+2. get, put delete, reminder and more... 

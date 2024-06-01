@@ -1,0 +1,5 @@
+LoginService
+--------------------
+1. create a new user
+2. login to the system and get a response a token 
+3. join to another houses
