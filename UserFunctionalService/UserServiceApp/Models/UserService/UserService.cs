@@ -49,6 +49,7 @@ public class UserService : IUserService
     private int getTheHouseIdByTheManagerPhoneNumber(int managerPhone)
     {
         var manager = _dbContext?.Users?.FirstOrDefault(u => u.PhoneNumber == managerPhone);
+        
         if (manager != null)
         {
             return manager.HouseId;
@@ -70,6 +71,7 @@ public class UserService : IUserService
     public int GetUserPhoneNumber(string token)
     {
         string phoneNumber = getPhoneNumberFromToken(token);
+
         return int.Parse(phoneNumber);
     }
 
@@ -88,7 +90,7 @@ public class UserService : IUserService
         
         try
         {
-            bool isMedicationExist = checkIfTheMedicationExistInDb(medicationBarcode);
+            bool isMedicationExist = CheckIfTheMedicationExistInDb(medicationBarcode);
 
             if (isMedicationExist)
             {
@@ -119,6 +121,7 @@ public class UserService : IUserService
     private void AddToUserNewMedication(int phoneNumber, string medicationBarcode, bool privatcy)
     {
         var user = _dbContext?.Users?.SingleOrDefault(u => u.PhoneNumber == phoneNumber);
+
         if (user == null)
         {
             _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService)", phoneNumber);
@@ -126,6 +129,7 @@ public class UserService : IUserService
         }
 
         var medication = _dbContext?.MedicationRepos.SingleOrDefault(m => m.Barcode == medicationBarcode);
+        
         if (medication == null)
         {
             _logger.LogInformation("The medication with the barcode {medicationBarcode} does not exist in the database", medicationBarcode);
@@ -189,7 +193,7 @@ public class UserService : IUserService
 
                 if (medicationDTO != null)
                 {
-                    insertMedicationToMedicationRepositoryTable(medicationDTO, medicationBarcode);
+                    InsertMedicationToMedicationRepositoryTable(medicationDTO, medicationBarcode);
                 }
                 else
                 {
@@ -217,7 +221,7 @@ public class UserService : IUserService
         return medicationDTO;
     }
 
-    private void insertMedicationToMedicationRepositoryTable(MedicationDTO medicationDTO, string medicationBarcode)
+    private void InsertMedicationToMedicationRepositoryTable(MedicationDTO medicationDTO, string medicationBarcode)
     {
         var medicationRepo = new MedicationRepo
         {
@@ -233,9 +237,10 @@ public class UserService : IUserService
         _dbContext.SaveChanges();
     }
 
-    private bool checkIfTheMedicationExistInDb(string medicationBarcode)
+    private bool CheckIfTheMedicationExistInDb(string medicationBarcode)
     {
-        var medication = _dbContext?.MedicationRepos.FirstOrDefault(m => m.Barcode == medicationBarcode);
+        var medication = _dbContext?.MedicationRepos
+                    .FirstOrDefault(m => m.Barcode == medicationBarcode);
 
         if (medication == null)
         {
@@ -250,14 +255,15 @@ public class UserService : IUserService
         try
         {
             var user = _dbContext?.Users
-            ?.Include(u => u.Medications)
-            .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+                ?.Include(u => u.Medications)
+                .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
 
             if (user == null)
             {
                 _logger.LogError("User with phone number {PhoneNumber} not found.", phoneNumber);
                 throw new Exception("User not found");
             }
+
             user.Medications = user?.Medications?.Where(m => m.IsPrivate == privacyStatus).ToList();
 
             return user?.Medications?.Select(m =>
@@ -272,7 +278,7 @@ public class UserService : IUserService
                     .WithUserId(m.UserId)
                     .WithMedicationRepoId(m.MedicationRepoId)
                     .WithImagePath(m.MedicationRepo.ImagePath)
-                    .WithIsPrivate(convertEnumToEnumDto(m.IsPrivate));
+                    .WithIsPrivate(ConvertEnumToEnumDto(m.IsPrivate));
 
                 return medicationDTOBuilder.Build();
             }) ?? Enumerable.Empty<MedicationDTO>();
@@ -288,12 +294,15 @@ public class UserService : IUserService
 
     public async Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode)
     {
-        var medication = _dbContext.MedicationRepos.FirstOrDefault(r => r.Barcode == medicationBarcode);
+        var medication = _dbContext.MedicationRepos
+                    .FirstOrDefault(r => r.Barcode == medicationBarcode);
+        
         if (medication == null)
         {
             MedicationDTO? medicationDTO = await SendARequestToMinistryOfHealthService(medicationBarcode)!;
             return medicationDTO!;
         }
+        
         var medicationDTOBuilder = MedicationDTO.Builder()
                                 .WithId(medication.Id)
                                 .WithEnglishName(medication.DrugEnglishName)
@@ -305,7 +314,7 @@ public class UserService : IUserService
         return medicationDTOBuilder;
     }
 
-    private PrivacyStatusDTO convertEnumToEnumDto(PrivacyStatus privacyStatus)
+    private PrivacyStatusDTO ConvertEnumToEnumDto(PrivacyStatus privacyStatus)
     {
         return (PrivacyStatusDTO)privacyStatus;
     }
@@ -333,7 +342,8 @@ public class UserService : IUserService
     private IEnumerable<HouseRequestDTO> getHouseRequests(int houseId)
     {
         return _dbContext.HouseRequests
-            .Where(houseRequest => houseRequest.Id == houseId && houseRequest.IsHandle == false)
+            .Where(houseRequest => 
+                    houseRequest.Id == houseId && houseRequest.IsHandle == false)
             .Select(houseRequest => HouseRequestDTO.Builder()
                 .WithId(houseRequest.Id)
                 .WithHouseId(houseRequest.HouseId)
@@ -357,7 +367,8 @@ public class UserService : IUserService
 
     private IEnumerable<UserDTO> getUsersForHouseRequests(IEnumerable<HouseRequestDTO> houseRequests)
     {
-        var phoneNumbers = houseRequests.Select(hr => hr.SenderPhoneNumber).ToList();
+        var phoneNumbers = houseRequests
+                .Select(hr => hr.SenderPhoneNumber).ToList();
 
         return _dbContext.Users
             ?.Where(user => phoneNumbers.Contains(user.PhoneNumber.ToString()))
@@ -370,14 +381,36 @@ public class UserService : IUserService
             ?? Enumerable.Empty<UserDTO>();
     }
 
-    public void UpdateMedication()
+    public void DeleteMedication(int userPhoneNumber, int medicationId)
     {
+        var user = _dbContext?.Users
+                ?.Include(u => u.Medications)
+                .SingleOrDefault(u => u.PhoneNumber == userPhoneNumber);
 
+        if (user == null)
+        {
+            _logger.LogError("User with phone number {PhoneNumber} not found", userPhoneNumber);
+            throw new InvalidOperationException($"User with phone number {userPhoneNumber} not found");
+
+        }
+
+        var medication = user.Medications
+                ?.SingleOrDefault(m => m.Id == medicationId);
+
+        if (medication == null)
+        {
+            _logger.LogError("Medication with ID {MedicationId} not found for user with phone number {PhoneNumber}", medicationId, userPhoneNumber);
+            throw new InvalidOperationException($"Medication with ID {medicationId} not found for user with phone number {userPhoneNumber}");
+        }
+
+        user?.Medications?.Remove(medication);
+
+        _dbContext?.SaveChanges();
     }
 
-    public void DeleteMedication(int userPhoneNumer, int medicationId)
+    public void UpdateMedication(MedicationDTO medicationDTO)
     {
-
+        
     }
 
 }

@@ -77,6 +77,9 @@ nCrunchTemp_*
 */UserServiceApp/appsettings.Development.json
 */UserServiceApp/appsettings.json
 
+*APIGateway/appsettings.json
+*APIGateway/appsettings.Development.json
+
 *LoginService/Login/appsettings.json
 *LoginService/Login/appsettings.Development.json
 *LoginService/Login/Properties

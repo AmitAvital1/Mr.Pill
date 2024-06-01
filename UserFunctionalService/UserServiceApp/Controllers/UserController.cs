@@ -27,14 +27,18 @@ public class UserController : Controller
         //     SendRequestToGateway();
         // });
     }
+    
+    private int GetCurrentPort()
+    {
+        int serverPort = HttpContext.Connection.LocalPort;
+        return serverPort;
+    }
 
     private void SendRequestToGateway()
     {
         try
         {
-            int port = HttpContext.Connection.LocalPort;
-
-            // if i have some instances of the server i need to suffly the name of the server
+            int port = GetCurrentPort();
            
             HttpRequestMessage requestMessage = new HttpRequestMessage
             {
@@ -65,7 +69,7 @@ public class UserController : Controller
     [HttpPost("medications")]
     public async Task<ActionResult> CreateNewMedication([FromBody] string medicationBarcode, bool privatcy)
     {
-        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        string? token = GetAuthorizationToken();
         int phoneNumber = _userService.GetPhoneNumberFromToken(token);
 
         if (!_userService.IsUserExistInDb(phoneNumber))
@@ -81,8 +85,8 @@ public class UserController : Controller
     [HttpGet("user/medications")]
     public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] PrivacyStatus  privacyStatus)
     {
-        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-        
+        string? token = GetAuthorizationToken();
+
         if (token == null)
         {
             return BadRequest(new { message = "Authorization token not provided" });
@@ -105,8 +109,8 @@ public class UserController : Controller
     [HttpGet("notifications")]
     public ActionResult GetMyNotification()
     {
-        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-        
+        string? token = GetAuthorizationToken();
+
         if (token == null)
         {
             return BadRequest(new { message = "Authorization token not provided" });
@@ -127,25 +131,48 @@ public class UserController : Controller
     public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
     {
         // Update logic
+
+       string? token = GetAuthorizationToken();
+
+        if (token == null)
+        {
+            return BadRequest(new { message = "Authorization token not provided" });
+        }
+
+        _userService.UpdateMedication(medicationDto);
+       
         return Ok();
     }
 
     [HttpDelete("medications/{medicationId}")]
     public ActionResult DeleteMedication(int medicationId)
     {
-        // Delete logic
-
-        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-        
-        if (token == null)
+        try
         {
-            return BadRequest(new { message = "Authorization token not provided" });
+            string? token = GetAuthorizationToken();
+
+            if (token == null)
+            {
+                return BadRequest(new { message = "Authorization token not provided" });
+            }
+
+            int userPhoneNumber = _userService.GetUserPhoneNumber(token);
+
+            _userService.DeleteMedication(userPhoneNumber, medicationId);
+
+            return Ok();
         }
+        catch (Exception ex)
+        {
+            string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _logger.LogError(ex, $"An error occurred at {currentTime} while deleting medication");
+            
+            return StatusCode(500, new { message = "An error occurred while deleting medication" });
+        }
+    }
 
-        int userPhoneNumer = _userService.GetUserPhoneNumber(token);
-
-        _userService.DeleteMedication(userPhoneNumer, medicationId);
-
-        return Ok();
+    private string? GetAuthorizationToken()
+    {
+        return HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
     }
 }
