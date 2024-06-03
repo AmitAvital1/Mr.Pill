@@ -1,4 +1,6 @@
 import React from "react";
+import axios from 'axios'; 
+
 import {
   SafeAreaView,
   StyleSheet,
@@ -8,6 +10,7 @@ import {
   Button,
 } from "react-native";
 
+
 const SignUpScreen = () => {
   const [firstname, onChangeLastName] = React.useState("");
   const [lastname, onChangeFirstName] = React.useState("");
@@ -15,6 +18,29 @@ const SignUpScreen = () => {
   const [isDisabled, setDisabled] = React.useState(true);
   const updateButton = () =>
     setDisabled(firstname == "" || lastname == "" || number == "");
+
+  function handleSubmit() {
+    sendLoginRequest();
+  }
+
+  const sendLoginRequest = async () => {
+    try {
+      // const UserDTO = {
+      //   PhoneNumber: number
+      // }
+      
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      const response = await axios.get("http://:5181/Mr-Pill/Health", { headers });
+      console.log(response.data);
+      
+    } catch (error) {
+
+      console.error("Error fetching data:", error);
+    }
+  }
 
   return (
     <SafeAreaView>
@@ -52,9 +78,7 @@ const SignUpScreen = () => {
 
       <Button
         title="הרשמה"
-        onPress={() => {
-          console.log(firstname, lastname, number);
-        }}
+        onPress={handleSubmit}
         disabled={isDisabled}
       />
     </SafeAreaView>
@@ -74,5 +98,6 @@ const styles = StyleSheet.create({
     backgroundColor: "lavender",
   },
 });
+
 
 export default SignUpScreen;

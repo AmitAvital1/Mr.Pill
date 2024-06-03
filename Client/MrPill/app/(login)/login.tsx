@@ -14,21 +14,22 @@ const LogInScreen = () => {
 
   const sendLoginRequest = async () => {
     try {
-      const UserDTO = {
-        PhoneNumber: number
-      }
+      // const UserDTO = {
+      //   PhoneNumber: number
+      // }
       
       const headers = {
         "Content-Type": "application/json",
       };
 
-      const response = await axios.post("http://localhost:5181/Login",UserDTO ,{ headers });
+      const response = await axios.get("http://10.0.2.2:5181/Mr-Pill/Health", { headers });
+      console.log(response.data)
       
     } catch (error) {
 
       console.error("Error fetching data:", error);
     }
-
+  }
 
   return (
     <SafeAreaView>
@@ -72,5 +73,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'lavender'
   },
 });
-}
+
 export default LogInScreen;
