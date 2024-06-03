@@ -24,7 +24,8 @@
       "permissions": [
         "INTERNET",
         "ACCESS_NETWORK_STATE"
-      ]
+      ],
+      "package": "com.anonymous.MrPill"
     },
     "web": {
       "bundler": "metro",
@@ -33,8 +34,15 @@
     },
     "plugins": [
       "expo-router",
-      "./withNetworkSecurityConfig",
-      [ "expo-build-properties", { "android": { "usesCleartextTraffic": true } } ] 
+      "./plugins/withNetworkSecurityConfig",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "usesCleartextTraffic": true
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
