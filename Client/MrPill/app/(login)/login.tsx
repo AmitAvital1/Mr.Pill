@@ -1,13 +1,14 @@
-import React from 'react';
-import axios from 'axios'; 
+import React, {useEffect, useState} from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
+import axios from 'axios';
+import dns from '../dns.json';
 
 const LogInScreen = () => {
 
   const [number, onChangeNumber] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(true);
   const updateButton = () => setDisabled(number == '')
-
+  /*
   function handleLogin() {
    sendLoginRequest();
   }
@@ -28,7 +29,59 @@ const LogInScreen = () => {
 
       console.error("Error fetching data:", error);
     }
+  */
+    
+    const [isLoading, setLoading] = useState(true);
+    const [data, setData] = useState<string[]>([]);
 
+    const handleLogin = async () => {
+      /*
+      try {
+        const addr = `${dns.login_service}${'Health'}`;
+        
+        const response = await fetch(addr, {
+          method: 'POST',
+          headers: {
+            //Accept: 'application/json',
+            'Content-Type': "application/x-www-form-urlencoded"
+          },
+          //body: JSON.stringify({
+          //  firstParam: 'yourValue',
+          //  secondParam: 'yourOtherValue',
+          //}),
+        });
+        
+        console.log(response);
+      }
+      */
+        //const response = await fetch(addr);
+        //const json = await response.json();
+        //console.log(json.data);
+
+/*
+        const response = await fetch('https://10.0.2.2:5001/Mr-Pill/Health', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json'
+          }
+        });*/
+
+        //const response = await fetch('https://10.0.2.2:5001/Mr-Pill/Health');
+        try {
+
+        const response = await fetch('https://google.com/');
+        console.log(response);
+
+        //const axresponse = await axios.post("http://10.0.2.2:5001/Mr-Pill/Health");
+        //console.log(axresponse.data);
+        
+        }
+
+      catch(error) {
+        console.log(error);
+      }
+
+    };
 
   return (
     <SafeAreaView>
@@ -52,7 +105,7 @@ const LogInScreen = () => {
       <Button 
         title="התחברות" 
         onPress={handleLogin} 
-        disabled={isDisabled}
+        //disabled={isDisabled}
       />
       
     </SafeAreaView>
@@ -72,5 +125,5 @@ const styles = StyleSheet.create({
     backgroundColor: 'lavender'
   },
 });
-}
+
 export default LogInScreen;

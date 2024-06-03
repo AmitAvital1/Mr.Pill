@@ -15,8 +15,7 @@ builder.Services.AddSingleton<ILoginService, LoginService>();
 builder.Services.AddCors(options => {
 
     options.AddPolicy("AllowOrigin", builder => {
-
-        builder.WithOrigins("http://localhost:8081")
+        builder.WithOrigins("http://10.0.2.16")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .WithExposedHeaders("X-Total-Count")
@@ -61,7 +60,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
@@ -74,7 +73,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
-
 
 app.UseCors("AllowOrigin");
 app.Run();
