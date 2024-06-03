@@ -1,13 +1,14 @@
-import React from 'react';
-import axios from 'axios'; 
+import React, {useEffect, useState} from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
+import axios from 'axios';
+import dns from '../dns.json';
 
 const LogInScreen = () => {
 
   const [number, onChangeNumber] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(true);
   const updateButton = () => setDisabled(number == '')
-
+ 
   function handleLogin() {
    sendLoginRequest();
   }
@@ -53,7 +54,7 @@ const LogInScreen = () => {
       <Button 
         title="התחברות" 
         onPress={handleLogin} 
-        disabled={isDisabled}
+        //disabled={isDisabled}
       />
       
     </SafeAreaView>
@@ -73,5 +74,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'lavender'
   },
 });
+
 
 export default LogInScreen;
