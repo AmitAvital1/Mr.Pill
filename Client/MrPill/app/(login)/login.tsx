@@ -23,8 +23,9 @@ const LogInScreen = () => {
         "Content-Type": "application/json",
       };
 
-      const response = await axios.get("http://10.0.2.2:5181/Mr-Pill/Health", { headers });
-      console.log(response.data)
+      console.log("send");
+      const response = await axios.get("http://10.0.2.2:5181/Mr-Pill/Health" ,{ headers });
+      console.log(response.data);
       
     } catch (error) {
 
