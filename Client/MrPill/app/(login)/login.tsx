@@ -1,7 +1,8 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
 import axios from 'axios';
 import dns from '../dns.json';
+import { router } from 'expo-router';
 
 const LogInScreen = () => {
 
@@ -10,26 +11,30 @@ const LogInScreen = () => {
   const updateButton = () => setDisabled(number == '')
  
   function handleLogin() {
-   sendLoginRequest();
+    let response = sendLoginRequest();
+    router.navigate({pathname: '(home)/home', params: {'userIsLoggedIn': 1}});
   }
 
   const sendLoginRequest = async () => {
     try {
-      // const UserDTO = {
-      //   PhoneNumber: number
-      // }
       
+      const UserDTO = {
+        "PhoneNumber": number
+      }
+
       const headers = {
         "Content-Type": "application/json",
       };
-
-      const response = await axios.get("http://10.0.2.2:5181/Mr-Pill/Health", { headers });
+      //${dns.login_service}${'Login'}
+      const response = await axios.post(`http://10.0.2.2:5181/Mr-Pill/Login`, UserDTO, { headers });
       console.log(response.data)
+      return true;
       
     } catch (error) {
-
       console.error("Error fetching data:", error);
+      return false;
     }
+
   }
 
   return (

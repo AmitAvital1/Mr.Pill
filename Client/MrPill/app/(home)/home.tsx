@@ -1,26 +1,62 @@
 import React from 'react';
-import { View, Text, StyleSheet, Button, Pressable } from 'react-native';
+import { router } from 'expo-router';
+import { ThemedText } from '@/components/ThemedText';
+import { View, StyleSheet } from 'react-native';
+import { AppHomeButton } from "@/components/AppHomeButton";
+import { MrPillLogo } from '@/components/MrPillLogo';
+import { strFC } from "@/components/strFC";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
 
-const SimplePage: React.FC = () => {
+const HomePage: React.FC = () => {
+
+  const userName = `שרה`;
+
   return (
-    <View style={styles.container}>
-      <View style={styles.container}>
-        <Pressable onPress={() => {}}>
-          <Text style={styles.text}>Hello, React Native!</Text>
-        </Pressable>
+    <ParallaxScrollView headerBackgroundColor={{ light: "white", dark: "white" }} headerImage={MrPillLogo()}>
+    
+      <View style={styles.pagetop}> 
+        <ThemedText>שלום {userName}.</ThemedText>
       </View>
-    </View>
+
+
+      <View style={styles.container}>
+        <View style={styles.row}>
+          <AppHomeButton ButtonContent={strFC("מלאי משפחתי")} ButtonAction={()=>{router.navigate('(home)/sharedpills')}}/>
+          <AppHomeButton ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.navigate('(home)/mypills')}}/>
+        </View>
+
+        <View style={styles.row}>
+          <AppHomeButton ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.navigate('(home)/reminders')}}/>
+          <AppHomeButton ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{router.navigate('(home)/addpill')}}/>
+        </View>
+      </View>
+
+    </ParallaxScrollView>
+
   );
 };
 
-const printHello = () => console.log("Hello");
-
 const styles = StyleSheet.create({
+  pagetop: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#aaf8f8',
+    borderRadius: 20,
+    minHeight: 50,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f8f8f8',
+  },
+  row: {
+    flex: 1,
+    minHeight: 170,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    flexDirection: 'row',
   },
   text: {
     fontSize: 20,
@@ -28,4 +64,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SimplePage;
+export default HomePage;

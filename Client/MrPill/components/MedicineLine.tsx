@@ -1,13 +1,13 @@
-import React, {FunctionComponent, useEffect, useRef} from 'react';
+import React, {Component, ComponentElement, FunctionComponent, PureComponent, useEffect, useRef} from 'react';
 import {View, StyleSheet, Pressable, Animated} from 'react-native';
 
-type PopButtonProps = {
+type MedicineLineProps = {
   ButtonContent: FunctionComponent;
   ButtonAction?: Function;
   BackgroundColor?: string;
 };
 
-export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonAction }) => {
+export const MedicineLine: React.FC<MedicineLineProps> = ({ ButtonContent, ButtonAction }) => {
   const animatedScale = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {

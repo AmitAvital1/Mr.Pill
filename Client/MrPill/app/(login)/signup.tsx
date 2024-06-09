@@ -20,10 +20,10 @@ const SignUpScreen = () => {
     setDisabled(firstname == "" || lastname == "" || number == "");
 
   function handleSubmit() {
-    sendLoginRequest();
+    sendSignupRequest();
   }
 
-  const sendLoginRequest = async () => {
+  const sendSignupRequest = async () => {
     try {
       // const UserDTO = {
       //   PhoneNumber: number
@@ -33,7 +33,7 @@ const SignUpScreen = () => {
         "Content-Type": "application/json",
       };
 
-      const response = await axios.get("http://:5181/Mr-Pill/Health", { headers });
+      const response = await axios.post("http://10.0.2.2:5181/Mr-Pill/Signup", { headers });
       console.log(response.data);
       
     } catch (error) {

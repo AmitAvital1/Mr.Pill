@@ -10,25 +10,14 @@ import {
   Text,
 } from "react-native";
 import { PopButton } from "@/components/PopButton";
-
+import { MrPillLogo } from "@/components/MrPillLogo";
+``
 const WelcomeScreen = () => {
   //const [text, onChangeText] = React.useState('');
 
-  const mrpilllogo = (
-    <Image
-      source={require("@/assets/images/icon.png")}
-      style={{ alignSelf: "center", marginTop: 20 }}
-    />
-  );
-
   return (
     <SafeAreaView style={{ backgroundColor: "lavender", flex: 1 }}>
-      <PopButton
-        ButtonContent={() => {
-          return mrpilllogo;
-        }}
-        BackgroundColor="white"
-      />
+      <PopButton ButtonContent={MrPillLogo} BackgroundColor="white"/>
 
       <View style={styles.pagetop}>
         <Text style={styles.title}>ברוכים הבאים למר. פיל</Text>
