@@ -25,10 +25,10 @@ const LogInScreen = () => {
       const headers = {
         "Content-Type": "application/json",
       };
-      //${dns.login_service}${'Login'}
-      const response = await axios.post(`http://10.0.2.2:5181/Mr-Pill/Login`, UserDTO, { headers });
-      console.log(response.data)
-      return true;
+
+      console.log("send");
+      const response = await axios.get("http://10.0.2.2:5181/Mr-Pill/Health" ,{ headers });
+      console.log(response.data);
       
     } catch (error) {
       console.error("Error fetching data:", error);
