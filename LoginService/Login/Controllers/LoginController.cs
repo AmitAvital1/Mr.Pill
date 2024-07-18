@@ -26,6 +26,15 @@ public class LoginController : Controller
 
     [AllowAnonymous]
     [HttpPost]
+    [Route("Body")]
+    public IActionResult Body([FromBody] string name)
+    {
+        Console.WriteLine(name);
+        return Ok($"arrive! : {name}");
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
     [Route("Login")]
     public IActionResult Login([FromBody] UserDTO UserLogin)
     {
