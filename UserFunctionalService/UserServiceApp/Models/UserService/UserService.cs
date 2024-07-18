@@ -281,8 +281,7 @@ public class UserService : IUserService
                     .WithIsPrivate(ConvertEnumToEnumDto(m.IsPrivate));
 
                 return medicationDTOBuilder.Build();
-            }) ?? Enumerable.Empty<MedicationDTO>();
-            
+            }) ?? Enumerable.Empty<MedicationDTO>();  
         }
         catch (Exception ex)
         {
@@ -295,11 +294,12 @@ public class UserService : IUserService
     public async Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode)
     {
         var medication = _dbContext.MedicationRepos
-                    .FirstOrDefault(r => r.Barcode == medicationBarcode);
+                .FirstOrDefault(r => r.Barcode == medicationBarcode);
         
         if (medication == null)
         {
             MedicationDTO? medicationDTO = await SendARequestToMinistryOfHealthService(medicationBarcode)!;
+            
             return medicationDTO!;
         }
         
@@ -331,9 +331,7 @@ public class UserService : IUserService
         }
 
         var houseRequests = getHouseRequests(House.Id);
-
         var phoneNumbers = houseRequests.Select(hr => hr.SenderPhoneNumber).ToList();
-
         var users = getUsersForHouseRequests(houseRequests);
 
         return users ?? Enumerable.Empty<UserDTO>();
@@ -344,23 +342,24 @@ public class UserService : IUserService
         return _dbContext.HouseRequests
             .Where(houseRequest => 
                     houseRequest.Id == houseId && houseRequest.IsHandle == false)
-            .Select(houseRequest => HouseRequestDTO.Builder()
-                .WithId(houseRequest.Id)
-                .WithHouseId(houseRequest.HouseId)
-                .WithSenderPhoneNumber(houseRequest.SenderPhoneNumber)
-                .WithIsHandled(houseRequest.IsHandle)
-                .WithIsApproved(houseRequest.IsApprove)
-                .WithIsSenderSeen(houseRequest.IsSenderSeen)
-                .WithMergeToNewHouse(houseRequest.MergeToNewHouse)
-                .WithDateStart(houseRequest.DateStart)
-                .WithDateEnd(houseRequest.DateEnd)
-                .Build()
+                .Select(houseRequest => HouseRequestDTO.Builder()
+                    .WithId(houseRequest.Id)
+                    .WithHouseId(houseRequest.HouseId)
+                    .WithSenderPhoneNumber(houseRequest.SenderPhoneNumber)
+                    .WithIsHandled(houseRequest.IsHandle)
+                    .WithIsApproved(houseRequest.IsApprove)
+                    .WithIsSenderSeen(houseRequest.IsSenderSeen)
+                    .WithMergeToNewHouse(houseRequest.MergeToNewHouse)
+                    .WithDateStart(houseRequest.DateStart)
+                    .WithDateEnd(houseRequest.DateEnd)
+                    .Build()
             );
     }
 
     public bool IsManager(int phoneNumber)
     {
-        var isManager = _dbContext.Houses.Any(house => house.Manager != null && house.Manager.PhoneNumber == phoneNumber);
+        var isManager = _dbContext.Houses
+                .Any(house => house.Manager != null && house.Manager.PhoneNumber == phoneNumber);
 
         return isManager;
     }
@@ -372,12 +371,12 @@ public class UserService : IUserService
 
         return _dbContext.Users
             ?.Where(user => phoneNumbers.Contains(user.PhoneNumber.ToString()))
-            .Select(user => UserDTO.Builder()
-                .WithFirstName(user.FirstName)
-                .WithLastName(user.LastName)
-                .WithPhoneNumber(user.PhoneNumber.ToString())
-                .Build()
-            )
+                .Select(user => UserDTO.Builder()
+                    .WithFirstName(user.FirstName)
+                    .WithLastName(user.LastName)
+                    .WithPhoneNumber(user.PhoneNumber.ToString())
+                    .Build()
+                )
             ?? Enumerable.Empty<UserDTO>();
     }
 
@@ -391,7 +390,6 @@ public class UserService : IUserService
         {
             _logger.LogError("User with phone number {PhoneNumber} not found", userPhoneNumber);
             throw new InvalidOperationException($"User with phone number {userPhoneNumber} not found");
-
         }
 
         var medication = user.Medications
@@ -406,6 +404,60 @@ public class UserService : IUserService
         user?.Medications?.Remove(medication);
 
         _dbContext?.SaveChanges();
+    }
+
+    public void InviteMemberToJoindMyHouse(int managerPhoneNumber, int phoneNumber)
+    {
+        // first we need to create a new notification to the user to we need to send a request to the pushNotificationService
+        try
+        {
+            int houseId = GetHouseIdMyManagerPhoneNumber(managerPhoneNumber);
+
+            HouseRequest request = new HouseRequest
+            {
+                HouseId = houseId,
+                SenderPhoneNumber = managerPhoneNumber.ToString(),
+                TargetPhoneNumber = phoneNumber.ToString(),
+                IsHandle = false,
+                IsApprove = false,
+                IsSenderSeen = false,
+                IsManagerHouseSendRequest = true,
+                MergeToNewHouse = false,
+                DateStart = DateTime.Now, 
+                DateEnd = DateTime.Now.AddDays(7) 
+            };
+
+            _dbContext.HouseRequests.Add(request);
+            _dbContext.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"An unexpected error occurred when try to send a request to new member. {ex.Message}");
+            throw;
+        }
+    }
+
+    private int GetHouseIdMyManagerPhoneNumber(int managerPhoneNumber)
+    {
+        try
+        {
+            var houseId = _dbContext?.Users
+                    ?.Where(u => u.PhoneNumber == managerPhoneNumber)
+                    .Select(u => u.HouseId)
+                    .FirstOrDefault();
+            
+            if (houseId == null)
+            {
+                throw new InvalidOperationException($"No house found for manager with phone number {managerPhoneNumber}");
+            }
+
+            return houseId.Value;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"An error occurred while fetching HouseId for manager with phone number {managerPhoneNumber}.");   
+            throw;
+        }
     }
 
     public void UpdateMedication(MedicationDTO medicationDTO)
