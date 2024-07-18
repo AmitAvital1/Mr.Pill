@@ -5,6 +5,7 @@ using MrPill.DTOs.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using UserServiceApp.Models;
 using UserServiceApp.Models.ManagerService;
+using UserServiceApp.Models.Exceptions;
 
 [Authorize]
 public class UserController : Controller
@@ -24,7 +25,7 @@ public class UserController : Controller
 
         // Task task = Task.Run(() =>
         // {
-        //     SendRequestToGateway();
+            // SendRequestToGateway();
         // });
     }
     
@@ -85,13 +86,7 @@ public class UserController : Controller
     [HttpGet("user/medications")]
     public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] PrivacyStatus  privacyStatus)
     {
-        string? token = GetAuthorizationToken();
-
-        if (token == null)
-        {
-            return BadRequest(new { message = "Authorization token not provided" });
-        }
-
+        string? token = GetAuthorizationTokenOrThrow();
         int userPhoneNumer = _userService.GetUserPhoneNumber(token);
         IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, privacyStatus);
         
@@ -109,13 +104,7 @@ public class UserController : Controller
     [HttpGet("notifications")]
     public ActionResult GetMyNotification()
     {
-        string? token = GetAuthorizationToken();
-
-        if (token == null)
-        {
-            return BadRequest(new { message = "Authorization token not provided" });
-        }
-
+        string? token = GetAuthorizationTokenOrThrow();
         int userPhoneNumer = _userService.GetUserPhoneNumber(token);
 
         if (_userService.IsManager(userPhoneNumer))
@@ -131,7 +120,6 @@ public class UserController : Controller
     public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
     {
         // Update logic
-
        string? token = GetAuthorizationToken();
 
         if (token == null)
@@ -149,13 +137,7 @@ public class UserController : Controller
     {
         try
         {
-            string? token = GetAuthorizationToken();
-
-            if (token == null)
-            {
-                return BadRequest(new { message = "Authorization token not provided" });
-            }
-
+            string? token = GetAuthorizationTokenOrThrow();
             int userPhoneNumber = _userService.GetUserPhoneNumber(token);
 
             _userService.DeleteMedication(userPhoneNumber, medicationId);
@@ -164,15 +146,60 @@ public class UserController : Controller
         }
         catch (Exception ex)
         {
-            string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            _logger.LogError(ex, $"An error occurred at {currentTime} while deleting medication");
+           
+            _logger.LogError(ex, $"An error occurred at {GetCurrentFormattedTime()} while deleting medication");
             
             return StatusCode(500, new { message = "An error occurred while deleting medication" });
         }
     }
 
-    private string? GetAuthorizationToken()
+    [HttpPost("inviteToMyHouse/{phoneNumber}")]
+    public ActionResult InviteNewMemberToJoindMyHouse(int phoneNumber)
     {
-        return HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+        try
+        {
+            string token = GetAuthorizationToken();
+            int managerPhoneNumber = _userService.GetUserPhoneNumber(token!);
+
+            if (_userService.IsManager(managerPhoneNumber))
+            {
+                _userService.InviteMemberToJoindMyHouse(managerPhoneNumber, phoneNumber);
+                return Ok();
+            }
+            else
+            {
+                throw new NotAuthorizedException("User is not authorized to add a member to the house.");
+            }
+        
+        }
+        catch (NotAuthorizedException ex)
+        {
+            _logger.LogError(ex, $"User is not authorized at {GetCurrentFormattedTime()} to add a member to the house.");
+
+            return StatusCode(403, new { message = "User is not authorized to perform this action." });
+        }
+        catch (Exception ex)
+        {
+             string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            _logger.LogError(ex, $"An error occurred at {currentTime} while try to add a member with phone number {phoneNumber} to my house.");
+            
+            return StatusCode(500, new { message = "An error occurred while try to add a new member to my house." });
+        }
+    }
+
+    private string GetAuthorizationTokenOrThrow()
+    {
+        string token = GetAuthorizationToken() ?? throw new Exception("Authorization token not provided");
+        return token;
+    }
+
+    private string GetCurrentFormattedTime()
+    {
+        return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+    }
+
+    private string GetAuthorizationToken()
+    {
+        return HttpContext.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last() !;
     }
 }

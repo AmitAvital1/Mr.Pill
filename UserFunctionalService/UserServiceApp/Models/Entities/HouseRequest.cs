@@ -4,6 +4,8 @@ public class HouseRequest
 {
     public int Id { get; set; }
     public int HouseId { get; set; }
+    public bool IsManagerHouseSendRequest { get; set; }
+    public string? TargetPhoneNumber { get; set; }
     public required string SenderPhoneNumber { get; set; }
     public bool IsHandle { get; set; }
     public bool IsApprove { get; set; }

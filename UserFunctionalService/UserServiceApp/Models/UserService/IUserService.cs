@@ -15,4 +15,5 @@ public interface IUserService
     public int GetPhoneNumberFromToken(string? token);
     public IEnumerable<UserDTO> GetAllUsersThatWantToBePartOfMyHome(int userPhoneNumer);
     public bool IsManager(int phoneNumber);
+    public void InviteMemberToJoindMyHouse(int managerPhoneNumber, int phoneNumber);
 }
