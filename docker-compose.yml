@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - mynetwork
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    ports:
+      - "5672:5672"   # RabbitMQ default port
+      - "15672:15672" # RabbitMQ Management UI port
+    networks:
+      - mynetwork
+
+  login:
+    build:
+      context: .
+      dockerfile: LoginService/Login/Dockerfile
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=db;Database=YourDatabase;User=sa;Password=YourStrong!Passw0rd;"
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__Username: "guest"
+      RabbitMQ__Password: "guest"
+    ports:
+      - "5181:8080"
+    networks:
+      - mynetwork
+
+  userfunctional:
+    build:
+      context: .
+      dockerfile: UserFunctionalService/UserServiceApp/Dockerfile
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=db;Database=YourDatabase;User=sa;Password=YourStrong!Passw0rd;"
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__Username: "guest"
+      RabbitMQ__Password: "guest"
+    ports:
+      - "5194:8080"
+    restart: always
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge

@@ -72,15 +72,15 @@ nCrunchTemp_*
 *.dotCover
 */UserServiceApp/views
 */UserServiceApp/obj
-*/UserServiceApp/Properties
+#*/UserServiceApp/Properties
 */UserServiceApp/wwwroot
 */UserServiceApp/appsettings.Development.json
-*/UserServiceApp/appsettings.json
+#/UserServiceApp/appsettings.json
 
-*APIGateway/appsettings.json
+#APIGateway/appsettings.json
 *APIGateway/appsettings.Development.json
 
-*LoginService/Login/appsettings.json
+#LoginService/Login/appsettings.json
 *LoginService/Login/appsettings.Development.json
 #*LoginService/Login/Properties
 #*LoginService/Login/wwwroot
@@ -89,9 +89,9 @@ nCrunchTemp_*
 
 *MinistryOfHealthService/Properties
 *MinistryOfHealthService/appsettings.Development.json
-*MinistryOfHealthService/appsettings.json
+#*MinistryOfHealthService/appsettings.json
 
-*PushNotificationService/appsettings.json
+#*PushNotificationService/appsettings.json
 *PushNotificationService/appsettings.Development.json
 *PushNotificationService/Properties
 *PushNotificationService/obj
