@@ -22,5 +22,10 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 
+FROM build as migrations
+RUN dotnet tool install --version 8.0.4 --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
 # Wait for the SQL Server to be up and running, then apply migrations
-CMD /bin/bash -c "while !</dev/tcp/db/1433; do sleep 1; done; dotnet ef database update --connection \"Server=db;Database=YourDatabase;User=sa;Password=YourStrong!Passw0rd;\"; dotnet UserServiceApp.dll"
+WORKDIR /app/UserFunctionalService/UserServiceApp
+CMD /bin/bash -c "while !</dev/tcp/db/1433; do sleep 1; done; dotnet ef database update; dotnet /app/build/UserServiceApp.dll"

@@ -23,4 +23,4 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 
 # Wait for the SQL Server to be up and running, then apply migrations
-CMD /bin/bash -c "while !</dev/tcp/db/1433; do sleep 1; done; dotnet ef database update; dotnet Login.dll"
+CMD /bin/bash -c "while !</dev/tcp/db/1433; do sleep 1; done; dotnet Login.dll"
