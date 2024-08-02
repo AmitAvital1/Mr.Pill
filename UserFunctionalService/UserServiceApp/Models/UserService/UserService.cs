@@ -18,7 +18,7 @@ public class UserService : IUserService
         _httpClient = httpClientFactory.CreateClient();
         _dbContext = dbContext;
         _logger = logger;
-        _baseUrlMOHservice = "http://localhost:5032/pill-details";
+        _baseUrlMOHservice = "http://localhost:5200/pill-details"; // the localhost port map to 8080 in the docker 
     }
 
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
@@ -286,7 +286,6 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while fetching user.");
-
             return Enumerable.Empty<MedicationDTO>();
         }
     }
@@ -326,7 +325,6 @@ public class UserService : IUserService
         if (House == null)
         {
             _logger.LogError("An error occurred while fetching Notification.");
-
             return Enumerable.Empty<UserDTO>();
         }
 
@@ -402,7 +400,6 @@ public class UserService : IUserService
         }
 
         user?.Medications?.Remove(medication);
-
         _dbContext?.SaveChanges();
     }
 

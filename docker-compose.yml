@@ -9,7 +9,7 @@ services:
     ports:
       - "1433:1433"
     networks:
-      - mynetwork
+      - mynetwork 
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -36,6 +36,16 @@ services:
       RabbitMQ__Password: "guest"
     ports:
       - "5181:8080"
+    networks:
+      - mynetwork
+
+  mohservice:
+    build:
+      context: .
+      dockerfile: MinistryOfHealthService/Dockerfile
+    ports:
+      - "5200:8080"
+    restart: always
     networks:
       - mynetwork
 
