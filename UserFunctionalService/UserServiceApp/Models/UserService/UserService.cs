@@ -18,7 +18,7 @@ public class UserService : IUserService
         _httpClient = httpClientFactory.CreateClient();
         _dbContext = dbContext;
         _logger = logger;
-        _baseUrlMOHservice = "http://localhost:5200/pill-details"; // the localhost port map to 8080 in the docker 
+        _baseUrlMOHservice = "http://mohservice/pill-details"; // the localhost port map to 8080 in the docker 
     }
 
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
