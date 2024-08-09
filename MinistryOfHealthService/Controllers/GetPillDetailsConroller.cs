@@ -14,9 +14,9 @@ namespace MOHService.Controllers
         }
 
         [HttpGet("pill-details/{barcode}")]
-        public ActionResult<MohPillDetailsDTO> GetPillDetailsFromApiById(string barcode)
+        public Task<MohPillDetailsDTO> GetPillDetailsFromApiById(string barcode)
         {
-            return Ok(_mohApiService.GetPillDetailsAPI(barcode));
+            return _mohApiService.GetPillDetailsAPI(barcode);
         }
     }
 }

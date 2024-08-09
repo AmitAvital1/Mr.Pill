@@ -17,15 +17,14 @@ namespace MOHService.service
         public async Task<MohPillDetailsDTO> GetPillDetailsAPI(string barcode)
         {
                 string apiUrl = MOH_API_URL;
-                
-                var content = new StringContent(createJsonBodyToMohWithBarcode(barcode), Encoding.UTF8, "application/json");
 
+                var content = new StringContent(createJsonBodyToMohWithBarcode(barcode), Encoding.UTF8, "application/json");
+            
                 HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string pillDetails = await response.Content.ReadAsStringAsync();
-
                     JToken pillJsonDetails = JArray.Parse(pillDetails)[0];
                     MohPillDetailsDTO dtoToReturn = createPillDetailsDtoFromJson(pillJsonDetails);
                     return dtoToReturn;
