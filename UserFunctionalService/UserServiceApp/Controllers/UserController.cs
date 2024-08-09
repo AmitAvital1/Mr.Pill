@@ -68,18 +68,20 @@ public class UserController : Controller
     }
 
     [HttpPost("medications")]
-    public async Task<ActionResult> CreateNewMedication([FromBody] string medicationBarcode, bool privatcy)
+    public async Task<ActionResult> CreateNewMedication([FromBody] AddMedicationDto addMedicationDto)
     {
+        string medicationBarcode = addMedicationDto.MedicationBarcode;
+        bool privacy = addMedicationDto.Privacy;
         string? token = GetAuthorizationToken();
         int phoneNumber = _userService.GetPhoneNumberFromToken(token);
-
+        Console.WriteLine(medicationBarcode);
         if (!_userService.IsUserExistInDb(phoneNumber))
         {
             _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService)", phoneNumber);
             return NotFound("Phone number does not exist");
         }
 
-        bool success = await _userService.CreateNewMedication(medicationBarcode, phoneNumber, privatcy);
+        bool success = await _userService.CreateNewMedication(medicationBarcode, phoneNumber, privacy);
         return success ? Ok() : StatusCode(500);
     }
 
