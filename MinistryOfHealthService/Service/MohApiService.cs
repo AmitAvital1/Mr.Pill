@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using System.Text;
 using MrPill.DTOs.DTOs;
 using static MrPill.MOHService.Constants.Constants;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace MOHService.service
 {
@@ -25,9 +26,16 @@ namespace MOHService.service
                 if (response.IsSuccessStatusCode)
                 {
                     string pillDetails = await response.Content.ReadAsStringAsync();
-                    JToken pillJsonDetails = JArray.Parse(pillDetails)[0];
-                    MohPillDetailsDTO dtoToReturn = createPillDetailsDtoFromJson(pillJsonDetails);
-                    return dtoToReturn;
+                    if(JArray.Parse(pillDetails).Count() > 0)
+                    {
+                        JToken pillJsonDetails = JArray.Parse(pillDetails)[0];
+                        MohPillDetailsDTO dtoToReturn = createPillDetailsDtoFromJson(pillJsonDetails);
+                        return dtoToReturn;
+                    }
+                    else
+                    {
+                        throw new UnsupportedContentTypeException("Bad barode: Medication not exist in Moh");
+                    }
                 }
                 else
                 {

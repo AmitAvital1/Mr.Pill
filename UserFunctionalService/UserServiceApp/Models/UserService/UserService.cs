@@ -188,6 +188,11 @@ public class UserService : IUserService
 
             if (response.IsSuccessStatusCode)
             {
+                if(response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    _logger.LogDebug("No medication found in Moh");
+                    return null;
+                }
                 string responseContent = await response.Content.ReadAsStringAsync();
                 medicationDTO = JsonConvert.DeserializeObject<MedicationDTO>(responseContent);
 

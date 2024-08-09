@@ -1,4 +1,6 @@
+using System.Net;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using MOHService.service;
 using MrPill.DTOs.DTOs;
 namespace MOHService.Controllers
@@ -14,9 +16,15 @@ namespace MOHService.Controllers
         }
 
         [HttpGet("pill-details/{barcode}")]
-        public Task<MohPillDetailsDTO> GetPillDetailsFromApiById(string barcode)
-        {
-            return _mohApiService.GetPillDetailsAPI(barcode);
+        public async Task<ActionResult<MohPillDetailsDTO>> GetPillDetailsFromApiById(string barcode)
+        {   try
+            {
+                MohPillDetailsDTO res = await _mohApiService.GetPillDetailsAPI(barcode);
+                return Ok(res);
+            }
+            catch(UnsupportedContentTypeException e){
+                return StatusCode(((int)HttpStatusCode.NoContent),e.Data);
+            }
         }
     }
 }
