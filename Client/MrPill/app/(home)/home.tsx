@@ -13,15 +13,23 @@ const HomePage: React.FC = () => {
 
   return (
     <ParallaxScrollView headerBackgroundColor={{ light: "white", dark: "white" }} headerImage={MrPillLogo()}>
-    
+       
       <View style={styles.pagetop}> 
-        <ThemedText>שלום {userName}.</ThemedText>
+
+        <ThemedText style={{fontSize: 18,}}>שלום <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{userName}</ThemedText>. התרופות הקרובות:</ThemedText>
+
+        {/* need to implement dynamic upcoming medication */}
+        <View style={styles.reminderBox}>
+          <ThemedText>Calcium carbonate</ThemedText>
+          <ThemedText>בשעה 14:00 לאחר האוכל </ThemedText>
+        </View>
+
       </View>
 
 
       <View style={styles.container}>
         <View style={styles.row}>
-          <AppHomeButton ButtonContent={strFC("מלאי משפחתי")} ButtonAction={()=>{router.navigate('(home)/sharedpills')}}/>
+          <AppHomeButton ButtonContent={strFC("הוסף ארון תרופות")} ButtonAction={()=>{router.navigate('(home)/sharedpills')}}/>
           <AppHomeButton ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.navigate('(home)/mypills')}}/>
         </View>
 
@@ -44,6 +52,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#aaf8f8',
     borderRadius: 20,
     minHeight: 50,
+    padding: 5,
   },
   container: {
     flex: 1,
@@ -60,7 +69,16 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 20,
-    color: '#333',
+    color: '#000',
+  },
+  reminderBox: {
+    backgroundColor: 'pink',
+    borderRadius: 12,
+    flex: 1,
+    justifyContent: 'center',
+    alignContent: 'center',
+    paddingHorizontal: 15,
+    paddingBottom: 5,
   },
 });
 

@@ -20,7 +20,7 @@ const WelcomeScreen = () => {
       <PopButton ButtonContent={MrPillLogo} BackgroundColor="white"/>
 
       <View style={styles.pagetop}>
-        <Text style={styles.title}>ברוכים הבאים למר. פיל</Text>
+        <Text style={styles.title}>ברוכים הבאים!</Text>
       </View>
 
       <View style={styles.button}>

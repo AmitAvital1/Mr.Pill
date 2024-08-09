@@ -12,28 +12,38 @@ import {
 
 
 const SignUpScreen = () => {
-  const [firstname, onChangeLastName] = React.useState("");
-  const [lastname, onChangeFirstName] = React.useState("");
+  const [firstname, onChangeFirstName] = React.useState("");
+  const [lastname, onChangeLastName] = React.useState("");
   const [number, onChangeNumber] = React.useState("");
   const [isDisabled, setDisabled] = React.useState(true);
   const updateButton = () =>
     setDisabled(firstname == "" || lastname == "" || number == "");
 
   function handleSubmit() {
-    sendSignupRequest();
+    sendSignupRequest(firstname, lastname, number);
   }
 
-  const sendSignupRequest = async () => {
+  const sendSignupRequest = async (firstname: string, lastname: string, number: string) => {
     try {
-      // const UserDTO = {
-      //   PhoneNumber: number
-      // }
       
-      const headers = {
-        "Content-Type": "application/json",
-      };
+      // for debugging
+      axios.defaults.validateStatus = function () {
+        return true;
+      }; //
 
-      const response = await axios.post("http://10.0.2.2:5181/Mr-Pill/Signup", { headers });
+
+      const request = {
+        method: 'post',
+        url: "http://10.0.2.2:5181/Mr-Pill/Register",
+        headers: { "Content-Type": "application/json" }, 
+        data: {
+          FirstName: firstname,
+          LastName: lastname,
+          PhoneNumber: number,
+        }
+      }
+
+      const response = await axios(request)
       console.log(response.data);
       
     } catch (error) {
