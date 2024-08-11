@@ -39,7 +39,7 @@ services:
       RabbitMQ__Password: "guest"
       ASPNETCORE_ENVIRONMENT: Production
     ports:
-      - "5181:5000"
+      - "5181:8080"
     networks:
       - mynetwork
 
@@ -69,7 +69,7 @@ services:
       RabbitMQ__Username: "guest"
       RabbitMQ__Password: "guest"
     ports:
-      - "5194:5000"
+      - "5194:8080"
     restart: always
     networks:
       - mynetwork
