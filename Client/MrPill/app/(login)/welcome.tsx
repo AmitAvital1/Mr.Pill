@@ -17,10 +17,11 @@ const WelcomeScreen = () => {
 
   return (
     <SafeAreaView style={{ backgroundColor: "lavender", flex: 1 }}>
-      <PopButton ButtonContent={MrPillLogo} BackgroundColor="white"/>
-
       <View style={styles.pagetop}>
-        <Text style={styles.title}>ברוכים הבאים למר. פיל</Text>
+      <Text style={styles.title}>ברוכים הבאים!</Text>
+        {MrPillLogo()}
+        
+
       </View>
 
       <View style={styles.button}>
@@ -34,6 +35,9 @@ const WelcomeScreen = () => {
           <Text style={styles.buttontext}>משתמש קיים 😎</Text>
         </Link>
       </View>
+      <View style={{ marginTop: 50 }}>
+
+      </View>
     </SafeAreaView>
   );
 };
@@ -42,14 +46,14 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#6666FC",
     flex: 1,
-    borderRadius: 40,
+    borderRadius: 100,
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
     borderColor: "black",
   },
   buttontext: {
-    fontSize: 32,
+    fontSize: 42,
     color: "white",
   },
   pagetop: {
@@ -59,12 +63,12 @@ const styles = StyleSheet.create({
     backgroundColor: "lavender",
     justifyContent: "center",
     alignContent: "center",
+    marginVertical: 25
   },
   title: {
-    fontSize: 48,
-    flex: 1,
-    margin: 10,
+    fontSize: 52,
     textAlign: "center",
+    fontWeight: "bold",
   },
 });
 

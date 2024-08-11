@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Image, Pressable, Modal } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import * as FileSystem from 'expo-file-system';
 import { Downloader } from "@/components/Downloader";
-//import axios from "axios";
+import axios from "axios";
 import { MrPillLogo } from "@/components/MrPillLogo";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Colors } from '@/constants/Colors';
@@ -22,6 +22,7 @@ type Pill = {
   ImagePath?: string;
   PrivacyStatusDTO?: boolean; // IsPrivate type in C#
 };
+
 
 const MyPills: React.FC = () => {
 
@@ -64,10 +65,23 @@ const MyPills: React.FC = () => {
   };
 
   useEffect(() => {
+
     const fetchPills = async () => {
+
+      const request = {
+        method: 'post',
+        url: "http://10.0.2.2:5181/Mr-Pill/user/medications",
+        headers: { "Content-Type": "application/json" }, 
+        data: {
+          "UserToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiR2VuZXJhbC1Vc2VyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsIlBob25lTnVtYmVyIjoiMDUwMDExMTIyMiIsImV4cCI6MTcyMjk3NDAxNCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo1MjIxL01yX1BpbGxfQXBwIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo1MjIxL01yX1BpbGxfQXBwIn0._c4HO-CKGuXaS-h2EzV89X9eYYGqXaZiyqbqyPyGWYw",
+          "PrivacyStatus": "AllMedications",
+        }
+      }
+
       try {
-        //const response = await axios.get<Pill[]>('YOUR_SERVER_ENDPOINT');
-        //setMyPills(response.data);
+        const response = await axios(request);
+        console.log(response.data);
+        setMyPills(response.data);
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
@@ -134,6 +148,7 @@ const MyPills: React.FC = () => {
 
   const handleMorePillSources = () => {
     toggleDropdown();
+    console.log(FileSystem.documentDirectory)
   }
 
   return (
@@ -163,7 +178,6 @@ const MyPills: React.FC = () => {
         </View>
 
       </View>
-      
       <>
       {dropdownVisible && (
           <View style={styles.dropdown}>
@@ -202,10 +216,10 @@ const styles = StyleSheet.create({
     borderBottomColor: "#cccccc",
   },
   itemText: {
-    fontSize: 16,
+    fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'right',
-    marginHorizontal: 30,
+    marginHorizontal: 25,
   },
   image: {
     alignSelf: "center",
