@@ -12,13 +12,14 @@ public class UserService : IUserService
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private readonly string _baseUrlMOHservice;
+    public static string mohServiceUrl = "http://mohservice:8080/moh-service/pill-details";
 
     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
         _dbContext = dbContext;
         _logger = logger;
-        _baseUrlMOHservice = "http://mohservice:8080/moh-service/pill-details";
+        _baseUrlMOHservice = mohServiceUrl;
     }
 
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
