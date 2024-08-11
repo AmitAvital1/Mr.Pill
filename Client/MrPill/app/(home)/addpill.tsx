@@ -6,49 +6,79 @@ import { router } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import { saveTokenToFile } from '@/components/tokenHandlerFunctions';
 
-declare global {
-  var userToken: string;
-}
-
-const LogInScreen = () => {
+const AddPillScreen = () => {
 
   const [number, onChangeNumber] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(true);
   const updateButton = () => setDisabled(number == '')
  
-  function handleLogin() {
-    let response = sendLoginRequest();
-    router.navigate({pathname: '(home)/home', params: {'userIsLoggedIn': 1}});
+  function handleAddPill() {
+
+    let response = sendAddPillRequest();
+    
+    if (!response) return false;
+
+    response = sendGetPillRequest();
+
+    if (!response) return false;
+
+    return true;
+
   }
 
-  const sendLoginRequest = async () => {
+  const sendGetPillRequest = async () => {
+
+    // bug when adding medication and then trying to get all user medications
     try {
-
-      axios.defaults.validateStatus = function () {
-        return true;
-      };
-
+      console.log(globalThis.userToken)
       const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5181/Mr-Pill/Login",
-        headers: { "Content-Type": "application/json" }, 
+        method: 'get',
+        url: "http://10.0.2.2:5194/user/medications",
+        headers: {
+            "Authorization": "Bearer " + globalThis.userToken,
+            "privacyStatus": "AllMedications",
+        },
         data: {
-          "FirstName": "tt",
-          "LastName": "gg",
-          "PhoneNumber": number,
-          "UserToken": "asdasd",
         }
       }
 
       const response = await axios(request);
 
-      if (response.request.status == 200) {
-        globalThis.userToken = JSON.parse(response.request._response).token
+      console.log(response.request._response);
+      console.log(response.request.status);
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return false;
+    }
+
+  }
+
+  const sendAddPillRequest = async () => {
+    try {
+
+      axios.defaults.validateStatus = function () {
         return true;
+      };
+      
+      const request = {
+        method: 'post',
+        url: "http://10.0.2.2:5194/medications",
+        headers: {
+            "Authorization": "Bearer " + globalThis.userToken,
+        },
+        data: {
+            "medicationBarcode": String(number),
+            //"phoneNumber": "0501231234",
+            "privatcy": false,
+        }
       }
-      else {
-        console.log(response.request.status)
-        return false;
+      const response = await axios(request);
+      console.log(response.request._response);
+      console.log(response.request.status);
+
+      if (response.request.status == 200) {
+        return true;
       }
       
     } catch (error) {
@@ -63,7 +93,7 @@ const LogInScreen = () => {
 
       <View style={styles.pagetop}>
         <Text style={{fontSize: 32, flex:1}}>
-          התחברות למר. פיל
+          הוספת תרופה חדשה
         </Text>
       </View>
 
@@ -71,15 +101,15 @@ const LogInScreen = () => {
         style={styles.input}
         onChangeText={onChangeNumber}
         value={number}
-        placeholder="מספר טלפון"
+        placeholder="מספר ברקוד של התרופה"
         keyboardType="numeric"
         textAlign='right'
         onEndEditing={updateButton}
       />
 
       <Button 
-        title="התחברות" 
-        onPress={handleLogin} 
+        title="הוסף תרופה" 
+        onPress={handleAddPill} 
         //disabled={isDisabled}
       />
       
@@ -102,4 +132,4 @@ const styles = StyleSheet.create({
 });
 
 
-export default LogInScreen;
+export default AddPillScreen;

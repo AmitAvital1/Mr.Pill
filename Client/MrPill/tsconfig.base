@@ -1,0 +1,15 @@
+{
+  "extends": "expo-module-scripts/tsconfig.base",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "app/*": ["app/*"],
+      "assets/*": ["assets/*"]
+    },
+    "jsx": "react",
+    "target": "esnext",
+    "module": "esnext"
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules"]
+}
