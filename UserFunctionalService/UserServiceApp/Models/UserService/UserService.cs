@@ -12,13 +12,14 @@ public class UserService : IUserService
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _lock = new(1, 1);
     private readonly string _baseUrlMOHservice;
+    public static string mohServiceUrl = "http://mohservice:8080/moh-service/pill-details";
 
     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger)
     {
         _httpClient = httpClientFactory.CreateClient();
         _dbContext = dbContext;
         _logger = logger;
-        _baseUrlMOHservice = "http://mohservice:8080/moh-service/pill-details";
+        _baseUrlMOHservice = mohServiceUrl;
     }
 
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
@@ -188,6 +189,11 @@ public class UserService : IUserService
 
             if (response.IsSuccessStatusCode)
             {
+                if(response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                {
+                    _logger.LogDebug("No medication found in Moh");
+                    return null;
+                }
                 string responseContent = await response.Content.ReadAsStringAsync();
                 medicationDTO = JsonConvert.DeserializeObject<MedicationDTO>(responseContent);
 

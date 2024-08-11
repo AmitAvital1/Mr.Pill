@@ -3,6 +3,7 @@ version: '3.8'
 services:
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: db
     environment:
       SA_PASSWORD: "YourStrong!Passw0rd"
       ACCEPT_EULA: "Y"
@@ -13,6 +14,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest"
@@ -23,6 +25,7 @@ services:
       - mynetwork
 
   login:
+    container_name: login
     build:
       context: .
       dockerfile: LoginService/Login/Dockerfile
@@ -40,6 +43,7 @@ services:
       - mynetwork
 
   mohservice:
+    container_name: mohservice
     build:
       context: .
       dockerfile: MinistryOfHealthService/Dockerfile
@@ -50,6 +54,7 @@ services:
       - mynetwork
 
   userfunctional:
+    container_name: userfunc
     build:
       context: .
       dockerfile: UserFunctionalService/UserServiceApp/Dockerfile
