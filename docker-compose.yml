@@ -37,8 +37,9 @@ services:
       RabbitMQ__Host: "rabbitmq"
       RabbitMQ__Username: "guest"
       RabbitMQ__Password: "guest"
+      ASPNETCORE_ENVIRONMENT: Production
     ports:
-      - "5181:8080"
+      - "5181:5000"
     networks:
       - mynetwork
 
@@ -62,12 +63,13 @@ services:
       - db
       - rabbitmq
     environment:
+      ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: "Server=db;Database=YourDatabase;User=sa;Password=YourStrong!Passw0rd;"
       RabbitMQ__Host: "rabbitmq"
       RabbitMQ__Username: "guest"
       RabbitMQ__Password: "guest"
     ports:
-      - "5194:8080"
+      - "5194:5000"
     restart: always
     networks:
       - mynetwork
