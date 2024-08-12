@@ -65,7 +65,7 @@ namespace MOHService.service
                                     ""veterinary"": false,
                                     ""cytotoxic"": false,
                                     ""prescription"": false,
-                                    ""isGSL"": true,
+                                    ""isGSL"": false,
                                     ""healthServices"": false,
                                     ""isPeopleMedication"": false,
                                     ""fromCanceledDrags"": null,
@@ -77,7 +77,7 @@ namespace MOHService.service
                                     ""newDragsDrop"": 0,
                                     ""pageIndex"": 1,
                                     ""orderBy"": 0,
-                                    ""types"": ""0""
+                                    ""types"": ""9""
                                     }";
 
 
