@@ -40,19 +40,24 @@ public class LoginController : Controller
     {
         try
         {
+            _logger.LogInformation("Login attempt with phone number {PhoneNumber}", UserLogin.PhoneNumber);
+
             if (!ModelState.IsValid)
             {
+                _logger.LogWarning("Invalid model state for login attempt with phone number {PhoneNumber}", UserLogin.PhoneNumber);
                 return BadRequest(new { Message = "Invalid model state in login" });
             }
 
             if (!int.TryParse(UserLogin.PhoneNumber, out int phoneNumberValue))
             {
+                _logger.LogWarning("Invalid phone number format for login attempt with phone number {PhoneNumber}", UserLogin.PhoneNumber);
                 return BadRequest(new { Message = "Invalid phone number format" });
             }
 
             if (_loginService.PhoneNumberExistInDb(phoneNumberValue))
             {
                 string UserToken = _loginService.GenerateUserToken(UserLogin.PhoneNumber);
+                _logger.LogInformation("Login successful for phone number {PhoneNumber}", UserLogin.PhoneNumber);
                 return Ok(new { token = UserToken });
             }
 
@@ -61,7 +66,7 @@ public class LoginController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while trying to login.");
+            _logger.LogError(ex, "An error occurred while trying to login with phone number {PhoneNumber}", UserLogin.PhoneNumber);
             return StatusCode(500, "Internal Server Error");
         }
     }
@@ -118,34 +123,64 @@ public class LoginController : Controller
     [Route("joined-new-house")]
     public async Task<IActionResult> JoinedToNewHouse([FromQuery] bool mergeToNewHouse, int managerPhone)
     {
-       _logger.LogInformation("Processing request to join a new house. Manager phone number: {ManagerPhone}, " +
-                       "Merge to new house: {MergeToNewHouse}", managerPhone, mergeToNewHouse);
-
-
-        string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
-
-        if (string.IsNullOrEmpty(token))
+      
+        try
         {
-            _logger.LogWarning("Token not found in the request headers");
-            return Unauthorized("Token not found");
+            _logger.LogInformation("Processing request to join a new house. Manager phone number: {ManagerPhone}, " +
+                        "Merge to new house: {MergeToNewHouse}", managerPhone, mergeToNewHouse);
+
+
+            string token = GetTokenFromHeaders();
+
+            if (!_loginService.PhoneNumberExistInDb(managerPhone))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", managerPhone);
+                return NotFound("Phone number does not exist");
+            }
+
+            if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse, managerPhone))
+            {
+                _logger.LogInformation("Successfully processed request for manager {ManagerPhone} to join a new house.", managerPhone);
+                return Ok(new { Massage = "request to joined to another house succsesfuly" });
+            }
+            
+            else
+            {
+                _logger.LogError("Failed to process request for manager {ManagerPhone} to join a new house.", managerPhone);
+                return StatusCode(500, "Internal Server Error");
+            }
+        } 
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access attempt: {Message}", ex.Message);
+            return Unauthorized(ex.Message);
         }
-
-        if (!_loginService.PhoneNumberExistInDb(managerPhone))
+        catch (Exception ex)
         {
-            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", managerPhone);
-            return NotFound("Phone number does not exist");
-        }
-
-        if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse, managerPhone))
-        {
-            _logger.LogInformation("Successfully processed request for manager {ManagerPhone} to join a new house.", managerPhone);
-            return Ok(new { Massage = "request to joined to another house succsesfuly" });
-        }
-        
-        else
-        {
-            _logger.LogError("Failed to process request for manager {ManagerPhone} to join a new house.", managerPhone);
-            return StatusCode(500, "Internal Server Error");
+            _logger.LogError(ex, "An unexpected error occurred while processing the request for manager {ManagerPhone}", managerPhone);
+            return StatusCode(500, "An unexpected error occurred");
         }
     }
+
+    private string GetTokenFromHeaders()
+    {
+        try
+        {
+            string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+            if (string.IsNullOrEmpty(token))
+            {
+                _logger.LogWarning("Token not found in the request headers");
+                 throw new UnauthorizedAccessException("Token not found in the request headers");
+            }
+
+            return token;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while extracting the token from headers");
+            throw new UnauthorizedAccessException("Failed to extract token", ex);
+        }
+    }
+
 }
