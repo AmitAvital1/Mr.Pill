@@ -118,6 +118,10 @@ public class LoginController : Controller
     [Route("joined-new-house")]
     public async Task<IActionResult> JoinedToNewHouse([FromQuery] bool mergeToNewHouse, int managerPhone)
     {
+       _logger.LogInformation("Processing request to join a new house. Manager phone number: {ManagerPhone}, " +
+                       "Merge to new house: {MergeToNewHouse}", managerPhone, mergeToNewHouse);
+
+
         string? token = HttpContext.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
 
         if (string.IsNullOrEmpty(token))
@@ -134,11 +138,13 @@ public class LoginController : Controller
 
         if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse, managerPhone))
         {
+            _logger.LogInformation("Successfully processed request for manager {ManagerPhone} to join a new house.", managerPhone);
             return Ok(new { Massage = "request to joined to another house succsesfuly" });
         }
         
         else
         {
+            _logger.LogError("Failed to process request for manager {ManagerPhone} to join a new house.", managerPhone);
             return StatusCode(500, "Internal Server Error");
         }
     }

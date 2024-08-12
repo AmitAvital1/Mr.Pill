@@ -25,6 +25,14 @@ public class UserService : IUserService
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper)
     {
         // the login service ensure that the phone number is a phone number of the manager
+
+         _logger.LogInformation("Starting to process the request to add a new user to the manager's house. ManagerPhone: {ManagerPhone}, " +
+                       "SenderPhoneNumber: {SenderPhoneNumber}, MergeToNewHouse: {MergeToNewHouse}",
+                       loginComunicationDWrapper.ManagerPhone, 
+                       loginComunicationDWrapper.SenderPhoneNumber, 
+                       loginComunicationDWrapper.MergeToNewHouse);
+
+
         int HouseId = getTheHouseIdByTheManagerPhoneNumber(loginComunicationDWrapper.ManagerPhone);
         int SenderPhoneNumber = loginComunicationDWrapper.SenderPhoneNumber;
         bool IsHandle = false;
@@ -95,6 +103,7 @@ public class UserService : IUserService
 
             if (isMedicationExist)
             {
+                _logger.LogInformation("Medication with barcode {MedicationBarcode} already exists. Adding to user {PhoneNumber}. ", medicationBarcode, phoneNumber);
                 AddToUserNewMedication(phoneNumber, medicationBarcode, privatcy);
             }
             else
@@ -107,6 +116,7 @@ public class UserService : IUserService
                     return true;
                 }
 
+                _logger.LogWarning("No MedicationDTO received from Ministry of Health for barcode {MedicationBarcode}. The request returned null.", medicationBarcode);
                 return false;
             }
 
@@ -165,19 +175,25 @@ public class UserService : IUserService
         return int.Parse(getPhoneNumberFromToken(token));
     }
 
-    private string getPhoneNumberFromToken(string token)
+   private string getPhoneNumberFromToken(string token)
     {
+        _logger.LogInformation("Extracting phone number from token: {Token}", token);
+
         var jwtHandler = new JwtSecurityTokenHandler();
         var jwtToken = jwtHandler.ReadToken(token) as JwtSecurityToken;
         var phoneNumberClaim = jwtToken?.Claims.FirstOrDefault(claim => claim.Type == "PhoneNumber");
 
         if (phoneNumberClaim == null || string.IsNullOrEmpty(phoneNumberClaim.Value))
         {
+            _logger.LogWarning("Phone number claim not found or is empty in the token.");
             throw new InvalidOperationException("Phone number claim not found in token");
         }
 
+        _logger.LogInformation("Extracted phone number: {PhoneNumber}", phoneNumberClaim.Value);
+
         return phoneNumberClaim?.Value!;
     }
+
 
     private async Task<MedicationDTO?> SendARequestToMinistryOfHealthService(string medicationBarcode)
     {
@@ -245,16 +261,21 @@ public class UserService : IUserService
 
     private bool CheckIfTheMedicationExistInDb(string medicationBarcode)
     {
+        _logger.LogInformation("Checking if medication with barcode {MedicationBarcode} exists in the database.", medicationBarcode);
+
         var medication = _dbContext?.MedicationRepos
                     .FirstOrDefault(m => m.Barcode == medicationBarcode);
 
         if (medication == null)
         {
+            _logger.LogInformation("Medication with barcode {MedicationBarcode} does not exist in the database.", medicationBarcode);
             return false;
         }
 
+        _logger.LogInformation("Medication with barcode {MedicationBarcode} found in the database.", medicationBarcode);
         return true;
     }
+
 
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int phoneNumber, PrivacyStatus privacyStatus)
     {
@@ -412,9 +433,12 @@ public class UserService : IUserService
     public void InviteMemberToJoindMyHouse(int managerPhoneNumber, int phoneNumber)
     {
         // first we need to create a new notification to the user to we need to send a request to the pushNotificationService
+        _logger.LogInformation("Inviting member with phone number {PhoneNumber} to join the house managed by {ManagerPhoneNumber}.", phoneNumber, managerPhoneNumber);
         try
         {
             int houseId = GetHouseIdMyManagerPhoneNumber(managerPhoneNumber);
+
+            _logger.LogInformation("Successfully retrieved HouseId {HouseId} for manager {ManagerPhoneNumber}. Proceeding to create a house request.", houseId, managerPhoneNumber);
 
             HouseRequest request = new HouseRequest
             {
@@ -432,6 +456,8 @@ public class UserService : IUserService
 
             _dbContext.HouseRequests.Add(request);
             _dbContext.SaveChanges();
+
+            _logger.LogInformation("House request successfully created and saved for member {PhoneNumber} to join house {HouseId}.", phoneNumber, houseId);
         }
         catch (Exception ex)
         {
@@ -444,6 +470,8 @@ public class UserService : IUserService
     {
         try
         {
+            _logger.LogInformation("Attempting to retrieve HouseId for manager with phone number {ManagerPhoneNumber}.", managerPhoneNumber);
+
             var houseId = _dbContext?.Users
                     ?.Where(u => u.PhoneNumber == managerPhoneNumber)
                     .Select(u => u.HouseId)
@@ -451,8 +479,11 @@ public class UserService : IUserService
             
             if (houseId == null)
             {
+                _logger.LogWarning("No house found for manager with phone number {ManagerPhoneNumber}.", managerPhoneNumber);
                 throw new InvalidOperationException($"No house found for manager with phone number {managerPhoneNumber}");
             }
+
+            _logger.LogInformation("Successfully retrieved HouseId {HouseId} for manager with phone number {ManagerPhoneNumber}.", houseId, managerPhoneNumber);
 
             return houseId.Value;
         }

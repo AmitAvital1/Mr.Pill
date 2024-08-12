@@ -29,6 +29,14 @@ public class UserController : Controller
         // });
     }
     
+    [AllowAnonymous]
+    [HttpGet]
+    [Route("Health")]
+    public IActionResult Health()
+    {
+        return Ok("arrive!");
+    }
+
     private int GetCurrentPort()
     {
         int serverPort = HttpContext.Connection.LocalPort;
@@ -70,29 +78,56 @@ public class UserController : Controller
     [HttpPost("medications")]
     public async Task<ActionResult> CreateNewMedication([FromBody] AddMedicationDto addMedicationDto)
     {
-        string medicationBarcode = addMedicationDto.MedicationBarcode;
-        bool privacy = addMedicationDto.Privacy;
-        string? token = GetAuthorizationToken();
-        int phoneNumber = _userService.GetPhoneNumberFromToken(token);
-        Console.WriteLine(medicationBarcode);
-        if (!_userService.IsUserExistInDb(phoneNumber))
+        try
         {
-            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService)", phoneNumber);
-            return NotFound("Phone number does not exist");
-        }
+            string medicationBarcode = addMedicationDto.MedicationBarcode;
+            bool privacy = addMedicationDto.Privacy;
+            string? token = GetAuthorizationTokenOrThrow();
+            int phoneNumber = _userService.GetPhoneNumberFromToken(token);
 
-        bool success = await _userService.CreateNewMedication(medicationBarcode, phoneNumber, privacy);
-        return success ? Ok() : StatusCode(500);
+            _logger.LogInformation("Medication Barcode: {MedicationBarcode}", medicationBarcode);
+
+            if (!_userService.IsUserExistInDb(phoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (checked by userService)", phoneNumber);
+                return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+            }
+
+            bool success = await _userService.CreateNewMedication(medicationBarcode, phoneNumber, privacy);
+
+            if (!success)
+            {
+                _logger.LogError("Failed to create a new medication for phone number {PhoneNumber} with barcode {MedicationBarcode}", phoneNumber, medicationBarcode);
+                return StatusCode(500, "Failed to create a new medication. Please try again later.");
+            }
+
+            _logger.LogInformation("Successfully created a new medication with barcode {MedicationBarcode} for user {PhoneNumber}.", medicationBarcode, phoneNumber);
+
+            return Ok(new { Message = "Medication created successfully.", PhoneNumber = phoneNumber, MedicationBarcode = medicationBarcode });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while creating a new medication.");
+            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+        }
     }
 
     [HttpGet("user/medications")]
-    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] PrivacyStatus  privacyStatus)
+    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] PrivacyStatus privacyStatus)
     {
-        string? token = GetAuthorizationTokenOrThrow();
-        int userPhoneNumer = _userService.GetUserPhoneNumber(token);
-        IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, privacyStatus);
-        
-        return Ok(medications);
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+            IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, privacyStatus);
+
+            return Ok(medications);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while fetching medications for user.");
+            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+        }
     }
 
     [HttpGet("medication/barcode")]
@@ -106,32 +141,45 @@ public class UserController : Controller
     [HttpGet("notifications")]
     public ActionResult GetMyNotification()
     {
-        string? token = GetAuthorizationTokenOrThrow();
-        int userPhoneNumer = _userService.GetUserPhoneNumber(token);
-
-        if (_userService.IsManager(userPhoneNumer))
+        try
         {
-            IEnumerable<UserDTO> userDTOs = _userService.GetAllUsersThatWantToBePartOfMyHome(userPhoneNumer);
-            return Ok(userDTOs);
-        }
+            string? token = GetAuthorizationTokenOrThrow();
+            int userPhoneNumer = _userService.GetUserPhoneNumber(token);
 
-        return BadRequest(new { message = @"This User With Phone {userPhoneNumer} is not a manager",userPhoneNumer });
+            if (_userService.IsManager(userPhoneNumer))
+            {
+                IEnumerable<UserDTO> userDTOs = _userService.GetAllUsersThatWantToBePartOfMyHome(userPhoneNumer);
+                return Ok(userDTOs);
+            }
+
+            _logger.LogWarning("User with phone number {UserPhoneNumer} attempted to access manager-only notifications but is not a manager.", userPhoneNumer);
+            return BadRequest(new { message = $"This user with phone {userPhoneNumer} is not a manager", userPhoneNumer });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving notifications for user. ");
+            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+        }
     }
 
     [HttpPut("medications/{medicationId}")]
     public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
     {
         // Update logic
-       string? token = GetAuthorizationToken();
-
-        if (token == null)
-        {
-            return BadRequest(new { message = "Authorization token not provided" });
-        }
-
+      try
+      {
+        string? token = GetAuthorizationTokenOrThrow();
+        
         _userService.UpdateMedication(medicationDto);
-       
+        _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", medicationId);
+
         return Ok();
+      }
+      catch(Exception ex)
+      {
+        _logger.LogError(ex, "An error occurred while updating medication with ID {MedicationId}.", medicationId);
+        return StatusCode(500, "An unexpected error occurred. Please try again later.");
+      } 
     }
 
     [HttpDelete("medications/{medicationId}")]
@@ -150,7 +198,6 @@ public class UserController : Controller
         {
            
             _logger.LogError(ex, $"An error occurred at {GetCurrentFormattedTime()} while deleting medication");
-            
             return StatusCode(500, new { message = "An error occurred while deleting medication" });
         }
     }
@@ -160,7 +207,7 @@ public class UserController : Controller
     {
         try
         {
-            string token = GetAuthorizationToken();
+            string token = GetAuthorizationTokenOrThrow();
             int managerPhoneNumber = _userService.GetUserPhoneNumber(token!);
 
             if (_userService.IsManager(managerPhoneNumber))
@@ -182,9 +229,9 @@ public class UserController : Controller
         }
         catch (Exception ex)
         {
-             string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
             _logger.LogError(ex, $"An error occurred at {currentTime} while try to add a member with phone number {phoneNumber} to my house.");
-            
             return StatusCode(500, new { message = "An error occurred while try to add a new member to my house." });
         }
     }

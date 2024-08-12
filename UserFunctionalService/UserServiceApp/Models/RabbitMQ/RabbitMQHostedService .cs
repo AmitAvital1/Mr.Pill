@@ -20,6 +20,8 @@ public class RabbitMQHostedService : IHostedService
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Starting the RabbitMQ connection and channel setup.");
+
         ConnectionFactory factory = new()
         {
             Uri = new Uri(RabbitMqConstants.Uri),
@@ -39,13 +41,17 @@ public class RabbitMQHostedService : IHostedService
         {
             var body = args.Body.ToArray();
             string json = Encoding.UTF8.GetString(body);
-          
+           
+           _logger.LogInformation("Message received from RabbitMQ queue.");
+
             LoginComunicationDWrapper wrapper = JsonSerializer.Deserialize<LoginComunicationDWrapper>(json)!;
 
             if (wrapper != null)
             {
                 _userService.SaveMassageToManagerHouseToAddNewUser(wrapper);
                 channel.BasicAck(args.DeliveryTag, false);
+
+                _logger.LogInformation("Message successfully processed and acknowledged.");
             }
             else
             {
