@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Login.Models.LoginService;
 using MrPill.DTOs.DTOs;
 
-[Authorize]
+[Authorize] 
 public class LoginController : Controller
 {
     private readonly ILogger<LoginController> _logger;

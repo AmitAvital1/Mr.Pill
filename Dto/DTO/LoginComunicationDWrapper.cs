@@ -5,39 +5,21 @@ namespace MrPill.DTOs.DTOs;
 
 public class LoginComunicationDWrapper
 {
-    private readonly UserDTO _userDTO;
-    private readonly bool _mergeToNewHouse;
-    private readonly int _managerPhone;
-    private readonly int _senderPhone;
+    public UserDTO UserDTO { get; set; }
+    public bool MergeToNewHouse { get; set; }
+    public int ManagerPhone { get; set; }
+    public int SenderPhoneNumber { get; set; }
     
-    public LoginComunicationDWrapper(UserDTO userDTO, bool mergeToNewHouse, int managerPhone, int senderPhone)
+    public LoginComunicationDWrapper() { }
+
+    public LoginComunicationDWrapper(UserDTO userDTO, bool mergeToNewHouse, int managerPhone, int senderPhoneNumber)
     {
-        _userDTO = userDTO;
-        _mergeToNewHouse = mergeToNewHouse;
-        _managerPhone = managerPhone;
-        _senderPhone = senderPhone;
+        UserDTO = userDTO;
+        MergeToNewHouse = mergeToNewHouse;
+        ManagerPhone = managerPhone;
+        SenderPhoneNumber = senderPhoneNumber;
     }
 
-    public UserDTO UserDTO
-    {
-        get { return _userDTO; }
-    }
-
-    public bool MergeToNewHouse
-    {
-        get { return _mergeToNewHouse; }
-    }
-
-    public int ManagerPhone
-    {
-        get { return _managerPhone; }
-    }
-
-    public int SenderPhoneNumber
-    {
-        get {return _senderPhone; }
-    }
-    
     public byte[] GetBytes()
     {
         string json = JsonSerializer.Serialize(this);

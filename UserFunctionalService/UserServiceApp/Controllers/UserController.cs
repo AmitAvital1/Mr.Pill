@@ -37,12 +37,6 @@ public class UserController : Controller
         return Ok("arrive!");
     }
 
-    private int GetCurrentPort()
-    {
-        int serverPort = HttpContext.Connection.LocalPort;
-        return serverPort;
-    }
-
     private void SendRequestToGateway()
     {
         try
@@ -121,19 +115,22 @@ public class UserController : Controller
             int userPhoneNumer = _userService.GetUserPhoneNumber(token);
             IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, privacyStatus);
 
-            return Ok(medications);
+            return HandleMedicationResponse(medications, userPhoneNumer, privacyStatus);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return HandleUnauthorizedAccess(ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while fetching medications for user.");
-            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+           return HandleUnexpectedError(ex);
         }
     }
 
     [HttpGet("medication/barcode")]
     public async Task<ActionResult<MedicationDTO>> GetMedicationByBarcode([FromQuery] string medicationBarcode)
     {
-        // need to authorize the endpoint and check what is the id of the user that send the request
+        // we can support the functionality that give a medication by barcode without add it to the user 
         MedicationDTO medication = await _userService.GetMedicationByBarcode(medicationBarcode);
         return Ok(medication);
     }
@@ -165,21 +162,21 @@ public class UserController : Controller
     [HttpPut("medications/{medicationId}")]
     public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
     {
-        // Update logic
-      try
-      {
-        string? token = GetAuthorizationTokenOrThrow();
-        
-        _userService.UpdateMedication(medicationDto);
-        _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", medicationId);
+        // Update logics
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            
+            _userService.UpdateMedication(medicationDto);
+            _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", medicationId);
 
-        return Ok();
-      }
-      catch(Exception ex)
-      {
-        _logger.LogError(ex, "An error occurred while updating medication with ID {MedicationId}.", medicationId);
-        return StatusCode(500, "An unexpected error occurred. Please try again later.");
-      } 
+            return Ok();
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while updating medication with ID {MedicationId}.", medicationId);
+            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+        } 
     }
 
     [HttpDelete("medications/{medicationId}")]
@@ -236,6 +233,27 @@ public class UserController : Controller
         }
     }
 
+    private ActionResult<IEnumerable<MedicationDTO>> HandleMedicationResponse(IEnumerable<MedicationDTO> medications, int userPhoneNumber, PrivacyStatus privacyStatus)
+    {
+        if (medications == null || !medications.Any())
+        {
+            return NotFound(new 
+            { 
+                Message = "No medications found for the user.", 
+                UserPhoneNumber = userPhoneNumber, 
+                PrivacyStatus = privacyStatus 
+            });
+        }
+
+        return Ok(new 
+        { 
+            Message = "Medications retrieved successfully.", 
+            UserPhoneNumber = userPhoneNumber, 
+            PrivacyStatus = privacyStatus, 
+            Medications = medications 
+        });
+    }
+
     private string GetAuthorizationTokenOrThrow()
     {
         string token = GetAuthorizationToken() ?? throw new Exception("Authorization token not provided");
@@ -247,8 +265,26 @@ public class UserController : Controller
         return DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 
+    private ActionResult HandleUnauthorizedAccess(UnauthorizedAccessException ex)
+    {
+        _logger.LogError(ex, "Unauthorized access attempt while fetching medications.");
+        return Unauthorized(new { Message = "Unauthorized access. Please provide a valid token." });
+    }
+
+    private ActionResult HandleUnexpectedError(Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred while fetching medications for user.");
+        return StatusCode(500, "An unexpected error occurred. Please try again later.");
+    }
+
     private string GetAuthorizationToken()
     {
         return HttpContext.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last() !;
+    }
+
+    private int GetCurrentPort()
+    {
+        int serverPort = HttpContext.Connection.LocalPort;
+        return serverPort;
     }
 }

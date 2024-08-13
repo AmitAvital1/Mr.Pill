@@ -34,18 +34,28 @@ public class UserService : IUserService
 
 
         int HouseId = getTheHouseIdByTheManagerPhoneNumber(loginComunicationDWrapper.ManagerPhone);
-        int SenderPhoneNumber = loginComunicationDWrapper.SenderPhoneNumber;
+        int senderPhoneNumber = loginComunicationDWrapper.SenderPhoneNumber;
+        int targetPhoneNumber = loginComunicationDWrapper.ManagerPhone;
         bool IsHandle = false;
 
-        addNewRequestToTheDb(HouseId, SenderPhoneNumber, IsHandle, loginComunicationDWrapper.MergeToNewHouse);
+        addNewRequestToTheDb(HouseId, senderPhoneNumber, IsHandle, loginComunicationDWrapper.MergeToNewHouse, targetPhoneNumber);
     }
 
-    private void addNewRequestToTheDb(int i_HouseId, int i_SenderPhoneNumber, bool i_IsHandle, bool i_MergeToNewHouse)
+    private void addNewRequestToTheDb(int i_HouseId, int i_SenderPhoneNumber, bool i_IsHandle, bool i_MergeToNewHouse, int i_TargetPhoneNumber)
     {
+        var currentTime = DateTime.Now;
+
+        _logger.LogInformation(
+        "Adding new request to the database at {CurrentTime}. " +
+        "HouseId: {HouseId}, SenderPhoneNumber: {SenderPhoneNumber}, " +
+        "IsHandle: {IsHandle}, MergeToNewHouse: {MergeToNewHouse}",
+        currentTime, i_HouseId, i_SenderPhoneNumber, i_IsHandle, i_MergeToNewHouse);
+
         var request = new HouseRequest
         {
             HouseId = i_HouseId,
             SenderPhoneNumber = i_SenderPhoneNumber.ToString(),
+            TargetPhoneNumber = i_TargetPhoneNumber.ToString(),
             IsHandle = i_IsHandle,
             MergeToNewHouse = i_MergeToNewHouse,
             DateStart = DateTime.Now
@@ -290,8 +300,8 @@ public class UserService : IUserService
                 _logger.LogError("User with phone number {PhoneNumber} not found.", phoneNumber);
                 throw new Exception("User not found");
             }
-
-            user.Medications = user?.Medications?.Where(m => m.IsPrivate == privacyStatus).ToList();
+          
+            user.Medications = FilterMedications(user, privacyStatus);
 
             return user?.Medications?.Select(m =>
             {
@@ -312,9 +322,24 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while fetching user.");
+            _logger.LogError(ex, "An error occurred while getting medications for user with phone number {PhoneNumber}.", phoneNumber);
             return Enumerable.Empty<MedicationDTO>();
         }
+    }
+
+    private List<UserMedications> FilterMedications(User user, PrivacyStatus privacyStatus)
+    {
+        if (user == null)
+        {
+            throw new ArgumentNullException(nameof(user), "User cannot be null");
+        }
+
+        if (privacyStatus == PrivacyStatus.PrivateMedications)
+        {
+            return user.Medications?.Where(m => m.IsPrivate == PrivacyStatus.PrivateMedications).ToList()!;
+        }
+        
+        return user.Medications?.ToList()!;
     }
 
     public async Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode)

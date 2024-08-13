@@ -8,11 +8,11 @@ public class MedicationDTO
     public int Id { get; set; }
     
     [Required(ErrorMessage = "Please enter a name.")]
-    [StringLength(50, ErrorMessage = "Name should not exceed 50 characters.")]
+    [StringLength(60, ErrorMessage = "Name should not exceed 60 characters.")]
     public string? EnglishName { get; set; }
     public string? HebrewName { get; set; }
 
-    [StringLength(100, ErrorMessage = "Description should not exceed 100 characters.")]
+    [StringLength(120, ErrorMessage = "Description should not exceed 120 characters.")]
     public string? EnglishDescription { get; set; }
     public string? HebrewDescription { get; set; }
     public DateTime? Validity { get; set; }

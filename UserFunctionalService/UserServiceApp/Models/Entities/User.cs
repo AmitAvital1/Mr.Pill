@@ -1,4 +1,3 @@
-
 namespace UserServiceApp.Models;
 public class User
 {
