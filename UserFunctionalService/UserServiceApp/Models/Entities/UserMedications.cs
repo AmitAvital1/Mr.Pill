@@ -5,10 +5,12 @@ public class UserMedications
     public required string Barcode { get; set; }
     public int? PillSize { get; set; } 
     public DateTime Validity { get; set; }
-    public int UserId { get; set; }
-    public required User User { get; set; }
-     public int MedicationRepoId { get; set; }
-     public PrivacyStatus IsPrivate  { get; set; }
+    public int CreatorId { get; set; }
+    public required User Creator { get; set; }
+    public required MedicineCabinet MedicineCabinet { get; set; }
+    public int MedicineCabinetId { get; set; }
+    public int MedicationRepoId { get; set; }
+    public bool IsPrivate  { get; set; }
     public  required MedicationRepo MedicationRepo { get; set; }
 }
 

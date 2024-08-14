@@ -69,8 +69,40 @@ public class UserController : Controller
         }
     }
 
+    [HttpPost("medicine-cabinet")]
+    public ActionResult CreateNewMedicineCabinet([FromQuery] string Name)
+    {
+        try 
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int phoneNumber = _userService.GetPhoneNumberFromToken(token);
+
+            if (!_userService.IsUserExistInDb(phoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (checked by userService)", phoneNumber);
+                return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+            }
+
+            if (_userService.NameAlreadyExistInMyInventory(Name, phoneNumber))
+            {
+                _logger.LogWarning("Attempt to add a medicine cabinet with an already existing name '{Name}' for user with phone number {PhoneNumber}.", Name, phoneNumber);
+                return BadRequest(new { Message = $"The name '{Name}' is already taken in your inventory." });
+            }
+
+            _userService.CreateNewMedicineCabinet(Name, phoneNumber);
+
+            return Ok(new { Message = "Medicine cabinet created successfully", MedicineCabinetName = Name });
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while creating a new medicine cabinet with name '{Name}' for user.", Name);
+            return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
+        }
+    }
+
     [HttpPost("medications")]
-    public async Task<ActionResult> CreateNewMedication([FromBody] AddMedicationDto addMedicationDto)
+    public async Task<ActionResult> CreateNewMedication([FromBody] AddMedicationDto addMedicationDto,[FromQuery] string medicineCabinetName)
     {
         try
         {
@@ -87,7 +119,7 @@ public class UserController : Controller
                 return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
             }
 
-            bool success = await _userService.CreateNewMedication(medicationBarcode, phoneNumber, privacy);
+            bool success = await _userService.CreateNewMedication(medicationBarcode, phoneNumber, privacy, medicineCabinetName);
 
             if (!success)
             {
@@ -107,15 +139,15 @@ public class UserController : Controller
     }
 
     [HttpGet("user/medications")]
-    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] PrivacyStatus privacyStatus)
+    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] string medicineCabinetName)
     {
         try
         {
             string? token = GetAuthorizationTokenOrThrow();
             int userPhoneNumer = _userService.GetUserPhoneNumber(token);
-            IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, privacyStatus);
+            IEnumerable<MedicationDTO> medications = _userService.GetAllMedicationByUserId(userPhoneNumer, medicineCabinetName);
 
-            return HandleMedicationResponse(medications, userPhoneNumer, privacyStatus);
+            return HandleMedicationResponse(medications, userPhoneNumer);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -124,6 +156,29 @@ public class UserController : Controller
         catch (Exception ex)
         {
            return HandleUnexpectedError(ex);
+        }
+    }
+
+    [HttpGet("user/cabinet")]
+    public ActionResult GetAllCabinets()
+    {
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+            IEnumerable<MedicineCabinetDTO> medicineCabinetDTOs = _userService.GetAllMedicineCabinets(userPhoneNumer);
+
+            if (!medicineCabinetDTOs.Any())
+            {
+                return NotFound(new { Message = "No medicine cabinets found for the user.", UserPhoneNumber = userPhoneNumer });
+            }
+
+            return Ok(medicineCabinetDTOs);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving medicine cabinets for user.");
+            return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
         }
     }
 
@@ -149,7 +204,8 @@ public class UserController : Controller
                 return Ok(userDTOs);
             }
 
-            _logger.LogWarning("User with phone number {UserPhoneNumer} attempted to access manager-only notifications but is not a manager.", userPhoneNumer);
+            _logger.LogWarning("User with phone number {UserPhoneNumer} attempted to access manager-only notifications " +
+                    "but is not a manager.", userPhoneNumer);
             return BadRequest(new { message = $"This user with phone {userPhoneNumer} is not a manager", userPhoneNumer });
         }
         catch (Exception ex)
@@ -180,14 +236,14 @@ public class UserController : Controller
     }
 
     [HttpDelete("medications/{medicationId}")]
-    public ActionResult DeleteMedication(int medicationId)
+    public ActionResult DeleteMedication(int medicationId, [FromQuery] string medicineCabinetName)
     {
         try
         {
             string? token = GetAuthorizationTokenOrThrow();
             int userPhoneNumber = _userService.GetUserPhoneNumber(token);
 
-            _userService.DeleteMedication(userPhoneNumber, medicationId);
+            _userService.DeleteMedication(userPhoneNumber, medicationId, medicineCabinetName);
 
             return Ok();
         }
@@ -221,7 +277,6 @@ public class UserController : Controller
         catch (NotAuthorizedException ex)
         {
             _logger.LogError(ex, $"User is not authorized at {GetCurrentFormattedTime()} to add a member to the house.");
-
             return StatusCode(403, new { message = "User is not authorized to perform this action." });
         }
         catch (Exception ex)
@@ -233,7 +288,7 @@ public class UserController : Controller
         }
     }
 
-    private ActionResult<IEnumerable<MedicationDTO>> HandleMedicationResponse(IEnumerable<MedicationDTO> medications, int userPhoneNumber, PrivacyStatus privacyStatus)
+    private ActionResult<IEnumerable<MedicationDTO>> HandleMedicationResponse(IEnumerable<MedicationDTO> medications, int userPhoneNumber)
     {
         if (medications == null || !medications.Any())
         {
@@ -241,7 +296,6 @@ public class UserController : Controller
             { 
                 Message = "No medications found for the user.", 
                 UserPhoneNumber = userPhoneNumber, 
-                PrivacyStatus = privacyStatus 
             });
         }
 
@@ -249,7 +303,6 @@ public class UserController : Controller
         { 
             Message = "Medications retrieved successfully.", 
             UserPhoneNumber = userPhoneNumber, 
-            PrivacyStatus = privacyStatus, 
             Medications = medications 
         });
     }
@@ -257,6 +310,7 @@ public class UserController : Controller
     private string GetAuthorizationTokenOrThrow()
     {
         string token = GetAuthorizationToken() ?? throw new Exception("Authorization token not provided");
+        
         return token;
     }
 

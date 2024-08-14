@@ -21,7 +21,7 @@ namespace UserServiceApp.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("UserServiceApp.Models.House", b =>
+            modelBuilder.Entity("UserServiceApp.Models.CabinetRequest", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -29,13 +29,31 @@ namespace UserServiceApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("FamilyName")
+                    b.Property<DateTime>("DateEnd")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("DateStart")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsApprove")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsHandle")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsSenderSeen")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SenderPhoneNumber")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TargetPhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Houses");
+                    b.ToTable("CabinetRequests");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.HouseRequest", b =>
@@ -116,6 +134,53 @@ namespace UserServiceApp.Migrations
                     b.ToTable("MedicationRepos");
                 });
 
+            modelBuilder.Entity("UserServiceApp.Models.MedicineCabinet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CreatorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("MedicineCabinetName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatorId");
+
+                    b.ToTable("MedicineCabinets");
+                });
+
+            modelBuilder.Entity("UserServiceApp.Models.MedicineCabinetUsers", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicineCabinetId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "MedicineCabinetId");
+
+                    b.HasIndex("MedicineCabinetId");
+
+                    b.HasIndex("UserId1")
+                        .IsUnique()
+                        .HasFilter("[UserId1] IS NOT NULL");
+
+                    b.ToTable("MedicineCabinetUsers");
+                });
+
             modelBuilder.Entity("UserServiceApp.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -128,43 +193,22 @@ namespace UserServiceApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("HouseId")
-                        .HasColumnType("int");
-
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MedicineCabinetUsersId")
+                        .HasColumnType("int");
 
                     b.Property<int>("PhoneNumber")
                         .HasColumnType("int");
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("HouseId")
-                        .IsUnique();
-
                     b.HasIndex("PhoneNumber")
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("UserServiceApp.Models.UserHouse", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("HouseId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Id")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "HouseId");
-
-                    b.HasIndex("HouseId");
-
-                    b.ToTable("UserHouses");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.UserMedications", b =>
@@ -179,16 +223,19 @@ namespace UserServiceApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IsPrivate")
+                    b.Property<int>("CreatorId")
                         .HasColumnType("int");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("bit");
 
                     b.Property<int>("MedicationRepoId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("PillSize")
+                    b.Property<int>("MedicineCabinetId")
                         .HasColumnType("int");
 
-                    b.Property<int>("UserId")
+                    b.Property<int?>("PillSize")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("Validity")
@@ -196,67 +243,73 @@ namespace UserServiceApp.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatorId");
+
                     b.HasIndex("MedicationRepoId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("MedicineCabinetId");
 
                     b.ToTable("UserMedications");
                 });
 
-            modelBuilder.Entity("UserServiceApp.Models.User", b =>
+            modelBuilder.Entity("UserServiceApp.Models.MedicineCabinet", b =>
                 {
-                    b.HasOne("UserServiceApp.Models.House", "House")
-                        .WithOne("Manager")
-                        .HasForeignKey("UserServiceApp.Models.User", "HouseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("UserServiceApp.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                    b.Navigation("House");
+                    b.Navigation("Creator");
                 });
 
-            modelBuilder.Entity("UserServiceApp.Models.UserHouse", b =>
+            modelBuilder.Entity("UserServiceApp.Models.MedicineCabinetUsers", b =>
                 {
-                    b.HasOne("UserServiceApp.Models.House", "House")
-                        .WithMany("UserHouses")
-                        .HasForeignKey("HouseId")
+                    b.HasOne("UserServiceApp.Models.MedicineCabinet", "MedicineCabinet")
+                        .WithMany("MedicineCabinetUsers")
+                        .HasForeignKey("MedicineCabinetId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("UserServiceApp.Models.User", "User")
-                        .WithMany("UserHouses")
+                        .WithMany("MedicineCabinetUsersList")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("House");
+                    b.HasOne("UserServiceApp.Models.User", null)
+                        .WithOne("MedicineCabinetUser")
+                        .HasForeignKey("UserServiceApp.Models.MedicineCabinetUsers", "UserId1");
+
+                    b.Navigation("MedicineCabinet");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.UserMedications", b =>
                 {
+                    b.HasOne("UserServiceApp.Models.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("UserServiceApp.Models.MedicationRepo", "MedicationRepo")
                         .WithMany("Medications")
                         .HasForeignKey("MedicationRepoId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UserServiceApp.Models.User", "User")
+                    b.HasOne("UserServiceApp.Models.MedicineCabinet", "MedicineCabinet")
                         .WithMany("Medications")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("MedicineCabinetId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
+                    b.Navigation("Creator");
+
                     b.Navigation("MedicationRepo");
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UserServiceApp.Models.House", b =>
-                {
-                    b.Navigation("Manager");
-
-                    b.Navigation("UserHouses");
+                    b.Navigation("MedicineCabinet");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.MedicationRepo", b =>
@@ -264,11 +317,18 @@ namespace UserServiceApp.Migrations
                     b.Navigation("Medications");
                 });
 
-            modelBuilder.Entity("UserServiceApp.Models.User", b =>
+            modelBuilder.Entity("UserServiceApp.Models.MedicineCabinet", b =>
                 {
                     b.Navigation("Medications");
 
-                    b.Navigation("UserHouses");
+                    b.Navigation("MedicineCabinetUsers");
+                });
+
+            modelBuilder.Entity("UserServiceApp.Models.User", b =>
+                {
+                    b.Navigation("MedicineCabinetUser");
+
+                    b.Navigation("MedicineCabinetUsersList");
                 });
 #pragma warning restore 612, 618
         }

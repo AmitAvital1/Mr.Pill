@@ -9,25 +9,26 @@ public class AppDbContext : DbContext
     public DbSet<User>? Users { get; set; }
     public DbSet<UserMedications> UserMedications { get; set; }
     public DbSet<MedicationRepo> MedicationRepos { get; set; }
-    public DbSet<House> Houses { get; set; }
-    public DbSet<UserHouse> UserHouses { get; set; }
-    public DbSet<HouseRequest> HouseRequests{ get; set; }
+    public DbSet<MedicineCabinet> MedicineCabinets { get; set; }
+    public DbSet<MedicineCabinetUsers> MedicineCabinetUsers { get; set; }
+    public DbSet<HouseRequest> HouseRequests{ get; set; } // to fix or remove 
+    public DbSet<CabinetRequest> CabinetRequests{ get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<UserHouse>()
-            .HasKey(userHouseTable => new { userHouseTable.UserId, userHouseTable.HouseId });
+        modelBuilder.Entity<MedicineCabinetUsers>()
+            .HasKey(MedicineCabinetUsersTable => new { MedicineCabinetUsersTable.UserId, MedicineCabinetUsersTable.MedicineCabinetId });
 
-        modelBuilder.Entity<UserHouse>()
-            .HasOne(userHouseTable => userHouseTable.User)
-            .WithMany(user => user.UserHouses)
-            .HasForeignKey(userHouseTable => userHouseTable.UserId)
+        modelBuilder.Entity<MedicineCabinetUsers>()
+            .HasOne(MedicineCabinetUsersTable => MedicineCabinetUsersTable.User)
+            .WithMany(user => user.MedicineCabinetUsersList)
+            .HasForeignKey(MedicineCabinetUsersTable => MedicineCabinetUsersTable.UserId)
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<UserHouse>()
-            .HasOne(userHouseTable => userHouseTable.House)
-            .WithMany(house => house.UserHouses)
-            .HasForeignKey(userHouseTable => userHouseTable.HouseId)
+        modelBuilder.Entity<MedicineCabinetUsers>()
+            .HasOne(MedicineCabinetUsersTable => MedicineCabinetUsersTable.MedicineCabinet)
+            .WithMany(MedicineCabinet => MedicineCabinet.MedicineCabinetUsers)
+            .HasForeignKey(MedicineCabinetUsersTable => MedicineCabinetUsersTable.MedicineCabinetId)
             .OnDelete(DeleteBehavior.NoAction);
 
 
@@ -38,14 +39,20 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<UserMedications>()
-            .HasOne(medication => medication.User)
-            .WithMany(user => user.Medications)
-            .HasForeignKey(medication => medication.UserId)
+            .HasOne(medication => medication.MedicineCabinet)
+            .WithMany(MedicineCabinet => MedicineCabinet.Medications)
+            .HasForeignKey(medication => medication.MedicineCabinetId)
             .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<User>()
             .HasIndex(user => user.PhoneNumber)
             .IsUnique();
+
+        modelBuilder.Entity<MedicineCabinet>()
+            .HasOne(MedicineCabinet => MedicineCabinet.Creator)
+            .WithMany()
+            .HasForeignKey(MedicineCabinet => MedicineCabinet.CreatorId)
+            .OnDelete(DeleteBehavior.Restrict);
 
     }
 }
