@@ -6,5 +6,5 @@ public interface ILoginService
     public bool PhoneNumberExistInDb(int PhoneNumber);
     public string GenerateUserToken(string phoneNumber);
     public bool RegisterUser(UserDTO userDTORegister);
-    public Task<bool> AddNewHouseSuccsesfully(string token, bool mergeToNewHouse, int managerPhone);
+    public Task<bool> AddNewHouseSuccsesfully(string token, int targetPhoneNumber, string medicineCabinetName);
 }

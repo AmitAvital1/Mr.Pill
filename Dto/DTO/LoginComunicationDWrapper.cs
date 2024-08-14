@@ -6,18 +6,18 @@ namespace MrPill.DTOs.DTOs;
 public class LoginComunicationDWrapper
 {
     public UserDTO UserDTO { get; set; }
-    public bool MergeToNewHouse { get; set; }
-    public int ManagerPhone { get; set; }
-    public int SenderPhoneNumber { get; set; }
+    public int TargetPhoneNumber { get; set; }
+    public int SourcePhoneNumber { get; set; }
+    public string MedicineCabinetName { get; set; }
     
     public LoginComunicationDWrapper() { }
 
-    public LoginComunicationDWrapper(UserDTO userDTO, bool mergeToNewHouse, int managerPhone, int senderPhoneNumber)
+    public LoginComunicationDWrapper(UserDTO userDTO, int TargetPhoneNumber, int SourcePhoneNumber, string MedicineCabinetName)
     {
-        UserDTO = userDTO;
-        MergeToNewHouse = mergeToNewHouse;
-        ManagerPhone = managerPhone;
-        SenderPhoneNumber = senderPhoneNumber;
+        this.UserDTO = userDTO;
+        this.TargetPhoneNumber = TargetPhoneNumber;
+        this.SourcePhoneNumber = SourcePhoneNumber;
+        this.MedicineCabinetName = MedicineCabinetName;
     }
 
     public byte[] GetBytes()
@@ -26,3 +26,4 @@ public class LoginComunicationDWrapper
         return Encoding.UTF8.GetBytes(json);
     }
 }
+

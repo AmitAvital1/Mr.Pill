@@ -5,7 +5,7 @@ public class User
     public required string FirstName { get; set; }
     public required string LastName { get; set; }
     public int PhoneNumber { get; set; }
-    public int HouseId { get; set; }
-    public House? House { get; set; }
-    public ICollection<UserHouse>? UserHouses { get; set; }
+    public int MedicineCabinetsId { get; set; }
+    public MedicineCabinets? MedicineCabinets { get; set; }
+    public ICollection<MedicineCabinetUsers>? MedicineCabinetUsers { get; set; }
 }

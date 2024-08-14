@@ -34,39 +34,17 @@ public class LoginService : ILoginService
 
                 if (!PhoneNumberExistInDb(phoneNumberValue))
                 {
-                    var newHouse = new House
+                     var newUser = new User
                     {
-                        FamilyName = userDTORegister.LastName !,
-                        Manager = new User
-                        {
-                            FirstName = userDTORegister.FirstName !,
-                            LastName = userDTORegister.LastName !,
-                            PhoneNumber = phoneNumberValue
-                        }
+                        FirstName = userDTORegister.FirstName!,
+                        LastName = userDTORegister.LastName!,
+                        PhoneNumber = phoneNumberValue
                     };
 
-                    _dbContext.Houses.Add(newHouse);
-
-                    newHouse.Manager.HouseId = newHouse.Id;
-
-                    _dbContext?.Users?.Add(newHouse.Manager);
-
-                    var userHouse = new UserHouse
-                    {
-                        UserId = newHouse.Manager.UserId,
-                        User = newHouse.Manager,  
-                        HouseId = newHouse.Id,
-                        House = newHouse          
-                    };
-
-                    if (_dbContext != null)
-                    {
-                        _dbContext.UserHouses.Add(userHouse);
-                        _dbContext.SaveChanges();
-                        return true;
-                    }
-
-                    return false;
+                    _dbContext?.Users?.Add(newUser);
+                    _dbContext?.SaveChanges();
+                    
+                    return true;
                 }
 
               return false;
@@ -128,7 +106,7 @@ public class LoginService : ILoginService
         return phoneNumberClaim?.Value!;
     }
 
-    public async Task<bool> AddNewHouseSuccsesfully(string token, bool mergeToNewHouse, int managerPhone)
+    public async Task<bool> AddNewHouseSuccsesfully(string token, int targetPhoneNumber, string medicineCabinetName)
     {
         try
         {
@@ -140,7 +118,17 @@ public class LoginService : ILoginService
                 return false;
             }
 
-           await sendRequestToRabbitMQ(user, mergeToNewHouse, managerPhone,int.Parse(phoneNumber));
+            var medicineCabinet = user?.MedicineCabinetUsers
+                     ?.FirstOrDefault(mc => mc.MedicineCabinets.MedicineCabinetName == medicineCabinetName &&
+                     mc?.MedicineCabinets?.Creator?.PhoneNumber == user.PhoneNumber);
+
+            if (medicineCabinet == null)
+            {
+                _logger.LogWarning("User with phone number {PhoneNumber} is not the creator of the medicine cabinet '{MedicineCabinetName}'.", phoneNumber, medicineCabinetName);
+                return false;
+            }
+
+           await sendRequestToRabbitMQ(user!, targetPhoneNumber, int.Parse(phoneNumber), medicineCabinetName);
 
             return true;
         }
@@ -152,11 +140,11 @@ public class LoginService : ILoginService
         }
     }
 
-    private Task sendRequestToRabbitMQ(User user, bool mergeToNewHouse, int managerPhone, int phoneNumber)
+    private Task sendRequestToRabbitMQ(User user, int targetPhoneNumber, int sourcePhoneNumber, string medicineCabinetName)
     {
         Mapper mapper = Mapper.Instance;
         UserDTO userDTO = mapper.CreateAUserDtoFromUserObject(user);
-        LoginComunicationDWrapper loginComunicationDWrapper = new(userDTO, mergeToNewHouse, managerPhone, phoneNumber);
+        LoginComunicationDWrapper loginComunicationDWrapper = new(userDTO, targetPhoneNumber, sourcePhoneNumber, medicineCabinetName);
 
         RabbitMqHandler rabbitMqHandler = RabbitMqHandler.Instance;
         rabbitMqHandler.SendMassage(loginComunicationDWrapper);

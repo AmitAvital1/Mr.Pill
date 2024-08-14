@@ -121,32 +121,27 @@ public class LoginController : Controller
 
     [HttpPost]
     [Route("joined-new-house")]
-    public async Task<IActionResult> JoinedToNewHouse([FromQuery] bool mergeToNewHouse, int managerPhone)
+    public async Task<IActionResult> JoinedToNewHouse([FromQuery] int targetPhoneNumber, [FromQuery] string medicineCabinetName)
     {
-      
         try
         {
-            _logger.LogInformation("Processing request to join a new house. Manager phone number: {ManagerPhone}, " +
-                        "Merge to new house: {MergeToNewHouse}", managerPhone, mergeToNewHouse);
-
-
             string token = GetTokenFromHeaders();
 
-            if (!_loginService.PhoneNumberExistInDb(managerPhone))
+            if (!_loginService.PhoneNumberExistInDb(targetPhoneNumber))
             {
-                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", managerPhone);
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", targetPhoneNumber);
                 return NotFound("Phone number does not exist");
             }
 
-            if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse, managerPhone))
+            if (await _loginService.AddNewHouseSuccsesfully(token, targetPhoneNumber, medicineCabinetName))
             {
-                _logger.LogInformation("Successfully processed request for manager {ManagerPhone} to join a new house.", managerPhone);
+                _logger.LogInformation("Successfully processed request for manager {targetPhoneNumber} to join a new house.", targetPhoneNumber);
                 return Ok(new { Massage = "request to joined to another house succsesfuly" });
             }
             
             else
             {
-                _logger.LogError("Failed to process request for manager {ManagerPhone} to join a new house.", managerPhone);
+                _logger.LogError("Failed to process request for target Phone Number {targetPhoneNumber} to join a new house.", targetPhoneNumber);
                 return StatusCode(500, "Internal Server Error");
             }
         } 
@@ -157,10 +152,53 @@ public class LoginController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while processing the request for manager {ManagerPhone}", managerPhone);
+            _logger.LogError(ex, "An unexpected error occurred while processing the request for target Phone Number {targetPhoneNumber}", targetPhoneNumber);
             return StatusCode(500, "An unexpected error occurred");
         }
     }
+
+    // [HttpPost]
+    // [Route("joined-new-house")]
+    // public async Task<IActionResult> JoinedToNewHouse([FromQuery] bool mergeToNewHouse, int managerPhone)
+    // {
+      
+    //     try
+    //     {
+    //         _logger.LogInformation("Processing request to join a new house. Manager phone number: {ManagerPhone}, " +
+    //                     "Merge to new house: {MergeToNewHouse}", managerPhone, mergeToNewHouse);
+
+
+    //         string token = GetTokenFromHeaders();
+
+    //         if (!_loginService.PhoneNumberExistInDb(managerPhone))
+    //         {
+    //             _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", managerPhone);
+    //             return NotFound("Phone number does not exist");
+    //         }
+
+    //         if (await _loginService.AddNewHouseSuccsesfully(token, mergeToNewHouse, managerPhone))
+    //         {
+    //             _logger.LogInformation("Successfully processed request for manager {ManagerPhone} to join a new house.", managerPhone);
+    //             return Ok(new { Massage = "request to joined to another house succsesfuly" });
+    //         }
+            
+    //         else
+    //         {
+    //             _logger.LogError("Failed to process request for manager {ManagerPhone} to join a new house.", managerPhone);
+    //             return StatusCode(500, "Internal Server Error");
+    //         }
+    //     } 
+    //     catch (UnauthorizedAccessException ex)
+    //     {
+    //         _logger.LogWarning(ex, "Unauthorized access attempt: {Message}", ex.Message);
+    //         return Unauthorized(ex.Message);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "An unexpected error occurred while processing the request for manager {ManagerPhone}", managerPhone);
+    //         return StatusCode(500, "An unexpected error occurred");
+    //     }
+    // }
 
     private string GetTokenFromHeaders()
     {

@@ -19,7 +19,7 @@ public class MedicationDTO
     public int UserId { get; set; }
     public int MedicationRepoId { get; set; }
     public string? ImagePath { get; set; }
-    public PrivacyStatusDTO? IsPrivate { get; set; }
+    public bool IsPrivate { get; set; }
 
     public class MedicationDTOBuilder
     {
@@ -48,7 +48,7 @@ public class MedicationDTO
             return this;
         }
 
-        public MedicationDTOBuilder WithIsPrivate(PrivacyStatusDTO? privatcy)
+        public MedicationDTOBuilder WithIsPrivate(bool privatcy)
         {
             _medicationDTO.IsPrivate = privatcy;
             return this;
