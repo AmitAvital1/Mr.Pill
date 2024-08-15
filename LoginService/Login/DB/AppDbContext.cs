@@ -8,4 +8,5 @@ public class AppDbContext : DbContext
     public DbSet<User>? Users { get; set; }
     public DbSet<MedicineCabinet> MedicineCabinets { get; set; }
     public DbSet<MedicineCabinetUsers> MedicineCabinetUsers { get; set; }
+    public DbSet<PhoneMessage> PhoneMessages { get; set; }
 }

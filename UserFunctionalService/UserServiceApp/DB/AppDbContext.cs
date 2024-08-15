@@ -12,7 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<MedicineCabinet> MedicineCabinets { get; set; }
     public DbSet<MedicineCabinetUsers> MedicineCabinetUsers { get; set; }
     public DbSet<CabinetRequest> CabinetRequests{ get; set; }
-
+    public DbSet<PhoneMessage> PhoneMessages { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<MedicineCabinetUsers>()
