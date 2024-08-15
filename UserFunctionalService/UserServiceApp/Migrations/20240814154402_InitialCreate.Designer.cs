@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserServiceApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240814131730_init")]
-    partial class init
+    [Migration("20240814154402_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,50 +57,6 @@ namespace UserServiceApp.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CabinetRequests");
-                });
-
-            modelBuilder.Entity("UserServiceApp.Models.HouseRequest", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("DateEnd")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("DateStart")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("HouseId")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsApprove")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsHandle")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsManagerHouseSendRequest")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsSenderSeen")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("MergeToNewHouse")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SenderPhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TargetPhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("HouseRequests");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.MedicationRepo", b =>
@@ -170,16 +126,9 @@ namespace UserServiceApp.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("int");
 
-                    b.Property<int?>("UserId1")
-                        .HasColumnType("int");
-
                     b.HasKey("UserId", "MedicineCabinetId");
 
                     b.HasIndex("MedicineCabinetId");
-
-                    b.HasIndex("UserId1")
-                        .IsUnique()
-                        .HasFilter("[UserId1] IS NOT NULL");
 
                     b.ToTable("MedicineCabinetUsers");
                 });
@@ -199,9 +148,6 @@ namespace UserServiceApp.Migrations
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("MedicineCabinetUsersId")
-                        .HasColumnType("int");
 
                     b.Property<int>("PhoneNumber")
                         .HasColumnType("int");
@@ -279,10 +225,6 @@ namespace UserServiceApp.Migrations
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.HasOne("UserServiceApp.Models.User", null)
-                        .WithOne("MedicineCabinetUser")
-                        .HasForeignKey("UserServiceApp.Models.MedicineCabinetUsers", "UserId1");
-
                     b.Navigation("MedicineCabinet");
 
                     b.Navigation("User");
@@ -329,8 +271,6 @@ namespace UserServiceApp.Migrations
 
             modelBuilder.Entity("UserServiceApp.Models.User", b =>
                 {
-                    b.Navigation("MedicineCabinetUser");
-
                     b.Navigation("MedicineCabinetUsersList");
                 });
 #pragma warning restore 612, 618

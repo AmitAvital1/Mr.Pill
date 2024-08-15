@@ -9,8 +9,10 @@ public class LoginComunicationDWrapper
     public int TargetPhoneNumber { get; set; }
     public int SourcePhoneNumber { get; set; }
     public string MedicineCabinetName { get; set; }
-    
+
+#pragma warning disable CS8618 
     public LoginComunicationDWrapper() { }
+#pragma warning restore CS8618 
 
     public LoginComunicationDWrapper(UserDTO userDTO, int TargetPhoneNumber, int SourcePhoneNumber, string MedicineCabinetName)
     {

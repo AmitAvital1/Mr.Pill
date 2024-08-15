@@ -10,9 +10,9 @@ public class UserService : IUserService
     private readonly HttpClient _httpClient;
     private readonly AppDbContext _dbContext;
     private readonly ILogger _logger;
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly SemaphoreSlim _lockSemaphoreSlimForCreateNewMedication = new(1, 1);
     private readonly string _baseUrlMOHservice;
-    public static string mohServiceUrl = "http://mohservice:8080/moh-service/pill-details";
+    public static readonly string mohServiceUrl = "http://mohservice:8080/moh-service/pill-details";
 
     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger)
     {
@@ -35,19 +35,21 @@ public class UserService : IUserService
 
         if (user == null)
         {
+            _logger.LogWarning("User with phone number {PhoneNumber} not found when checking for medicine cabinet name '{Name}'.", 
+                phoneNumber, Name);
             return false;
         }
 
         var cabinetExists = user.MedicineCabinetUsersList?
-        .Any(mcu => mcu.MedicineCabinet.MedicineCabinetName.Equals(Name, StringComparison.OrdinalIgnoreCase)) ?? false;
+            .Any(mcu => mcu.MedicineCabinet.MedicineCabinetName.Equals(Name, StringComparison.OrdinalIgnoreCase)) ?? false;
 
-        if (cabinetExists)
+        if (!cabinetExists)
         {
-            _logger.LogInformation("The medicine cabinet name '{Name}' already exists for user with phone number {PhoneNumber}.", Name, phoneNumber);
+            _logger.LogInformation("The medicine cabinet name '{Name}' is available for user with phone number {PhoneNumber}.", Name, phoneNumber);
             return false;
         }
 
-        _logger.LogInformation("The medicine cabinet name '{Name}' is available for user with phone number {PhoneNumber}.", Name, phoneNumber);
+        _logger.LogInformation("The medicine cabinet name '{Name}' already exists for user with phone number {PhoneNumber}.", Name, phoneNumber);
         return true;
     }
 
@@ -81,7 +83,6 @@ public class UserService : IUserService
             };
 
             user.MedicineCabinetUsersList.Add(newMedicineCabinetUser);
-
             _dbContext!.MedicineCabinets.Add(newMedicineCabinet);
             _dbContext.SaveChanges();
 
@@ -89,8 +90,17 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while creating a new medicine cabinet with name '{Name}' for user with phone number {PhoneNumber}.", name, phoneNumber);
-            throw new InvalidOperationException($"An error occurred while creating the medicine cabinet '{name}' for user with phone number {phoneNumber}.", ex);
+            _logger.LogError(
+                ex, 
+                "An error occurred while creating a new medicine cabinet with name '{Name}' for user with phone number {PhoneNumber}.", 
+                name, 
+                phoneNumber
+            );
+
+            throw new InvalidOperationException(
+                $"An error occurred while creating the medicine cabinet '{name}' for user with phone number {phoneNumber}.", 
+                ex
+            );
         }
     }
 
@@ -173,7 +183,7 @@ public class UserService : IUserService
         // The continuation task (code after `await`) is responsible for completing its work and releasing the SemaphoreSlim.
         // This ensures other threads can acquire the SemaphoreSlim and access the critical section when available.
  
-        await _lock.WaitAsync().ConfigureAwait(true);
+        await _lockSemaphoreSlimForCreateNewMedication.WaitAsync().ConfigureAwait(true);
         
         try
         {
@@ -181,7 +191,13 @@ public class UserService : IUserService
 
             if (isMedicationExist)
             {
-                _logger.LogInformation("Medication with barcode {MedicationBarcode} already exists. Adding to user {PhoneNumber}. ", medicationBarcode, phoneNumber);
+                _logger.LogInformation(
+                    "Medication with barcode {MedicationBarcode} already exists. " +
+                    "Adding to user {PhoneNumber}.", 
+                    medicationBarcode, 
+                    phoneNumber
+                );
+
                 AddToUserNewMedication(phoneNumber, medicationBarcode, privatcy, medicineCabinetName);
             }
             else
@@ -194,7 +210,12 @@ public class UserService : IUserService
                     return true;
                 }
 
-                _logger.LogWarning("No MedicationDTO received from Ministry of Health for barcode {MedicationBarcode}. The request returned null.", medicationBarcode);
+                _logger.LogWarning(
+                    "No MedicationDTO received from Ministry of Health for barcode {MedicationBarcode}. " +
+                    "The request returned null.", 
+                    medicationBarcode
+                );
+
                 return false;
             }
 
@@ -202,9 +223,8 @@ public class UserService : IUserService
         }
         finally
         {
-            _lock.Release();
+            _lockSemaphoreSlimForCreateNewMedication.Release();
         }
-
     }
 
     private void AddToUserNewMedication(int phoneNumber, string medicationBarcode, bool privacy, string medicineCabinetName)
@@ -232,7 +252,15 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while adding medication with barcode '{Barcode}' to the medicine cabinet '{MedicineCabinetName}' for user with phone number {PhoneNumber}.", medicationBarcode, medicineCabinetName, phoneNumber);
+           _logger.LogError(
+                ex, 
+                "An error occurred while adding medication with barcode '{Barcode}' to the medicine cabinet '{MedicineCabinetName}' " +
+                "for user with phone number {PhoneNumber}.", 
+                medicationBarcode, 
+                medicineCabinetName, 
+                phoneNumber
+            );
+
             throw;
         }
     }
@@ -240,20 +268,24 @@ public class UserService : IUserService
     private User? GetUserByPhoneNumber(int phoneNumber)
     {
         var user = _dbContext?.Users?.SingleOrDefault(u => u.PhoneNumber == phoneNumber);
+        
         if (user == null)
         {
             _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService).", phoneNumber);
         }
+
         return user;
     }
 
     private MedicationRepo? GetMedicationByBarcodeWithoutReturnADto(string medicationBarcode)
     {
         var medication = _dbContext?.MedicationRepos.SingleOrDefault(m => m.Barcode == medicationBarcode);
+        
         if (medication == null)
         {
             _logger.LogInformation("The medication with the barcode {medicationBarcode} does not exist in the database.", medicationBarcode);
         }
+
         return medication;
     }
 
@@ -265,8 +297,13 @@ public class UserService : IUserService
 
         if (medicineCabinet == null)
         {
-            _logger.LogInformation("The medicine cabinet with the name '{MedicineCabinetName}' does not exist for user with phone number {PhoneNumber}.", medicineCabinetName, user.PhoneNumber);
+           _logger.LogInformation(
+                "The medicine cabinet with the name '{MedicineCabinetName}' does not exist for user with phone number {PhoneNumber}.", 
+                medicineCabinetName, 
+                user.PhoneNumber
+            );
         }
+
         return medicineCabinet;
     }
 
@@ -311,10 +348,8 @@ public class UserService : IUserService
         }
 
         _logger.LogInformation("Extracted phone number: {PhoneNumber}", phoneNumberClaim.Value);
-
         return phoneNumberClaim?.Value!;
     }
-
 
     private async Task<MedicationDTO?> SendARequestToMinistryOfHealthService(string medicationBarcode)
     {
@@ -414,7 +449,12 @@ public class UserService : IUserService
             
             if (medicineCabinet == null)
             {
-                _logger.LogError("Medicine cabinet with name '{MedicineCabinetName}' not found for user with phone number {PhoneNumber}.", medicineCabinetName, phoneNumber);
+                _logger.LogError(
+                    "Medicine cabinet with name '{MedicineCabinetName}' not found for user with phone number {PhoneNumber}.", 
+                    medicineCabinetName, 
+                    phoneNumber
+                );
+
                 throw new Exception("Medicine cabinet not found");
             }
 
@@ -428,7 +468,6 @@ public class UserService : IUserService
             _logger.LogError(ex, "An error occurred while getting medications for user with phone number {PhoneNumber}.", phoneNumber);
             return Enumerable.Empty<MedicationDTO>();
         }
-    
     }
 
     private IEnumerable<MedicationDTO> ConvertMedicationsToDTOs(IEnumerable<UserMedications> medications)
@@ -464,9 +503,8 @@ public class UserService : IUserService
         }
 
         return medicineCabinet.Medications?
-        .Where(m => !m.IsPrivate || (m.IsPrivate && m.CreatorId == user.UserId))
-        .ToList() ?? new List<UserMedications>();
-    
+            .Where(m => !m.IsPrivate || (m.IsPrivate && m.CreatorId == user.UserId))
+            .ToList() ?? new List<UserMedications>();
     }
 
     public IEnumerable<MedicineCabinetDTO> GetAllMedicineCabinets(int userPhoneNumer)
@@ -480,8 +518,8 @@ public class UserService : IUserService
         }
 
         var medicineCabinets = user.MedicineCabinetUsersList?
-        .Select(mcu => mcu.MedicineCabinet)
-        .ToList();
+            .Select(mcu => mcu.MedicineCabinet)
+            .ToList();
 
         if (medicineCabinets == null || !medicineCabinets.Any())
         {
@@ -512,85 +550,18 @@ public class UserService : IUserService
         }
         
         var medicationDTOBuilder = MedicationDTO.Builder()
-                                .WithId(medication.Id)
-                                .WithEnglishName(medication.DrugEnglishName)
-                                .WithHebrewName(medication.DrugHebrewName)
-                                .WithEnglishDescription(medication.EnglishDescription)
-                                .WithHebrewDescription(medication.HebrewDescription)
-                                .Build();
+                        .WithId(medication.Id)
+                        .WithEnglishName(medication.DrugEnglishName)
+                        .WithHebrewName(medication.DrugHebrewName)
+                        .WithEnglishDescription(medication.EnglishDescription)
+                        .WithHebrewDescription(medication.HebrewDescription)
+                        .Build();
 
         return medicationDTOBuilder;
     }
 
-    public IEnumerable<UserDTO> GetAllUsersThatWantToBePartOfMyHome(int userPhoneNumer)
-    {
-        // var House = _dbContext.Houses.FirstOrDefault(r => r.Manager!.PhoneNumber == userPhoneNumer);
-
-        // if (House == null)
-        // {
-        //     _logger.LogError("An error occurred while fetching Notification.");
-        //     return Enumerable.Empty<UserDTO>();
-        // }
-
-        // var houseRequests = getHouseRequests(House.Id);
-        // var phoneNumbers = houseRequests.Select(hr => hr.SenderPhoneNumber).ToList();
-        // var users = getUsersForHouseRequests(houseRequests);
-
-        // return users ?? Enumerable.Empty<UserDTO>();
-
-
-        return null;
-    }
-
-    private IEnumerable<HouseRequestDTO> getHouseRequests(int houseId)
-    {
-        return _dbContext.HouseRequests
-            .Where(houseRequest => 
-                    houseRequest.Id == houseId && houseRequest.IsHandle == false)
-                .Select(houseRequest => HouseRequestDTO.Builder()
-                    .WithId(houseRequest.Id)
-                    .WithHouseId(houseRequest.HouseId)
-                    .WithSenderPhoneNumber(houseRequest.SenderPhoneNumber)
-                    .WithIsHandled(houseRequest.IsHandle)
-                    .WithIsApproved(houseRequest.IsApprove)
-                    .WithIsSenderSeen(houseRequest.IsSenderSeen)
-                    .WithMergeToNewHouse(houseRequest.MergeToNewHouse)
-                    .WithDateStart(houseRequest.DateStart)
-                    .WithDateEnd(houseRequest.DateEnd)
-                    .Build()
-            );
-    }
-
-    public bool IsManager(int phoneNumber)
-    {
-        // var isManager = _dbContext.Houses
-        //         .Any(house => house.Manager != null && house.Manager.PhoneNumber == phoneNumber);
-
-        // return isManager;
-
-
-        return false;
-    }
-
-    private IEnumerable<UserDTO> getUsersForHouseRequests(IEnumerable<HouseRequestDTO> houseRequests)
-    {
-        var phoneNumbers = houseRequests
-                .Select(hr => hr.SenderPhoneNumber).ToList();
-
-        return _dbContext.Users
-            ?.Where(user => phoneNumbers.Contains(user.PhoneNumber.ToString()))
-                .Select(user => UserDTO.Builder()
-                    .WithFirstName(user.FirstName)
-                    .WithLastName(user.LastName)
-                    .WithPhoneNumber(user.PhoneNumber.ToString())
-                    .Build()
-                )
-            ?? Enumerable.Empty<UserDTO>();
-    }
-
     public void DeleteMedication(int userPhoneNumber, int medicationId, string medicineCabinetName)
     {
-
         var user = GetUserByPhoneNumber(userPhoneNumber);
           
         if (user == null)
@@ -612,79 +583,20 @@ public class UserService : IUserService
 
         if (medication == null)
         {
-            _logger.LogError("Medication with ID {MedicationId} not found in medicine cabinet '{MedicineCabinetName}' for user with phone number {PhoneNumber}.", medicationId, medicineCabinetName, userPhoneNumber);
-            throw new InvalidOperationException($"Medication with ID {medicationId} not found in medicine cabinet '{medicineCabinetName}' for user with phone number {userPhoneNumber}");
+            _logger.LogError(
+                "Medication with ID {MedicationId} not found in medicine cabinet '{MedicineCabinetName}' for user with phone number {PhoneNumber}.", 
+                medicationId, 
+                medicineCabinetName, 
+                userPhoneNumber
+            );
+
+            throw new InvalidOperationException(
+                $"Medication with ID {medicationId} not found in medicine cabinet '{medicineCabinetName}' for user with phone number {userPhoneNumber}"
+            );
         }
 
         medicineCabinet?.Medications?.Remove(medication);
         _dbContext?.SaveChanges();
-    }
-
-    public void InviteMemberToJoindMyHouse(int managerPhoneNumber, int phoneNumber)
-    {
-        // first we need to create a new notification to the user to we need to send a request to the pushNotificationService
-        _logger.LogInformation("Inviting member with phone number {PhoneNumber} to join the house managed by {ManagerPhoneNumber}.", phoneNumber, managerPhoneNumber);
-        try
-        {
-            int houseId = GetHouseIdMyManagerPhoneNumber(managerPhoneNumber);
-
-            _logger.LogInformation("Successfully retrieved HouseId {HouseId} for manager {ManagerPhoneNumber}. Proceeding to create a house request.", houseId, managerPhoneNumber);
-
-            HouseRequest request = new HouseRequest
-            {
-                HouseId = houseId,
-                SenderPhoneNumber = managerPhoneNumber.ToString(),
-                TargetPhoneNumber = phoneNumber.ToString(),
-                IsHandle = false,
-                IsApprove = false,
-                IsSenderSeen = false,
-                IsManagerHouseSendRequest = true,
-                MergeToNewHouse = false,
-                DateStart = DateTime.Now, 
-                DateEnd = DateTime.Now.AddDays(7) 
-            };
-
-            _dbContext.HouseRequests.Add(request);
-            _dbContext.SaveChanges();
-
-            _logger.LogInformation("House request successfully created and saved for member {PhoneNumber} to join house {HouseId}.", phoneNumber, houseId);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"An unexpected error occurred when try to send a request to new member. {ex.Message}");
-            throw;
-        }
-    }
-
-    private int GetHouseIdMyManagerPhoneNumber(int managerPhoneNumber)
-    {
-        // try
-        // {
-        //     _logger.LogInformation("Attempting to retrieve HouseId for manager with phone number {ManagerPhoneNumber}.", managerPhoneNumber);
-
-        //     var houseId = _dbContext?.Users
-        //             ?.Where(u => u.PhoneNumber == managerPhoneNumber)
-        //             .Select(u => u.HouseId)
-        //             .FirstOrDefault();
-            
-        //     if (houseId == null)
-        //     {
-        //         _logger.LogWarning("No house found for manager with phone number {ManagerPhoneNumber}.", managerPhoneNumber);
-        //         throw new InvalidOperationException($"No house found for manager with phone number {managerPhoneNumber}");
-        //     }
-
-        //     _logger.LogInformation("Successfully retrieved HouseId {HouseId} for manager with phone number {ManagerPhoneNumber}.", houseId, managerPhoneNumber);
-
-        //     return houseId.Value;
-        // }
-        // catch (Exception ex)
-        // {
-        //     _logger.LogError(ex, $"An error occurred while fetching HouseId for manager with phone number {managerPhoneNumber}.");   
-        //     throw;
-        // }
-
-
-        return 1;
     }
 
     public void UpdateMedication(MedicationDTO medicationDTO)

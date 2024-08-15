@@ -13,9 +13,6 @@ public interface IUserService
     public int GetUserPhoneNumber(string token);
      public bool IsUserExistInDb(int PhoneNumber);
     public int GetPhoneNumberFromToken(string? token);
-    public IEnumerable<UserDTO> GetAllUsersThatWantToBePartOfMyHome(int userPhoneNumer);
-    public bool IsManager(int phoneNumber);
-    public void InviteMemberToJoindMyHouse(int managerPhoneNumber, int phoneNumber);
     public bool NameAlreadyExistInMyInventory(string Name, int phoneNumber);
     public void CreateNewMedicineCabinet(string name, int phoneNumber);
     public IEnumerable<MedicineCabinetDTO> GetAllMedicineCabinets(int userPhoneNumer);

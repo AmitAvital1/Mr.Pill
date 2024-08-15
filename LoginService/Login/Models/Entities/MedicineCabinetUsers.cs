@@ -5,8 +5,8 @@ public class MedicineCabinetUsers
 {
     [Key]
     public int Id { get; set; }
-    public int CreatorId { get; set; }
-    public required User Creator { get; set; }
-    public int MedicineCabinetsId { get; set; }
-    public required MedicineCabinets MedicineCabinets { get; set; }
+    public int UserId { get; set; }
+    public required User User { get; set; }
+    public int MedicineCabinetId { get; set; }
+    public required MedicineCabinet MedicineCabinet { get; set; }
 }

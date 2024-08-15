@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using MrPill.DTOs.DTOs;
 using Login.Models.MapperObject;
 using Login.Models.RabbitMq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Login.Models.LoginService;
 
@@ -14,7 +15,7 @@ public class LoginService : ILoginService
     private readonly ILogger<LoginService> _logger;
     private readonly IConfiguration _config;
     private readonly AppDbContext _dbContext;
-    private static readonly object _lockObject = new();
+    private static readonly object _lockObjectRegister = new();
 
     public LoginService(ILogger<LoginService> logger,  IConfiguration configuration, AppDbContext appDbContext)
     {
@@ -25,7 +26,7 @@ public class LoginService : ILoginService
 
     public bool RegisterUser(UserDTO userDTORegister)
     {
-        lock (_lockObject)
+        lock (_lockObjectRegister)
         {
             try
             {
@@ -34,20 +35,31 @@ public class LoginService : ILoginService
 
                 if (!PhoneNumberExistInDb(phoneNumberValue))
                 {
-                     var newUser = new User
+                    var newUser = new User
                     {
                         FirstName = userDTORegister.FirstName!,
                         LastName = userDTORegister.LastName!,
                         PhoneNumber = phoneNumberValue
                     };
 
-                    _dbContext?.Users?.Add(newUser);
-                    _dbContext?.SaveChanges();
-                    
-                    return true;
+                    if (_dbContext != null)
+                    {
+                        _dbContext.Users?.Add(newUser);
+                        _dbContext.SaveChanges();
+
+                        return true;
+                    }
+
+                    _logger.LogError("Database context is null.");
+                    return false;
                 }
 
               return false;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                _logger.LogError(dbEx, "A database update error occurred while trying to register and save in db.");
+                return false;
             }
             catch (Exception ex)
             {
@@ -115,20 +127,34 @@ public class LoginService : ILoginService
 
             if (user == null)
             {
+                _logger.LogWarning("User with phone number '{PhoneNumber}' not found.", phoneNumber);
                 return false;
             }
 
-            var medicineCabinet = user?.MedicineCabinetUsers
-                     ?.FirstOrDefault(mc => mc.MedicineCabinets.MedicineCabinetName == medicineCabinetName &&
-                     mc?.MedicineCabinets?.Creator?.PhoneNumber == user.PhoneNumber);
+            var medicineCabinet = user?.MedicineCabinetUsersList
+                    ?.FirstOrDefault(mcu => 
+                            mcu.MedicineCabinet.MedicineCabinetName.Equals(medicineCabinetName, StringComparison.OrdinalIgnoreCase) &&
+                            mcu?.MedicineCabinet?.Creator?.PhoneNumber == user.PhoneNumber);
+
 
             if (medicineCabinet == null)
             {
-                _logger.LogWarning("User with phone number {PhoneNumber} is not the creator of the medicine cabinet '{MedicineCabinetName}'.", phoneNumber, medicineCabinetName);
+                _logger.LogWarning(
+                    "User with phone number {PhoneNumber} is not the creator of the medicine cabinet '{MedicineCabinetName}'.", 
+                    phoneNumber, 
+                    medicineCabinetName
+                );
+
                 return false;
             }
 
            await sendRequestToRabbitMQ(user!, targetPhoneNumber, int.Parse(phoneNumber), medicineCabinetName);
+
+           _logger.LogInformation(
+                "Request to RabbitMQ sent successfully for user with phone number '{PhoneNumber}' and medicine cabinet '{MedicineCabinetName}'.", 
+                phoneNumber, 
+                medicineCabinetName
+            );
 
             return true;
         }
@@ -145,20 +171,34 @@ public class LoginService : ILoginService
         Mapper mapper = Mapper.Instance;
         UserDTO userDTO = mapper.CreateAUserDtoFromUserObject(user);
         LoginComunicationDWrapper loginComunicationDWrapper = new(userDTO, targetPhoneNumber, sourcePhoneNumber, medicineCabinetName);
-
         RabbitMqHandler rabbitMqHandler = RabbitMqHandler.Instance;
+        
         rabbitMqHandler.SendMassage(loginComunicationDWrapper);
 
         return Task.CompletedTask;
     }
 
+    // private User? getUserFromPhoneNumber(int phoneNumber)
+    // {
+    //     if (_dbContext.Users == null)
+    //     {
+    //         throw new InvalidOperationException("User table not exist");
+    //     }
+
+    //     return _dbContext.Users.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+    // }
+
     private User? getUserFromPhoneNumber(int phoneNumber)
     {
         if (_dbContext.Users == null)
         {
-             throw new InvalidOperationException("User table not exist");
+            throw new InvalidOperationException("User table does not exist");
         }
 
-        return _dbContext.Users.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+        return _dbContext.Users
+            ?.Include(u => u.MedicineCabinetUsersList) 
+            .ThenInclude(mcu => mcu.MedicineCabinet) 
+            .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
     }
+
 }

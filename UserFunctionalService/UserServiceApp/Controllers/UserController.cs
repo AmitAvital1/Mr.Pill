@@ -34,7 +34,7 @@ public class UserController : Controller
     [Route("Health")]
     public IActionResult Health()
     {
-        return Ok("arrive!");
+        return Ok("arrive to user controller!");
     }
 
     private void SendRequestToGateway()
@@ -85,7 +85,12 @@ public class UserController : Controller
 
             if (_userService.NameAlreadyExistInMyInventory(Name, phoneNumber))
             {
-                _logger.LogWarning("Attempt to add a medicine cabinet with an already existing name '{Name}' for user with phone number {PhoneNumber}.", Name, phoneNumber);
+               _logger.LogWarning(
+                    "Attempt to add a medicine cabinet with an already existing name '{Name}' for user with phone number {PhoneNumber}.", 
+                    Name, 
+                    phoneNumber
+                ); 
+                
                 return BadRequest(new { Message = $"The name '{Name}' is already taken in your inventory." });
             }
 
@@ -123,12 +128,16 @@ public class UserController : Controller
 
             if (!success)
             {
-                _logger.LogError("Failed to create a new medication for phone number {PhoneNumber} with barcode {MedicationBarcode}", phoneNumber, medicationBarcode);
+                _logger.LogError(
+                    "Failed to create a new medication for phone number {PhoneNumber} with barcode {MedicationBarcode}", 
+                    phoneNumber, 
+                    medicationBarcode
+                );
+
                 return StatusCode(500, "Failed to create a new medication. Please try again later.");
             }
 
             _logger.LogInformation("Successfully created a new medication with barcode {MedicationBarcode} for user {PhoneNumber}.", medicationBarcode, phoneNumber);
-
             return Ok(new { Message = "Medication created successfully.", PhoneNumber = phoneNumber, MedicationBarcode = medicationBarcode });
         }
         catch (Exception ex)
@@ -190,31 +199,6 @@ public class UserController : Controller
         return Ok(medication);
     }
 
-    [HttpGet("notifications")]
-    public ActionResult GetMyNotification()
-    {
-        try
-        {
-            string? token = GetAuthorizationTokenOrThrow();
-            int userPhoneNumer = _userService.GetUserPhoneNumber(token);
-
-            if (_userService.IsManager(userPhoneNumer))
-            {
-                IEnumerable<UserDTO> userDTOs = _userService.GetAllUsersThatWantToBePartOfMyHome(userPhoneNumer);
-                return Ok(userDTOs);
-            }
-
-            _logger.LogWarning("User with phone number {UserPhoneNumer} attempted to access manager-only notifications " +
-                    "but is not a manager.", userPhoneNumer);
-            return BadRequest(new { message = $"This user with phone {userPhoneNumer} is not a manager", userPhoneNumer });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occurred while retrieving notifications for user. ");
-            return StatusCode(500, "An unexpected error occurred. Please try again later.");
-        }
-    }
-
     [HttpPut("medications/{medicationId}")]
     public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
     {
@@ -255,39 +239,6 @@ public class UserController : Controller
         }
     }
 
-    [HttpPost("inviteToMyHouse/{phoneNumber}")]
-    public ActionResult InviteNewMemberToJoindMyHouse(int phoneNumber)
-    {
-        try
-        {
-            string token = GetAuthorizationTokenOrThrow();
-            int managerPhoneNumber = _userService.GetUserPhoneNumber(token!);
-
-            if (_userService.IsManager(managerPhoneNumber))
-            {
-                _userService.InviteMemberToJoindMyHouse(managerPhoneNumber, phoneNumber);
-                return Ok();
-            }
-            else
-            {
-                throw new NotAuthorizedException("User is not authorized to add a member to the house.");
-            }
-        
-        }
-        catch (NotAuthorizedException ex)
-        {
-            _logger.LogError(ex, $"User is not authorized at {GetCurrentFormattedTime()} to add a member to the house.");
-            return StatusCode(403, new { message = "User is not authorized to perform this action." });
-        }
-        catch (Exception ex)
-        {
-            string currentTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-            _logger.LogError(ex, $"An error occurred at {currentTime} while try to add a member with phone number {phoneNumber} to my house.");
-            return StatusCode(500, new { message = "An error occurred while try to add a new member to my house." });
-        }
-    }
-
     private ActionResult<IEnumerable<MedicationDTO>> HandleMedicationResponse(IEnumerable<MedicationDTO> medications, int userPhoneNumber)
     {
         if (medications == null || !medications.Any())
@@ -310,7 +261,6 @@ public class UserController : Controller
     private string GetAuthorizationTokenOrThrow()
     {
         string token = GetAuthorizationToken() ?? throw new Exception("Authorization token not provided");
-        
         return token;
     }
 

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserServiceApp.Migrations
 {
     /// <inheritdoc />
-    public partial class init : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,28 +28,6 @@ namespace UserServiceApp.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CabinetRequests", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "HouseRequests",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    HouseId = table.Column<int>(type: "int", nullable: false),
-                    IsManagerHouseSendRequest = table.Column<bool>(type: "bit", nullable: false),
-                    TargetPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    SenderPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IsHandle = table.Column<bool>(type: "bit", nullable: false),
-                    IsApprove = table.Column<bool>(type: "bit", nullable: false),
-                    IsSenderSeen = table.Column<bool>(type: "bit", nullable: false),
-                    MergeToNewHouse = table.Column<bool>(type: "bit", nullable: false),
-                    DateStart = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    DateEnd = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_HouseRequests", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,8 +56,7 @@ namespace UserServiceApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PhoneNumber = table.Column<int>(type: "int", nullable: false),
-                    MedicineCabinetUsersId = table.Column<int>(type: "int", nullable: false)
+                    PhoneNumber = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -112,8 +89,7 @@ namespace UserServiceApp.Migrations
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
                     MedicineCabinetId = table.Column<int>(type: "int", nullable: false),
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    UserId1 = table.Column<int>(type: "int", nullable: true)
+                    Id = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -126,11 +102,6 @@ namespace UserServiceApp.Migrations
                     table.ForeignKey(
                         name: "FK_MedicineCabinetUsers_Users_UserId",
                         column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "UserId");
-                    table.ForeignKey(
-                        name: "FK_MedicineCabinetUsers_Users_UserId1",
-                        column: x => x.UserId1,
                         principalTable: "Users",
                         principalColumn: "UserId");
                 });
@@ -181,13 +152,6 @@ namespace UserServiceApp.Migrations
                 column: "MedicineCabinetId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MedicineCabinetUsers_UserId1",
-                table: "MedicineCabinetUsers",
-                column: "UserId1",
-                unique: true,
-                filter: "[UserId1] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserMedications_CreatorId",
                 table: "UserMedications",
                 column: "CreatorId");
@@ -214,9 +178,6 @@ namespace UserServiceApp.Migrations
         {
             migrationBuilder.DropTable(
                 name: "CabinetRequests");
-
-            migrationBuilder.DropTable(
-                name: "HouseRequests");
 
             migrationBuilder.DropTable(
                 name: "MedicineCabinetUsers");
