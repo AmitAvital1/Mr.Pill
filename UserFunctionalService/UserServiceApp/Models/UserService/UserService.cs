@@ -12,7 +12,7 @@ public class UserService : IUserService
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _lockSemaphoreSlimForCreateNewMedication = new(1, 1);
     private readonly string _baseUrlMOHservice;
-    public static readonly string mohServiceUrl = "http://mohservice:8080/moh-service/pill-details";
+    public static string mohServiceUrl = "http://mohservice:8080/moh-service/pill-details";
 
     public UserService(IHttpClientFactory httpClientFactory, AppDbContext dbContext, ILogger<UserService> logger)
     {

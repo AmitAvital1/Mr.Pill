@@ -200,5 +200,46 @@ public class LoginService : ILoginService
             .ThenInclude(mcu => mcu.MedicineCabinet) 
             .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
     }
+    public string GenerateVerificationCode()
+    {
+        Random random = new Random();
+        return random.Next(100000, 999999).ToString();
+    }
+
+    public void SaveVerificationCode(int phoneNumber, string? code)
+    {
+        var phoneMessage = new PhoneMessage
+        {
+            PhoneNumber = phoneNumber,
+            SentTime = DateTime.Now,
+            Code = code
+        };
+
+        _dbContext.PhoneMessages.Add(phoneMessage);
+        _dbContext.SaveChanges();
+    }
+
+    public bool ValidateVerificationCode(int phoneNumber, string? code)
+    {
+        var latestMessage = _dbContext.PhoneMessages
+            .Where(m => m.PhoneNumber == phoneNumber)
+            .OrderByDescending(m => m.SentTime)
+            .FirstOrDefault();
+
+        if (latestMessage == null || latestMessage.Code != code)
+        {
+            return false;
+        }
+
+        var timeElapsed = DateTime.UtcNow - latestMessage.SentTime;
+        if (timeElapsed > TimeSpan.FromMinutes(2))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    
 
 }

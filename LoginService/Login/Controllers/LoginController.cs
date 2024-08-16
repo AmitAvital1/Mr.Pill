@@ -36,7 +36,7 @@ public class LoginController : Controller
     [AllowAnonymous]
     [HttpPost]
     [Route("Login")]
-    public IActionResult Login([FromBody] UserDTO UserLogin)
+    public IActionResult Login([FromBody] PhoneNumberDTO UserLogin)
     {
         try
         {
@@ -56,9 +56,13 @@ public class LoginController : Controller
 
             if (_loginService.PhoneNumberExistInDb(phoneNumberValue))
             {
-                string UserToken = _loginService.GenerateUserToken(UserLogin.PhoneNumber);
-                _logger.LogInformation("Login successful for phone number {PhoneNumber}", UserLogin.PhoneNumber);
-                return Ok(new { token = UserToken });
+                // Generate 6-digit code
+                var code = _loginService.GenerateVerificationCode();
+                // Save the code and timestamp in the database
+                _loginService.SaveVerificationCode(phoneNumberValue, code);
+
+                _logger.LogInformation("Verification code sent to phone number {PhoneNumber}", UserLogin.PhoneNumber);
+                return Ok(new { message = "Verification code sent" });
             }
 
             _logger.LogInformation("User with phone number {PhoneNumber} does not exist", UserLogin.PhoneNumber);
@@ -73,34 +77,126 @@ public class LoginController : Controller
 
     [AllowAnonymous]
     [HttpPost]
-    [Route("Register")]
-    public IActionResult Register([FromBody] UserDTO userDTORegister)
+    [Route("ValidateCode")]
+    public IActionResult ValidateCode([FromBody] CodeValidationDTO validationDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            _logger.LogInformation("Validating code for phone number {PhoneNumber}", validationDto.PhoneNumber);
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for code validation with phone number {PhoneNumber}", validationDto.PhoneNumber);
+                return BadRequest(new { Message = "Invalid model state in validation" });
+            }
+
+            if (!int.TryParse(validationDto.PhoneNumber, out int phoneNumberValue))
+            {
+                _logger.LogWarning("Invalid phone number format for validation attempt with phone number {PhoneNumber}", validationDto.PhoneNumber);
+                return BadRequest(new { Message = "Invalid phone number format" });
+            }
+
+            var isValid = _loginService.ValidateVerificationCode(phoneNumberValue, validationDto.Code);
+
+            if (isValid)
+            {
+                string UserToken = _loginService.GenerateUserToken(validationDto.PhoneNumber);
+                _logger.LogInformation("Code validation successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
+                return Ok(new { token = UserToken });
+            }
+
+            _logger.LogWarning("Invalid code for phone number {PhoneNumber}", validationDto.PhoneNumber);
+            return Unauthorized(new { message = "Invalid code" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while validating the code with phone number {PhoneNumber}", validationDto.PhoneNumber);
+            return StatusCode(500, "Internal Server Error");
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("GenerateRegistrationCode")]
+    public IActionResult GenerateRegistrationCode([FromBody] PhoneNumberDTO phoneNumberDto)
     {
         try
         {
+            _logger.LogInformation("Generating registration code for phone number {PhoneNumber}", phoneNumberDto.PhoneNumber);
+
             if (!ModelState.IsValid)
             {
-                return BadRequest(new { Message = "Invalid model state In register" });
-            }
-
-            if (!int.TryParse(userDTORegister.PhoneNumber, out int phoneNumberValue))
-            {
+                _logger.LogWarning("Invalid model state for registration code generation with phone number {PhoneNumber}", phoneNumberDto.PhoneNumber);
                 return BadRequest(new { Message = "Invalid phone number format" });
             }
-            
+
+            if (!int.TryParse(phoneNumberDto.PhoneNumber, out int phoneNumberValue))
+            {
+                _logger.LogWarning("Invalid phone number format for registration code generation with phone number {PhoneNumber}", phoneNumberDto.PhoneNumber);
+                return BadRequest(new { Message = "Invalid phone number format" });
+            }
+
             bool phoneNumberExistInDb;
             
             lock (_lockerRegister)
             {
                 phoneNumberExistInDb = _loginService.PhoneNumberExistInDb(phoneNumberValue);
             }
-
-            if (!phoneNumberExistInDb)
+            if (phoneNumberExistInDb)
             {
+                _logger.LogInformation("User with phone number {PhoneNumber} exists in the system", phoneNumberDto.PhoneNumber);
+                return Conflict(new { message = "User already exists", PhoneNumber = phoneNumberDto.PhoneNumber });
+            }
+            
+            var code = _loginService.GenerateVerificationCode();
+            _loginService.SaveVerificationCode(phoneNumberValue, code);
+
+            _logger.LogInformation("Registration code sent to phone number {PhoneNumber}", phoneNumberDto.PhoneNumber);
+            return Ok(new { message = "Registration code sent" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while generating registration code for phone number {PhoneNumber}", phoneNumberDto.PhoneNumber);
+            return StatusCode(500, "Internal Server Error");
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPost]
+    [Route("Register")]
+    public IActionResult VerifyAndRegistrationCode([FromBody] CodeValidationRegistrationDTO validationDto)
+    {
+        try
+        {
+            _logger.LogInformation("Verifying registration code for phone number {PhoneNumber}", validationDto.PhoneNumber);
+
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("Invalid model state for registration code verification with phone number {PhoneNumber}", validationDto.PhoneNumber);
+                return BadRequest(ModelState);
+            }
+
+            if (!int.TryParse(validationDto.PhoneNumber, out int phoneNumberValue))
+            {
+                _logger.LogWarning("Invalid phone number format for registration code verification with phone number {PhoneNumber}", validationDto.PhoneNumber);
+                return BadRequest(new { Message = "Invalid phone number format" });
+            }
+
+            var isValid = _loginService.ValidateVerificationCode(phoneNumberValue, validationDto.Code);
+
+            if (isValid)
+            {
+                _logger.LogInformation("Registration code validation successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
+                var userDTORegister = UserDTO.Builder().WithFirstName(validationDto.FirstName).WithLastName(validationDto.LastName).WithPhoneNumber(validationDto.PhoneNumber).Build();
                 if (_loginService.RegisterUser(userDTORegister))
                 {
                     string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber);
-
+                     _logger.LogInformation("User registration successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
                     return Ok(new { token = UserToken });
                 }
                 else
@@ -109,15 +205,16 @@ public class LoginController : Controller
                 }
             }
 
-            _logger.LogInformation("User with phone number {PhoneNumber} exists in the system", userDTORegister.PhoneNumber);
-            return Conflict(new { message = "User already exists", PhoneNumber = userDTORegister.PhoneNumber });
+            _logger.LogWarning("Invalid registration code for phone number {PhoneNumber}", validationDto.PhoneNumber);
+            return Unauthorized(new { message = "Invalid code" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while trying to register.");
+            _logger.LogError(ex, "An error occurred while verifying registration code for phone number {PhoneNumber}", validationDto.PhoneNumber);
             return StatusCode(500, "Internal Server Error");
         }
     }
+
 
     [HttpPost]
     [Route("joined-new-house")]
