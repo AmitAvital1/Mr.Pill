@@ -4,6 +4,16 @@ import { MrPillLogo } from "@/components/MrPillLogo";
 import { saveTokenToFile, readTokenFromFile } from "@/components/tokenHandlerFunctions";
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
+import DataHandler from "@/DataHandler";
+
+declare global {
+  var userToken: string
+  var userData: {
+    FirstName: string,
+    LastName: string,
+    PhoneNumber: string
+  };
+}
 
 import {
   SafeAreaView,
@@ -13,53 +23,76 @@ import {
   Text,
   Button,
 } from "react-native";
+import { router } from "expo-router";
 
-declare global {
-  var userData: {
-    FirstName: string,
-    LastName: string,
-    PhoneNumber: string
-  };
+
+const isValidPhoneNumber = (phoneNumber: string) => {
+  if (!phoneNumber) return false;
+  if (!/^[0-9]{10}$/.test(phoneNumber)) return false;
+  if (phoneNumber.length != 10) return false;
+  if (phoneNumber[0] != '0' || phoneNumber[1] != '5') return false;
+
+  return true;
+}
+
+const isValidCodeModelCorrect = (validCode: string) => {
+  if (!validCode) return false;
+  if (!/^[0-9]{6}$/.test(validCode)) return false;
+  if (validCode.length != 6) return false;
+
+  return true;
 }
 
 const bgc = "#97ffde"
 
 const SignUpScreen = () => {
 
-  const [firstname, onChangeFirstName] = React.useState("");
-  const [lastname, onChangeLastName] = React.useState("");
-  const [phnumber, onChangePhoneNumber] = React.useState("");
+  const [firstName, onChangeFirstName] = React.useState("");
+  const [lastName, onChangeLastName] = React.useState("");
+  const [phoneNumber, onChangePhoneNumber] = React.useState("");
+  const [validationCode, onChangeValidationCode] = React.useState("");
   const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
+  const [isSignupClicked, setIsSignupClicked] = React.useState(false);
+  const [isSignupSuccessful, setIsSignupSuccessful] = React.useState(false);
 
-  const isValidPhoneNumber = (phoneNumber: string) => {
-    if (!phoneNumber) return false;
-    if (!/^[0-9]{10}$/.test(phoneNumber)) return false;
-    if (phoneNumber.length != 10) return false;
-    if (phoneNumber[0] != '0' || phoneNumber[1] != '5') return false;
-
-    return true;
-  }
 
   function isValidData (phoneNumber: string, firstName: string, lastName: string) {
 
-    if (!firstname || !lastname || firstname == "" || lastname == "") return false;
+    if (!firstName || !lastName || firstName == "" || lastName == "") return false;
     if (!isValidPhoneNumber(phoneNumber)) return false;
+    if (!isValidCodeModelCorrect(validationCode)) return false;
 
     return true;
 
   }
 
   function handleSubmit() {
-    sendSignupRequest(firstname, lastname, phnumber);
+
+    setIsSignupClicked(true);
+
+    return sendSignupRequest(phoneNumber);
   }
 
-  function updateButton() {
-    setIsButtonDisabled(!isValidData(phnumber, firstname, lastname))
+  async function handleVerify() {
+    
+    const response = await sendValidationRequest(phoneNumber, firstName, lastName, validationCode);
+    
+    if (!response) return null;
+    if (!response.request) return null;
+
+    if (response.request.status == 200) {
+      setIsSignupSuccessful(true);
+      DataHandler.setUser(firstName, lastName, phoneNumber, JSON.parse(response.request._response).token)
+      router.navigate({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
+    }
+    
+    return response;
+
   }
 
-  const sendSignupRequest = async (firstname: string, lastname: string, phnumber: string) => {
+  const sendValidationRequest = async (phoneNumber: string, firstName: string, lastName: string, validationCode: string) => {
     try {
-      
+
       // for debugging
       axios.defaults.validateStatus = function () {
         return true;
@@ -70,55 +103,93 @@ const SignUpScreen = () => {
         url: "http://10.0.2.2:5181/Mr-Pill/Register",
         headers: { }, 
         data: {
-          FirstName: firstname,
-          LastName: lastname,
+          FirstName: firstName,
+          LastName: lastName,
+          PhoneNumber: phoneNumber,
+          Code: validationCode
+        }
+      }
+      const response = await axios(request)
+      return response;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      return null;
+    }
+  }
+
+  const sendSignupRequest = async (phnumber: string) => {
+
+    try {
+      // for debugging
+      axios.defaults.validateStatus = function () {
+        return true;
+      }; //
+
+      const request = {
+        method: 'post',
+        url: "http://10.0.2.2:5181/Mr-Pill/GenerateRegistrationCode",
+        headers: { }, 
+        data: {
           PhoneNumber: phnumber,
         }
       }
 
-      globalThis.userData = {
-        FirstName: firstname,
-        LastName: lastname,
-        PhoneNumber: phnumber
-      }
-
-      const response = await axios(request)
-      console.log(response.data);
+      const response = await axios(request);
+      return response;
       
     } catch (error) {
-
+      
       console.error("Error fetching data:", error);
+      return null;
+
     }
   }
 
+  function updateButton() {
+    setIsButtonDisabled(!isValidData(phoneNumber, firstName, lastName))
+    console.log(isSignupSuccessful)
+  }
+
   useEffect(() => {
-    setIsButtonDisabled(!isValidPhoneNumber(phnumber));
-  }, [phnumber]);
+    setIsButtonDisabled(!isValidPhoneNumber(phoneNumber));
+  }, [phoneNumber]);
 
   return (
     <SafeAreaView style={{backgroundColor: bgc, flex: 1}}>
-      <View style={styles.pagetop}>
 
+      <View style={styles.pagetop}>
         <Text style={{alignSelf: "center", fontSize: 38, flex: 0, fontWeight: "bold", marginBottom: -15}}>הרשמה למר. פיל</Text>
         {MrPillLogo(0.75)}
-      
       </View>
 
       <TextInput
         style={styles.input}
         onChangeText={(input: any) => {onChangePhoneNumber(input); updateButton()}}
-        value={phnumber}
+        value={phoneNumber}
         placeholder="מספר טלפון"
         keyboardType="numeric"
         textAlign="right"
         onEndEditing={updateButton}
       />
 
+      {!isSignupClicked && <View>
+        <ConfirmButton
+          title={isButtonDisabled? "הכנס טלפון": "לחץ להמשך"}
+          onPress={handleSubmit}
+          isDisabled={isButtonDisabled}
+          marginTop={15}
+          marginBottom={15}
+          borderColor={"#4c685f"}
+        />
+      </View>}
+
+
+      {isSignupClicked && <View>
       <TextInput
         style={styles.input}
         onChangeText={(input: any) => {onChangeFirstName(input); updateButton()}}
         placeholder="שם פרטי"
-        value={firstname}
+        value={firstName}
         textAlign="right"
         onEndEditing={updateButton}
       />
@@ -127,20 +198,32 @@ const SignUpScreen = () => {
         style={styles.input}
         onChangeText={(input: any) => {onChangeLastName(input); updateButton()}}
         placeholder="שם משפחה"
-        value={lastname}
+        value={lastName}
         textAlign="right"
         onEndEditing={updateButton}
       />
-      
-      <View>
+
+      <TextInput
+        style={styles.input}
+        onChangeText={(input: any) => {onChangeValidationCode(input); updateButton()}}
+        value={validationCode}
+        placeholder="קוד"
+        keyboardType="numeric"
+        textAlign="right"
+        onEndEditing={updateButton}
+      />
+      </View>}
+
+      {isSignupClicked && <View>
         <ConfirmButton
           title={isButtonDisabled? "הכנס פרטים": "הירשם!"}
-          onPress={handleSubmit}
+          onPress={handleVerify}
           isDisabled={isButtonDisabled}
           marginTop={15}
+          marginBottom={15}
           borderColor={"#4c685f"}
         />
-      </View>
+      </View>}
 
     </SafeAreaView>
   );

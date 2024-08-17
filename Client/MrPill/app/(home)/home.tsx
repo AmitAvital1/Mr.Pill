@@ -6,17 +6,20 @@ import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
+import DataHandler from "@/DataHandler";
+
+const bgc = "#b8eaff"
 
 const HomePage: React.FC = () => {
 
-  const userName = `שרה`;
+  const user = DataHandler.getUser()
 
   return (
-    <ParallaxScrollView headerBackgroundColor={{ light: "white", dark: "white" }} headerImage={MrPillLogo()}>
-       
+    <ParallaxScrollView headerBackgroundColor={{ light: bgc, dark: bgc }} headerImage={MrPillLogo()} backgroundColor={bgc}>
+      <View style={{backgroundColor: bgc}}>
       <View style={styles.pagetop}> 
 
-        <ThemedText style={{fontSize: 18,}}>שלום <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{userName}</ThemedText>. התרופות הקרובות:</ThemedText>
+        <ThemedText style={{fontSize: 18, marginBottom: 10}}>שלום <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>. התרופות הקרובות:</ThemedText>
 
         {/* need to implement dynamic upcoming medication */}
         <View style={styles.reminderBox}>
@@ -26,19 +29,20 @@ const HomePage: React.FC = () => {
 
       </View>
 
+      <View style={{marginVertical: 40}}></View>
 
       <View style={styles.container}>
         <View style={styles.row}>
-          <AppHomeButton ButtonContent={strFC("הוסף ארון תרופות")} ButtonAction={()=>{router.navigate('(home)/sharedpills')}}/>
-          <AppHomeButton ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.navigate('(home)/mypills')}}/>
+          <AppHomeButton ButtonContent={strFC("הוסף ארון תרופות")} ButtonAction={()=>{router.navigate('/(home)/sharedpills')}}/>
+          <AppHomeButton ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.navigate('/(home)/mypills')}}/>
         </View>
 
         <View style={styles.row}>
-          <AppHomeButton ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.navigate('(home)/reminders')}}/>
-          <AppHomeButton ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{router.navigate('(home)/addpill')}}/>
+          <AppHomeButton ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.navigate('/(home)/reminders')}}/>
+          <AppHomeButton ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{router.navigate('/(home)/addpill')}}/>
         </View>
       </View>
-
+      </View>
     </ParallaxScrollView>
 
   );
@@ -49,7 +53,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#aaf8f8',
+    backgroundColor: '#dcffff',
     borderRadius: 20,
     minHeight: 50,
     padding: 5,
@@ -64,7 +68,7 @@ const styles = StyleSheet.create({
     minHeight: 170,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
+    backgroundColor: bgc,
     flexDirection: 'row',
   },
   text: {
@@ -78,7 +82,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignContent: 'center',
     paddingHorizontal: 15,
-    paddingBottom: 5,
+    paddingVertical: 5,
   },
 });
 

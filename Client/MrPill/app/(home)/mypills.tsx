@@ -152,7 +152,7 @@ const MyPills: React.FC = () => {
   }
 
   return (
-    <ParallaxScrollView headerBackgroundColor={{ light: "white", dark: "white" }} headerImage={MrPillLogo()}>
+    <ParallaxScrollView headerBackgroundColor={{ light: "white", dark: "white" }} headerImage={MrPillLogo()} backgroundColor="white">
       
       <View style={styles.lineContainer}>
 

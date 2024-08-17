@@ -58,6 +58,7 @@ public class LoginController : Controller
             {
                 // Generate 6-digit code
                 var code = _loginService.GenerateVerificationCode();
+                _logger.LogInformation("validation code: {Code}", code);
                 // Save the code and timestamp in the database
                 _loginService.SaveVerificationCode(phoneNumberValue, code);
 
@@ -154,6 +155,7 @@ public class LoginController : Controller
             }
             
             var code = _loginService.GenerateVerificationCode();
+            _logger.LogInformation("validation code: {Code}", code);    
             _loginService.SaveVerificationCode(phoneNumberValue, code);
 
             _logger.LogInformation("Registration code sent to phone number {PhoneNumber}", phoneNumberDto.PhoneNumber);

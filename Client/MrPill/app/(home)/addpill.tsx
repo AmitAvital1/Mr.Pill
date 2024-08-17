@@ -5,8 +5,11 @@ import dns from '../dns.json';
 import { router } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import { saveTokenToFile } from '@/components/tokenHandlerFunctions';
+import DataHandler from '@/DataHandler'
 
 const AddPillScreen = () => {
+
+  const user = DataHandler.getUser()
 
   const [number, onChangeNumber] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(true);
@@ -30,12 +33,12 @@ const AddPillScreen = () => {
 
     // bug when adding medication and then trying to get all user medications
     try {
-      console.log(globalThis.userToken)
+      console.log(user.Token)
       const request = {
         method: 'get',
         url: "http://10.0.2.2:5194/user/medications",
         headers: {
-            "Authorization": "Bearer " + globalThis.userToken,
+            "Authorization": "Bearer " + user.Token, 
             "privacyStatus": "AllMedications",
         },
         data: {
@@ -65,7 +68,7 @@ const AddPillScreen = () => {
         method: 'post',
         url: "http://10.0.2.2:5194/medications",
         headers: {
-            "Authorization": "Bearer " + globalThis.userToken,
+            "Authorization": "Bearer " + user.Token,
         },
         data: {
             "medicationBarcode": String(number),

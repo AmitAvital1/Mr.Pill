@@ -28,13 +28,14 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
 const style = StyleSheet.create({  
   button: {
     minWidth: 150,
-    backgroundColor: "#6666FC",
+    backgroundColor: "#c9c9ff",
     flex: 1,
     borderRadius: 1000,
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
-    borderColor: "black",
+    borderColor: "#8a8aa7",
+    borderWidth: 3,
   },
   container: {
     flex: 1,

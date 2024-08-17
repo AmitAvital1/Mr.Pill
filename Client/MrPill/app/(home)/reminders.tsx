@@ -5,6 +5,8 @@ import { MrPillLogo } from "@/components/MrPillLogo";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 
+const bgc = "#5deca2";
+
 type Reminder = {
   Id: number,
   PillId: number,
@@ -101,7 +103,7 @@ const RemindersPage: React.FC = () => {
 
 
   return (
-    <ParallaxScrollView headerBackgroundColor={{ light: "white", dark: "white" }} headerImage={MrPillLogo()}>
+    <ParallaxScrollView headerBackgroundColor={{ light: bgc, dark: bgc }} headerImage={MrPillLogo()} backgroundColor={bgc}>
       <View style={styles.lineContainer}>
       
       <View style={{alignItems: 'center'}}>
@@ -153,7 +155,7 @@ const styles = StyleSheet.create({
     padding: 16,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f3aacd",
+    backgroundColor: "#f2fdbb",
     borderRadius: 15,
   },
   text: {
@@ -189,7 +191,7 @@ const styles = StyleSheet.create({
     padding: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f3aacd",
+    backgroundColor: "#f2fdbb",
     borderRadius: 15,
   },
   imageContainer: {
