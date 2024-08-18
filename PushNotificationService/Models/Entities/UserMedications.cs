@@ -1,4 +1,4 @@
-namespace UserServiceApp.Models;
+namespace PN.Models;
 public class UserMedications
 {
     public int Id { get; set; }
