@@ -167,9 +167,6 @@ namespace UserServiceApp.Migrations
                     b.Property<bool>("IsRecurring")
                         .HasColumnType("bit");
 
-                    b.Property<int>("MedicationRepoId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Message")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
@@ -183,11 +180,14 @@ namespace UserServiceApp.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<int>("UserMedicationId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("MedicationRepoId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserMedicationId");
 
                     b.ToTable("Reminders");
                 });
@@ -291,21 +291,21 @@ namespace UserServiceApp.Migrations
 
             modelBuilder.Entity("UserServiceApp.Models.Reminder", b =>
                 {
-                    b.HasOne("UserServiceApp.Models.MedicationRepo", "MedicationRepo")
-                        .WithMany()
-                        .HasForeignKey("MedicationRepoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("UserServiceApp.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("MedicationRepo");
+                    b.HasOne("UserServiceApp.Models.UserMedications", "UserMedication")
+                        .WithMany("Reminders")
+                        .HasForeignKey("UserMedicationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("User");
+
+                    b.Navigation("UserMedication");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.UserMedications", b =>
@@ -350,6 +350,11 @@ namespace UserServiceApp.Migrations
             modelBuilder.Entity("UserServiceApp.Models.User", b =>
                 {
                     b.Navigation("MedicineCabinetUsersList");
+                });
+
+            modelBuilder.Entity("UserServiceApp.Models.UserMedications", b =>
+                {
+                    b.Navigation("Reminders");
                 });
 #pragma warning restore 612, 618
         }

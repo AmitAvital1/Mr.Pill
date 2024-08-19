@@ -92,11 +92,11 @@ nCrunchTemp_*
 #*MinistryOfHealthService/appsettings.json
 
 #*PushNotificationService/appsettings.json
-*PushNotificationService/appsettings.Development.json
+#PushNotificationService/appsettings.Development.json
 *PushNotificationService/Properties
 *PushNotificationService/obj
 *PushNotificationService/views
-*PushNotificationService/mrpill-pushnotification-firebase-adminsdk-xx2h6-733f35800d.json
+#PushNotificationService/mrpill-pushnotification-firebase-adminsdk-xx2h6-733f35800d.json
 
 # AxoCover
 .axoCover/*

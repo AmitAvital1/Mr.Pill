@@ -9,6 +9,6 @@ public class Reminder
     public bool IsRecurring { get; set; }
     public TimeSpan RecurrenceInterval { get; set; }
     public bool IsActive { get; set; }
-    public int MedicationRepoId { get; set; }
-    public MedicationRepo MedicationRepo { get; set; }
+    public int UserMedicationId { get; set; }
+    public UserMedications UserMedication { get; set; }
 }

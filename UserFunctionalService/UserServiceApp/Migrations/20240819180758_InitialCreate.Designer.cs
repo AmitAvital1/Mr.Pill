@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserServiceApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240815160550_UpdatePhoneMessageTable")]
-    partial class UpdatePhoneMessageTable
+    [Migration("20240819180758_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -156,6 +156,45 @@ namespace UserServiceApp.Migrations
                     b.ToTable("PhoneMessages");
                 });
 
+            modelBuilder.Entity("UserServiceApp.Models.Reminder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<TimeSpan>("RecurrenceInterval")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("ReminderTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserMedicationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserMedicationId");
+
+                    b.ToTable("Reminders");
+                });
+
             modelBuilder.Entity("UserServiceApp.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -251,6 +290,25 @@ namespace UserServiceApp.Migrations
                     b.Navigation("MedicineCabinet");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("UserServiceApp.Models.Reminder", b =>
+                {
+                    b.HasOne("UserServiceApp.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UserServiceApp.Models.UserMedications", "UserMedication")
+                        .WithMany()
+                        .HasForeignKey("UserMedicationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserMedication");
                 });
 
             modelBuilder.Entity("UserServiceApp.Models.UserMedications", b =>

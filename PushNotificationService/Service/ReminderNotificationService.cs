@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using PN.Models.DB;
 
 public class ReminderNotificationService : IHostedService, IDisposable
@@ -24,8 +25,10 @@ public class ReminderNotificationService : IHostedService, IDisposable
             var now = DateTime.UtcNow;
 
             var dueReminders = dbContext.Reminders
-                .Where(r => r.IsActive && r.ReminderTime <= now)
-                .ToList();
+            .Include(r => r.UserMedication) // Include related UserMedications
+            .ThenInclude(um => um.MedicationRepo) // If needed, include related MedicationRepo
+            .Where(r => r.IsActive && r.ReminderTime <= now)
+            .ToList();
 
             foreach (var reminder in dueReminders)
             {
