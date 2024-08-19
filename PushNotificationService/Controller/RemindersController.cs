@@ -22,17 +22,28 @@ public class ReminderController : Controller
     {
         try
         {
+            string? token = GetAuthorizationTokenOrThrow();
+            int phoneNumber = _reminderService.GetPhoneNumberFromToken(token);
+
+            if (!_reminderService.IsUserExistInDb(phoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (checked by userService)", phoneNumber);
+                return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+            }
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(new { Message = "Invalid model state for reminder" });
             }
+
+
             
             return Ok(new { Message = "Reminder set successfully" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while setting reminder.");
-            return StatusCode(500, "Internal Server Error");
+            _logger.LogError(ex, "An error occurred while setting reminder");
+            return StatusCode(500, "Internal Server Error " + ex.Message);
         }
     }
 
@@ -49,4 +60,28 @@ public class ReminderController : Controller
     {
         return null;
     }
+
+     private string GetAuthorizationTokenOrThrow()
+    {
+        string token = GetAuthorizationToken() ?? throw new Exception("Authorization token not provided");
+        return token;
+    }
+
+    private ActionResult HandleUnauthorizedAccess(UnauthorizedAccessException ex)
+    {
+        _logger.LogError(ex, "Unauthorized access attempt while fetching medications.");
+        return Unauthorized(new { Message = "Unauthorized access. Please provide a valid token." });
+    }
+
+    private ActionResult HandleUnexpectedError(Exception ex)
+    {
+        _logger.LogError(ex, "An error occurred while fetching medications for user.");
+        return StatusCode(500, "An unexpected error occurred. Please try again later.");
+    }
+
+    private string GetAuthorizationToken()
+    {
+        return HttpContext.Request.Headers.Authorization.FirstOrDefault()?.Split(" ").Last() !;
+    }
 }
+

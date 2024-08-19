@@ -63,12 +63,12 @@ public class AppDbContext : DbContext
             entity.HasOne(e => e.User)
                 .WithMany()
                 .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.Cascade); 
+                .OnDelete(DeleteBehavior.NoAction); 
 
-            entity.HasOne(e => e.MedicationRepo)
-                .WithMany()
-                .HasForeignKey(e => e.MedicationRepoId)
-                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.UserMedication)
+                .WithMany(UserMedication => UserMedication.Reminders)
+                .HasForeignKey(e => e.UserMedicationId)
+                .OnDelete(DeleteBehavior.NoAction);
 
             entity.Property(e => e.ReminderTime).IsRequired();
             entity.Property(e => e.Message).HasMaxLength(500);

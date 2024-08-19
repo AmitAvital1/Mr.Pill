@@ -12,6 +12,7 @@ public class UserMedications
     public bool IsPrivate  { get; set; }
     public int MedicationRepoId { get; set; }
     public  required MedicationRepo MedicationRepo { get; set; }
+    public ICollection<Reminder>? Reminders { get; set; } 
 }
 
 

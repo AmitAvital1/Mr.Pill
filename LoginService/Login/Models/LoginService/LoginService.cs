@@ -178,16 +178,6 @@ public class LoginService : ILoginService
         return Task.CompletedTask;
     }
 
-    // private User? getUserFromPhoneNumber(int phoneNumber)
-    // {
-    //     if (_dbContext.Users == null)
-    //     {
-    //         throw new InvalidOperationException("User table not exist");
-    //     }
-
-    //     return _dbContext.Users.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
-    // }
-
     private User? getUserFromPhoneNumber(int phoneNumber)
     {
         if (_dbContext.Users == null)

@@ -49,6 +49,21 @@ namespace UserServiceApp.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "PhoneMessages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PhoneNumber = table.Column<int>(type: "int", nullable: false),
+                    SentTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Code = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PhoneMessages", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -117,8 +132,8 @@ namespace UserServiceApp.Migrations
                     Validity = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatorId = table.Column<int>(type: "int", nullable: false),
                     MedicineCabinetId = table.Column<int>(type: "int", nullable: false),
-                    MedicationRepoId = table.Column<int>(type: "int", nullable: false),
-                    IsPrivate = table.Column<bool>(type: "bit", nullable: false)
+                    IsPrivate = table.Column<bool>(type: "bit", nullable: false),
+                    MedicationRepoId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -141,6 +156,35 @@ namespace UserServiceApp.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Reminders",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    ReminderTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    IsRecurring = table.Column<bool>(type: "bit", nullable: false),
+                    RecurrenceInterval = table.Column<TimeSpan>(type: "time", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    UserMedicationId = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reminders", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Reminders_UserMedications_UserMedicationId",
+                        column: x => x.UserMedicationId,
+                        principalTable: "UserMedications",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Reminders_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "UserId");
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_MedicineCabinets_CreatorId",
                 table: "MedicineCabinets",
@@ -150,6 +194,16 @@ namespace UserServiceApp.Migrations
                 name: "IX_MedicineCabinetUsers_MedicineCabinetId",
                 table: "MedicineCabinetUsers",
                 column: "MedicineCabinetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reminders_UserId",
+                table: "Reminders",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Reminders_UserMedicationId",
+                table: "Reminders",
+                column: "UserMedicationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserMedications_CreatorId",
@@ -181,6 +235,12 @@ namespace UserServiceApp.Migrations
 
             migrationBuilder.DropTable(
                 name: "MedicineCabinetUsers");
+
+            migrationBuilder.DropTable(
+                name: "PhoneMessages");
+
+            migrationBuilder.DropTable(
+                name: "Reminders");
 
             migrationBuilder.DropTable(
                 name: "UserMedications");
