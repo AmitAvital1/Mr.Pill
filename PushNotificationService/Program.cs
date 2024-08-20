@@ -19,8 +19,10 @@ builder.Services.AddSingleton<ILogger>(provider =>
     var loggerFactory = provider.GetRequiredService<ILoggerFactory>();
     return loggerFactory.CreateLogger("MyLogger");
 });
+
 builder.Services.AddSingleton<IReminderService, ReminderService>();
 builder.Services.AddHostedService<ReminderNotificationService>();
+
 builder.Services.AddDbContext<AppDbContext>( options=>{
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
 }, ServiceLifetime.Singleton);
@@ -46,7 +48,6 @@ builder.Services.AddAuthentication(options =>
             (Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
     };
 });
-
 
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<FirebaseManager>();

@@ -6,4 +6,5 @@ public class User
     public required string LastName { get; set; }
     public int PhoneNumber { get; set; }
     public ICollection<MedicineCabinetUsers>? MedicineCabinetUsersList { get; set; }
+    public ICollection<Reminder>? Reminders { get; set; }
 }

@@ -55,26 +55,38 @@ public class AppDbContext : DbContext
             .HasForeignKey(MedicineCabinet => MedicineCabinet.CreatorId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Reminder>()
+            .HasOne(r => r.User)
+            .WithMany(u => u.Reminders)
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-        modelBuilder.Entity<Reminder>(entity =>
-        {
-            entity.HasKey(e => e.Id);
+         modelBuilder.Entity<Reminder>()
+            .HasOne(r => r.UserMedication)
+            .WithMany(um => um.Reminders)
+            .HasForeignKey(r => r.UserMedicationId)
+            .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(e => e.User)
-                .WithMany()
-                .HasForeignKey(e => e.UserId)
-                .OnDelete(DeleteBehavior.NoAction); 
 
-            entity.HasOne(e => e.UserMedication)
-                .WithMany(UserMedication => UserMedication.Reminders)
-                .HasForeignKey(e => e.UserMedicationId)
-                .OnDelete(DeleteBehavior.NoAction);
+        // modelBuilder.Entity<Reminder>(entity =>
+        // {
+        //     entity.HasKey(e => e.Id);
 
-            entity.Property(e => e.ReminderTime).IsRequired();
-            entity.Property(e => e.Message).HasMaxLength(500);
-            entity.Property(e => e.IsRecurring).IsRequired();
-            entity.Property(e => e.RecurrenceInterval).IsRequired();
-            entity.Property(e => e.IsActive).IsRequired();
-        });
+        //     entity.HasOne(e => e.User)
+        //         .WithMany()
+        //         .HasForeignKey(e => e.UserId)
+        //         .OnDelete(DeleteBehavior.NoAction); 
+
+        //     entity.HasOne(e => e.UserMedication)
+        //         .WithMany(UserMedication => UserMedication.Reminders)
+        //         .HasForeignKey(e => e.UserMedicationId)
+        //         .OnDelete(DeleteBehavior.NoAction);
+
+        //     entity.Property(e => e.ReminderTime).IsRequired();
+        //     entity.Property(e => e.Message).HasMaxLength(500);
+        //     entity.Property(e => e.IsRecurring).IsRequired();
+        //     entity.Property(e => e.RecurrenceInterval).IsRequired();
+        //     entity.Property(e => e.IsActive).IsRequired();
+        // });
     }
 }

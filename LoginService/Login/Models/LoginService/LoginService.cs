@@ -136,7 +136,6 @@ public class LoginService : ILoginService
                             mcu.MedicineCabinet.MedicineCabinetName.Equals(medicineCabinetName, StringComparison.OrdinalIgnoreCase) &&
                             mcu?.MedicineCabinet?.Creator?.PhoneNumber == user.PhoneNumber);
 
-
             if (medicineCabinet == null)
             {
                 _logger.LogWarning(
@@ -161,7 +160,6 @@ public class LoginService : ILoginService
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred in AddNewHouseSuccsesfully");
-            
             return false;
         }
     }
@@ -222,6 +220,7 @@ public class LoginService : ILoginService
         }
 
         var timeElapsed = DateTime.UtcNow - latestMessage.SentTime;
+
         if (timeElapsed > TimeSpan.FromMinutes(2))
         {
             return false;
@@ -229,7 +228,4 @@ public class LoginService : ILoginService
 
         return true;
     }
-
-    
-
 }

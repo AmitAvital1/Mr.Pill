@@ -192,11 +192,17 @@ public class LoginController : Controller
             if (isValid)
             {
                 _logger.LogInformation("Registration code validation successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
-                var userDTORegister = UserDTO.Builder().WithFirstName(validationDto.FirstName).WithLastName(validationDto.LastName).WithPhoneNumber(validationDto.PhoneNumber).Build();
+                var userDTORegister = UserDTO.Builder()
+                .WithFirstName(validationDto.FirstName)
+                .WithLastName(validationDto.LastName)
+                .WithPhoneNumber(validationDto.PhoneNumber)
+                .Build();
+                
                 if (_loginService.RegisterUser(userDTORegister))
                 {
                     string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber);
-                     _logger.LogInformation("User registration successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
+                    _logger.LogInformation("User registration successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
+                    
                     return Ok(new { token = UserToken });
                 }
                 else

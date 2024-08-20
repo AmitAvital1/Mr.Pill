@@ -3,49 +3,72 @@ using PN.Models.DB;
 
 public class ReminderNotificationService : IHostedService, IDisposable
 {
-    private Timer _timer;
+    private Timer? _timer;
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private static readonly object _lock = new object();
+    private readonly AppDbContext _dbContext;
 
-    public ReminderNotificationService(IServiceScopeFactory serviceScopeFactory)
+    public ReminderNotificationService(IServiceScopeFactory serviceScopeFactory, AppDbContext appDbContext)
     {
         _serviceScopeFactory = serviceScopeFactory;
+        _dbContext = appDbContext;
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _timer = new Timer(SendNotifications, null, TimeSpan.Zero, TimeSpan.FromMinutes(1)); // Check every minute
+        _timer = new Timer(SendNotifications!, null, TimeSpan.FromSeconds(10), TimeSpan.FromMinutes(1)); // Check every minute
         return Task.CompletedTask;
     }
 
     private void SendNotifications(object state)
     {
-        using (var scope = _serviceScopeFactory.CreateScope())
+        try
         {
-            var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var now = DateTime.UtcNow;
-            Thread.Sleep(1000 * 6);
-            var dueReminders = dbContext.Reminders
-            .Include(r => r.UserMedication) // Include related UserMedications
-            .ThenInclude(um => um.MedicationRepo) // If needed, include related MedicationRepo
-            .Where(r => r.IsActive && r.ReminderTime <= now)
-            .ToList();
-
-            foreach (var reminder in dueReminders)
+            using (var scope = _serviceScopeFactory.CreateScope())
             {
-                // Send notification logic (e.g., email, SMS, push notification)
-                // Mark reminder as inactive if it's not recurring
-                if (!reminder.IsRecurring)
-                {
-                    reminder.IsActive = false;
-                }
-                else
-                {
-                    // Set next occurrence time for recurring reminders
-                    reminder.ReminderTime = reminder.ReminderTime.Add(reminder.RecurrenceInterval);
-                }
-            }
+                var now = DateTime.UtcNow;
+                var allUsers = _dbContext.Users.ToList();
 
-            dbContext.SaveChanges();
+                Console.WriteLine($"Total number of users: {allUsers.Count}");
+                
+                var activeUsersWithDueReminders = _dbContext.Users
+                .Where(u => u.Reminders.Any(r => r.IsActive && r.ReminderTime <= now))
+                .ToList();
+
+                var dueReminders = _dbContext.Reminders
+                .Include(r => r.UserMedication)
+                .ThenInclude(um => um.MedicationRepo)
+                .Where(r => r.IsActive && r.ReminderTime <= now && r.UserMedication != null && r.UserMedication.MedicationRepo != null)
+                .ToList();
+
+                foreach (var reminder in dueReminders)
+                {
+                    // Send notification logic
+                    if (!reminder.IsRecurring)
+                    {
+                        reminder.IsActive = false;
+                    }
+                    else
+                    {
+                        reminder.ReminderTime = reminder.ReminderTime.Add(reminder.RecurrenceInterval);
+                    }
+                }
+
+                _dbContext.SaveChanges();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred while sending notifications:");
+            Console.WriteLine($"Message: {ex.Message}");
+            Console.WriteLine($"Stack Trace: {ex.StackTrace}");
+
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine("Inner Exception:");
+                Console.WriteLine($"Message: {ex.InnerException.Message}");
+                Console.WriteLine($"Stack Trace: {ex.InnerException.StackTrace}");
+            }
         }
     }
 
