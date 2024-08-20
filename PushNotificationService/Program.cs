@@ -7,6 +7,8 @@ using PN.Models.ReminderService;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// builder.Environment.EnvironmentName = "Development";
+
 builder.Configuration
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true);

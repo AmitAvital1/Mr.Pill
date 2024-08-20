@@ -61,32 +61,10 @@ public class AppDbContext : DbContext
             .HasForeignKey(r => r.UserId)
             .OnDelete(DeleteBehavior.Cascade);
 
-         modelBuilder.Entity<Reminder>()
+        modelBuilder.Entity<Reminder>()
             .HasOne(r => r.UserMedication)
             .WithMany(um => um.Reminders)
             .HasForeignKey(r => r.UserMedicationId)
             .OnDelete(DeleteBehavior.Cascade);
-
-
-        // modelBuilder.Entity<Reminder>(entity =>
-        // {
-        //     entity.HasKey(e => e.Id);
-
-        //     entity.HasOne(e => e.User)
-        //         .WithMany()
-        //         .HasForeignKey(e => e.UserId)
-        //         .OnDelete(DeleteBehavior.NoAction); 
-
-        //     entity.HasOne(e => e.UserMedication)
-        //         .WithMany(UserMedication => UserMedication.Reminders)
-        //         .HasForeignKey(e => e.UserMedicationId)
-        //         .OnDelete(DeleteBehavior.NoAction);
-
-        //     entity.Property(e => e.ReminderTime).IsRequired();
-        //     entity.Property(e => e.Message).HasMaxLength(500);
-        //     entity.Property(e => e.IsRecurring).IsRequired();
-        //     entity.Property(e => e.RecurrenceInterval).IsRequired();
-        //     entity.Property(e => e.IsActive).IsRequired();
-        // });
     }
 }

@@ -9,5 +9,5 @@ public class MedicationRepo
     public string? HebrewDescription { get; set; }
     public string? ImagePath { get; set; }
     public ICollection<UserMedications>? Medications { get; set; } 
-    public ICollection<Reminder>? RemindersList { get; set; }
+    
 }

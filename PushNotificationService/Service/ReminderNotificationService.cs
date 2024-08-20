@@ -27,14 +27,7 @@ public class ReminderNotificationService : IHostedService, IDisposable
             using (var scope = _serviceScopeFactory.CreateScope())
             {
                 var now = DateTime.UtcNow;
-                var allUsers = _dbContext.Users.ToList();
-
-                Console.WriteLine($"Total number of users: {allUsers.Count}");
-                
-                var activeUsersWithDueReminders = _dbContext.Users
-                .Where(u => u.Reminders.Any(r => r.IsActive && r.ReminderTime <= now))
-                .ToList();
-
+                  
                 var dueReminders = _dbContext.Reminders
                 .Include(r => r.UserMedication)
                 .ThenInclude(um => um.MedicationRepo)
