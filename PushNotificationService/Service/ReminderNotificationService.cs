@@ -23,7 +23,7 @@ public class ReminderNotificationService : IHostedService, IDisposable
         {
             var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
             var now = DateTime.UtcNow;
-
+            Thread.Sleep(1000 * 6);
             var dueReminders = dbContext.Reminders
             .Include(r => r.UserMedication) // Include related UserMedications
             .ThenInclude(um => um.MedicationRepo) // If needed, include related MedicationRepo
