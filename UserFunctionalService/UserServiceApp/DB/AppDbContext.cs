@@ -59,12 +59,12 @@ public class AppDbContext : DbContext
             .HasOne(r => r.User)
             .WithMany(u => u.Reminders)
             .HasForeignKey(r => r.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
 
         modelBuilder.Entity<Reminder>()
             .HasOne(r => r.UserMedication)
             .WithMany(um => um.Reminders)
             .HasForeignKey(r => r.UserMedicationId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

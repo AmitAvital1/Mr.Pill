@@ -182,7 +182,7 @@ public class UserService : IUserService
         // After acquiring the SemaphoreSlim, it can release the lock and wait for the asynchronous operation (if any) to complete.
         // The continuation task (code after `await`) is responsible for completing its work and releasing the SemaphoreSlim.
         // This ensures other threads can acquire the SemaphoreSlim and access the critical section when available.
- 
+        
         await _lockSemaphoreSlimForCreateNewMedication.WaitAsync().ConfigureAwait(true);
         
         try
@@ -232,13 +232,30 @@ public class UserService : IUserService
         try
         {
             var user = GetUserByPhoneNumber(phoneNumber);
-            if (user == null) return;
+            if (user == null)
+            {
+                 _logger.LogError(
+                    "User not found to by phone number {PhoneNumber}"
+                ,phoneNumber);
+                return;
+            }
 
             var medication = GetMedicationByBarcodeWithoutReturnADto(medicationBarcode);
-            if (medication == null) return;
+            if (medication == null){
+                _logger.LogError(
+                    "Error getting medication by barcode {medicationBarcode}"
+                ,medicationBarcode);
+                return;
+            }
 
             var medicineCabinet = GetMedicineCabinetByName(user, medicineCabinetName);
-            if (medicineCabinet == null) return;
+            if (medicineCabinet == null)
+            {
+                _logger.LogError(
+                    "Error getting medicine cabinet by name - {medicineCabinetName}"
+                ,medicineCabinetName);
+                return;
+            }
 
             AddMedicationToCabinet(user, medication, privacy, medicineCabinet);
 

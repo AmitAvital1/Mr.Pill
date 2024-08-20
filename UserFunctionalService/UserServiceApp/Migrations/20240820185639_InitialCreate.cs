@@ -164,7 +164,7 @@ namespace UserServiceApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<int>(type: "int", nullable: false),
                     ReminderTime = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsRecurring = table.Column<bool>(type: "bit", nullable: false),
                     RecurrenceInterval = table.Column<TimeSpan>(type: "time", nullable: false),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserServiceApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240820093244_fix-reminder")]
-    partial class fixreminder
+    [Migration("20240820185639_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -296,13 +296,13 @@ namespace UserServiceApp.Migrations
                     b.HasOne("UserServiceApp.Models.User", "User")
                         .WithMany("Reminders")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("UserServiceApp.Models.UserMedications", "UserMedication")
                         .WithMany("Reminders")
                         .HasForeignKey("UserMedicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");

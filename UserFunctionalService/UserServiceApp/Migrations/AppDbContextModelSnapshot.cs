@@ -293,13 +293,13 @@ namespace UserServiceApp.Migrations
                     b.HasOne("UserServiceApp.Models.User", "User")
                         .WithMany("Reminders")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("UserServiceApp.Models.UserMedications", "UserMedication")
                         .WithMany("Reminders")
                         .HasForeignKey("UserMedicationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("User");
