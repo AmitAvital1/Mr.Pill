@@ -1,6 +1,9 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace PN.Models;
 public class Reminder
 {
+    [Key]
     public int Id { get; set; }
     public int UserId { get; set; }
     public User? User { get; set; }

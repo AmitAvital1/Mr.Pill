@@ -18,7 +18,6 @@ public class ReminderService : IReminderService
         _logger = logger;
     }
 
-// TODO
     public void SetReminder(ReminderDTO reminderDto, int phoneNumber)
     {
         var user = _dbContext?.Users
@@ -29,8 +28,10 @@ public class ReminderService : IReminderService
             throw new Exception("No user found on phone number " + phoneNumber);
         }
         
+        var medicationRepoId = _dbContext?.UserMedications
+                ?.FirstOrDefault(u => u.Id == reminderDto.UserMedicationId).MedicationRepoId;
         var medicationRepo = _dbContext?.MedicationRepos
-                ?.FirstOrDefault(u => u.Id == reminderDto.UserMedicationId);
+                ?.FirstOrDefault(u => u.Id == medicationRepoId);
             
         if(medicationRepo == null)
         {
@@ -51,6 +52,51 @@ public class ReminderService : IReminderService
 
             _dbContext.Reminders.Add(reminder);
             _dbContext.SaveChanges();
+    }
+
+    public IEnumerable<UIReminderDTO> GetUserReminders(int phoneNumber)
+    {
+        var user = _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+
+        if(user == null)
+        {
+            throw new Exception("No user found on phone number " + phoneNumber);
+        }
+        
+        var res = new List<UIReminderDTO>();
+
+        var Reminders = _dbContext.Reminders
+                .Where(r => r.UserId == user.UserId && r.IsActive)
+                .ToList();
+            
+        foreach (var _reminder in Reminders)
+        {
+            UIReminderDTO dto = new UIReminderDTO();
+            dto.ReminderId = _reminder.Id;
+            dto.ReminderTime = _reminder.ReminderTime;
+            dto.RecurrenceInterval = _reminder.RecurrenceInterval;
+
+            var userMedication = _dbContext.UserMedications
+                    .Where(um => um.Id == _reminder.UserMedicationId)
+                    .FirstOrDefault();
+
+            var medicationRepo = _dbContext.MedicationRepos
+                    .Where(um => um.Id == userMedication.MedicationRepoId)
+                    .FirstOrDefault();
+
+            string cabinetName = _dbContext.MedicineCabinets
+                    .Where(mc => mc.Id == userMedication.MedicineCabinetId)
+                    .FirstOrDefault().MedicineCabinetName;
+
+            dto.DrugHebrewName = medicationRepo.DrugHebrewName;
+            dto.ImagePath = medicationRepo.ImagePath;
+            dto.MedicineCabinetName = cabinetName;
+
+            res.Add(dto);
+        }
+
+       return res;
 
     }
 

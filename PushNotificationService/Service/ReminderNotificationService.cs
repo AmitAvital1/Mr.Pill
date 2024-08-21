@@ -26,19 +26,31 @@ public class ReminderNotificationService : IHostedService, IDisposable
         {
             using (var scope = _serviceScopeFactory.CreateScope())
             {
-                var now = DateTime.UtcNow;
-                  
+                var now = DateTime.UtcNow.AddHours(3);
+
                 var dueReminders = _dbContext.Reminders
-                .Include(r => r.UserMedication)
-                .ThenInclude(um => um.MedicationRepo)
-                .Where(r => r.IsActive && r.ReminderTime <= now && r.UserMedication != null && r.UserMedication.MedicationRepo != null)
+                .Where(r => r.IsActive && r.ReminderTime <= now)
                 .ToList();
 
                 foreach (var reminder in dueReminders)
                 {
-                    // Send notification logic
+                    var userMedication = _dbContext.UserMedications
+                    .Where(um => um.Id == reminder.UserMedicationId)
+                    .FirstOrDefault();
+
+                    var medicationRepo = _dbContext.MedicationRepos
+                    .Where(um => um.Id == userMedication.MedicationRepoId)
+                    .FirstOrDefault();
+
+                    var user = _dbContext.Users
+                    .Where(um => um.UserId == reminder.UserId)
+                    .FirstOrDefault();
+
+                    Console.WriteLine(user.FirstName + " Need take a pill named: " + medicationRepo.DrugEnglishName);
+
                     if (!reminder.IsRecurring)
                     {
+
                         reminder.IsActive = false;
                     }
                     else
