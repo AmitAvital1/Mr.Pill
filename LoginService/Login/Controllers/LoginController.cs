@@ -200,7 +200,7 @@ public class LoginController : Controller
                 
                 if (_loginService.RegisterUser(userDTORegister))
                 {
-                    string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber);
+                    string UserToken = _loginService.GenerateUserToken(userDTORegister.PhoneNumber!);
                     _logger.LogInformation("User registration successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
                     
                     return Ok(new { token = UserToken });
@@ -220,7 +220,6 @@ public class LoginController : Controller
             return StatusCode(500, "Internal Server Error");
         }
     }
-
 
     [HttpPost]
     [Route("joined-new-house")]

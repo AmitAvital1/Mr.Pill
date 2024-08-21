@@ -221,7 +221,7 @@ public class LoginService : ILoginService
 
         var timeElapsed = DateTime.UtcNow - latestMessage.SentTime;
 
-        if (timeElapsed > TimeSpan.FromMinutes(2))
+        if (timeElapsed > TimeSpan.FromMinutes(4))
         {
             return false;
         }
