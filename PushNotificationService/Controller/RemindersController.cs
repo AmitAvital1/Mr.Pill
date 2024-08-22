@@ -3,6 +3,7 @@ namespace PN.Controllers;
 using MrPill.DTOs.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using PN.Models.ReminderService;
+using PN.Models;
 
 [Authorize]
 public class ReminderController : Controller
@@ -14,6 +15,24 @@ public class ReminderController : Controller
     {
         _logger = logger;
         _reminderService = reminderService;
+    }
+
+    [HttpGet]
+    [Route("Reminders")]
+    public ActionResult<IEnumerable<ReminderDTO>> GetReminders()
+    {
+        string? token = GetAuthorizationTokenOrThrow();
+        int phoneNumber = _reminderService.GetPhoneNumberFromToken(token);
+
+        if (!_reminderService.IsUserExistInDb(phoneNumber))
+        {
+            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (checked by userService)", phoneNumber);
+            return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+        }
+
+        IEnumerable<UIReminderDTO> reminders = _reminderService.GetUserReminders(phoneNumber);
+
+        return Ok(reminders);
     }
 
     [HttpPost]
@@ -36,7 +55,7 @@ public class ReminderController : Controller
                 return BadRequest(new { Message = "Invalid model state for reminder" });
             }
 
-
+            _reminderService.SetReminder(reminderDto, phoneNumber);
             
             return Ok(new { Message = "Reminder set successfully" });
         }
