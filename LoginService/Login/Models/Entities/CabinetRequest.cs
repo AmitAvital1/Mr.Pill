@@ -1,5 +1,4 @@
-namespace UserServiceApp.Models;
-
+namespace Login.Models.LoginService;
 public class CabinetRequest
 {
     public int Id { get; set; }

@@ -195,10 +195,10 @@ public class LoginController : Controller
             {
                 _logger.LogInformation("Registration code validation successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
                 var userDTORegister = UserDTO.Builder()
-                .WithFirstName(validationDto.FirstName)
-                .WithLastName(validationDto.LastName)
-                .WithPhoneNumber(validationDto.PhoneNumber)
-                .Build();
+                        .WithFirstName(validationDto.FirstName!)
+                        .WithLastName(validationDto.LastName!)
+                        .WithPhoneNumber(validationDto.PhoneNumber)
+                        .Build();
                 
                 if (_loginService.RegisterUser(userDTORegister))
                 {
@@ -220,6 +220,70 @@ public class LoginController : Controller
         {
             _logger.LogError(ex, "An error occurred while verifying registration code for phone number {PhoneNumber}", validationDto.PhoneNumber);
             return StatusCode(500, "Internal Server Error");
+        }
+    }
+
+    [HttpGet]
+    [Route("get-notifications")]
+    public IActionResult GetNotifications()
+    {
+        try
+        {
+            string token = GetTokenFromHeaders();
+            IEnumerable<CabinetRequestDTO> cabinetRequestDTOs = _loginService.GetAllRequestByUserToken(token);
+
+            var response = new
+            {
+                Success = true,
+                Message = "Notifications retrieved successfully.",
+                TotalNotifications = cabinetRequestDTOs.Count(),
+                Timestamp = DateTime.UtcNow,
+                Data = cabinetRequestDTOs
+            };
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while getting notifications.");
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting notifications.");
+        }
+    }
+
+    [HttpPut]
+    [Route("handle-notification")]
+    public IActionResult HandleNotification([FromQuery] int requestId, [FromQuery] bool approve)
+    {
+        try
+        {
+            string token = GetTokenFromHeaders();
+            _loginService.HandleNotification(token, requestId, approve);
+            
+            var successResponse = new
+            {
+                Success = true,
+                Message = "Notification handled successfully.",
+                RequestId = requestId,
+                Approved = approve,
+                Timestamp = DateTime.UtcNow
+            };
+
+            return Ok(successResponse);
+        }
+        catch (Exception ex)
+        {
+           _logger.LogError(ex, "An error occurred while handling the notification for request ID {RequestId}.", requestId);
+
+           var errorResponse = new
+            {
+                Success = false,
+                Message = "An error occurred while handling the notification.",
+                RequestId = requestId,
+                Error = ex.Message,
+                Timestamp = DateTime.UtcNow
+            };
+
+            return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
         }
     }
 
@@ -270,7 +334,7 @@ public class LoginController : Controller
             if (string.IsNullOrEmpty(token))
             {
                 _logger.LogWarning("Token not found in the request headers");
-                 throw new UnauthorizedAccessException("Token not found in the request headers");
+                throw new UnauthorizedAccessException("Token not found in the request headers");
             }
 
             return token;

@@ -106,12 +106,14 @@ public class LoginService : ILoginService
     
     private string getPhoneNumberFromToken(string token)
     {
+        _logger.LogInformation("Attempting to extract phone number from token.");
         var jwtHandler = new JwtSecurityTokenHandler();
         var jwtToken = jwtHandler.ReadToken(token) as JwtSecurityToken;
         var phoneNumberClaim = jwtToken?.Claims.FirstOrDefault(claim => claim.Type == "PhoneNumber");
        
         if (phoneNumberClaim == null || string.IsNullOrEmpty(phoneNumberClaim.Value))
         {
+            _logger.LogWarning("Invalid token provided. Unable to read the token as JwtSecurityToken.");
             throw new InvalidOperationException("Phone number claim not found in token");
         }
 
@@ -133,8 +135,8 @@ public class LoginService : ILoginService
 
             var medicineCabinet = user?.MedicineCabinetUsersList
                     ?.FirstOrDefault(mcu => 
-                            mcu.MedicineCabinet.MedicineCabinetName.Equals(medicineCabinetName, StringComparison.OrdinalIgnoreCase) &&
-                            mcu?.MedicineCabinet?.Creator?.PhoneNumber == user.PhoneNumber);
+                        mcu.MedicineCabinet.MedicineCabinetName.Equals(medicineCabinetName, StringComparison.OrdinalIgnoreCase) &&
+                        mcu?.MedicineCabinet?.Creator?.PhoneNumber == user.PhoneNumber);
 
             if (medicineCabinet == null)
             {
@@ -149,7 +151,7 @@ public class LoginService : ILoginService
 
            await sendRequestToRabbitMQ(user!, targetPhoneNumber, int.Parse(phoneNumber), medicineCabinetName);
 
-           _logger.LogInformation(
+            _logger.LogInformation(
                 "Request to RabbitMQ sent successfully for user with phone number '{PhoneNumber}' and medicine cabinet '{MedicineCabinetName}'.", 
                 phoneNumber, 
                 medicineCabinetName
@@ -164,6 +166,143 @@ public class LoginService : ILoginService
         }
     }
 
+    public IEnumerable<CabinetRequestDTO> GetAllRequestByUserToken(string token)
+    {
+        string phoneNumber = getPhoneNumberFromToken(token);
+        User? user = getUserFromPhoneNumber(int.Parse(phoneNumber));
+
+        if (user == null)
+        {
+            _logger.LogWarning("User with phone number '{PhoneNumber}' not found.", phoneNumber);
+            throw new InvalidOperationException($"User with phone number '{phoneNumber}' not found.");
+        }
+
+        var cabinetRequestDTOs = _dbContext.CabinetRequests
+            .Where(request => request.TargetPhoneNumber == phoneNumber && request.IsHandle == false)
+            .Select(request => CabinetRequestDTO.Builder()
+                .WithId(request.Id)
+                .WithTargetPhoneNumber(request.TargetPhoneNumber)
+                .WithSenderName(getSenderNameByPhoneNumber(request.SenderPhoneNumber))
+                .WithSenderPhoneNumber(request.SenderPhoneNumber)
+                .WithIsHandle(request.IsHandle)
+                .WithCabinetName(request.CabinetName)
+                .WithIsApprove(request.IsApprove)
+                .WithIsSenderSeen(request.IsSenderSeen)
+                .WithDateStart(request.DateStart)
+                .WithDateEnd(request.DateEnd)
+                .Build())
+            .ToList();
+
+        return cabinetRequestDTOs;        
+    }
+
+    private string getSenderNameByPhoneNumber(string senderPhoneNumber)
+    {
+        int phoneNumber = int.Parse(senderPhoneNumber);
+        var user = _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+        
+        if (user == null)
+        {
+            _logger.LogWarning("User with phone number '{PhoneNumber}' not found.", senderPhoneNumber);
+            throw new InvalidOperationException($"User with phone number '{senderPhoneNumber}' not found.");
+        }
+
+        return $"{user.FirstName} {user.LastName}";
+    }
+
+    public void HandleNotification(string token, int requestId, bool approve)
+    {
+        string phoneNumber = getPhoneNumberFromToken(token);
+        User? user = getUserFromPhoneNumber(int.Parse(phoneNumber));
+
+        if (user == null)
+        {
+            _logger.LogWarning("User with phone number '{PhoneNumber}' not found.", phoneNumber);
+            throw new InvalidOperationException($"User with phone number '{phoneNumber}' not found.");
+        }
+
+        updateCabinetRequestByRequestId(user, requestId, approve);
+
+        if(approve)
+        {
+            addUserToCabinet(user, requestId);
+        }
+    }
+
+    private void addUserToCabinet(User user, int requestId)
+    {
+        var cabinetRequest = _dbContext.CabinetRequests
+            .FirstOrDefault(request => request.Id == requestId);
+
+        if (cabinetRequest == null)
+        {
+            _logger.LogWarning("Cabinet request with ID {RequestId} not found.", requestId);
+            throw new InvalidOperationException($"Cabinet request with ID {requestId} not found.");
+        }
+
+        int phoneNumber = int.Parse(cabinetRequest.SenderPhoneNumber);
+        User? targetUser = getUserFromPhoneNumber(phoneNumber);
+
+        if (user == null)
+        {
+            _logger.LogWarning("User with phone number '{PhoneNumber}' not found.", phoneNumber);
+            throw new InvalidOperationException($"User with phone number '{phoneNumber}' not found.");
+        }
+
+        var medicineCabinet = targetUser!.MedicineCabinetUsersList?
+            .Select(mcu => mcu.MedicineCabinet)
+            .FirstOrDefault(mc => mc.MedicineCabinetName == cabinetRequest.CabinetName);
+        
+        if (medicineCabinet == null)
+        {
+            _logger.LogWarning(
+                "Medicine cabinet with name '{MedicineCabinetName}' not found for user '{UserId}'.", 
+                cabinetRequest.CabinetName, 
+                targetUser.UserId
+            );
+
+            throw new InvalidOperationException($"Medicine cabinet with name '{cabinetRequest.CabinetName}' not found for user '{targetUser.UserId}'.");
+        }
+
+        var medicineCabinetUser = new MedicineCabinetUsers
+        {
+            User = user,
+            MedicineCabinet = medicineCabinet,
+            UserId = user.UserId,
+            MedicineCabinetId = medicineCabinet.Id
+        };
+
+        user.MedicineCabinetUsersList?.Add(medicineCabinetUser);
+        medicineCabinet.MedicineCabinetUsers?.Add(medicineCabinetUser);
+        _dbContext.SaveChanges();
+    }
+
+    private void updateCabinetRequestByRequestId(User user, int requestId, bool approve)
+    {
+        var cabinetRequest = _dbContext.CabinetRequests
+            .FirstOrDefault(request => request.Id == requestId);
+
+        if (cabinetRequest == null)
+        {
+            _logger.LogWarning("Cabinet request with ID {RequestId} not found.", requestId);
+            throw new InvalidOperationException($"Cabinet request with ID {requestId} not found.");
+        }
+
+        if (cabinetRequest.TargetPhoneNumber != user.PhoneNumber.ToString())
+        {
+            _logger.LogWarning("User {UserId} is not authorized to update cabinet request with ID {RequestId}.", user.UserId, requestId);
+            throw new UnauthorizedAccessException($"User is not authorized to update this cabinet request.");
+        }
+
+        cabinetRequest.IsApprove = approve;
+        cabinetRequest.IsHandle = true;
+        cabinetRequest.DateEnd = DateTime.Now;
+        _dbContext.SaveChanges();
+
+        _logger.LogInformation("Cabinet request with ID {RequestId} has been updated. Approved: {Approve}", requestId, approve);
+    }
+
     private Task sendRequestToRabbitMQ(User user, int targetPhoneNumber, int sourcePhoneNumber, string medicineCabinetName)
     {
         Mapper mapper = Mapper.Instance;
@@ -172,7 +311,6 @@ public class LoginService : ILoginService
         RabbitMqHandler rabbitMqHandler = RabbitMqHandler.Instance;
         
         rabbitMqHandler.SendMassage(loginComunicationDWrapper);
-
         return Task.CompletedTask;
     }
 
@@ -184,7 +322,7 @@ public class LoginService : ILoginService
         }
 
         return _dbContext.Users
-            ?.Include(u => u.MedicineCabinetUsersList) 
+            ?.Include(u => u.MedicineCabinetUsersList!) 
             .ThenInclude(mcu => mcu.MedicineCabinet) 
             .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
     }
