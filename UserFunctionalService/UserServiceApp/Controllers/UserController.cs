@@ -172,6 +172,27 @@ public class UserController : Controller
         }
     }
 
+    [HttpGet("user/all/medications")]
+    public ActionResult<IEnumerable<MedicationDTO>> GetAllMedication()
+    {
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+            IEnumerable<MedicationDTO> medications = _userService.GetAllMedication(userPhoneNumer);
+
+            return HandleMedicationResponse(medications, userPhoneNumer);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return HandleUnauthorizedAccess(ex);
+        }
+        catch (Exception ex)
+        {
+           return HandleUnexpectedError(ex);
+        }
+    }
+
     [HttpGet("user/cabinet")]
     public ActionResult GetAllCabinets()
     {
@@ -206,11 +227,9 @@ public class UserController : Controller
     [HttpPut("medications/{medicationId}")]
     public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
     {
-        // Update logics
         try
         {
             string? token = GetAuthorizationTokenOrThrow();
-            
             _userService.UpdateMedication(medicationDto);
             _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", medicationId);
 
@@ -230,7 +249,6 @@ public class UserController : Controller
         {
             string? token = GetAuthorizationTokenOrThrow();
             int userPhoneNumber = _userService.GetUserPhoneNumber(token);
-
             _userService.DeleteMedication(userPhoneNumber, medicationId, medicineCabinetName);
 
             return Ok();

@@ -9,5 +9,7 @@ public interface ILoginService
     public Task<bool> AddNewHouseSuccsesfully(string token, int targetPhoneNumber, string medicineCabinetName);
     public string GenerateVerificationCode();
     public void SaveVerificationCode(int phoneNumber, string? code);
-     public bool ValidateVerificationCode(int phoneNumber, string? code);
+    public bool ValidateVerificationCode(int phoneNumber, string? code);
+    public IEnumerable<CabinetRequestDTO> GetAllRequestByUserToken(string token);
+    public void HandleNotification(string token, int requestId, bool approve);
 }

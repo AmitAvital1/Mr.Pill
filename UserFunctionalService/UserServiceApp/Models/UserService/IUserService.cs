@@ -8,6 +8,7 @@ public interface IUserService
     public void UpdateMedication(MedicationDTO medicationDTO);
     public void DeleteMedication(int userPhoneNumber, int medicationId, string medicineCabinetName);
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int phoneNumber, string medicineCabinetName);
+    public IEnumerable<MedicationDTO> GetAllMedication(int userPhoneNumer);
      public  Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode);
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper);
     public int GetUserPhoneNumber(string token);
