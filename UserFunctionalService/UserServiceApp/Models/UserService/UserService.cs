@@ -135,15 +135,17 @@ public class UserService : IUserService
         var currentTime = DateTime.Now;
 
         _logger.LogInformation(
-        "Adding new request to the database at {CurrentTime}. " +
-        "SenderPhoneNumber: {SenderPhoneNumber}, TargetPhoneNumber: {TargetPhoneNumber}, " +
-        "CabinetName: {CabinetName}, IsHandle: {IsHandle}",
-        currentTime, senderPhoneNumber, targetPhoneNumber, cabinetName, isHandle);
+            "Adding new request to the database at {CurrentTime}. " +
+            "SenderPhoneNumber: {SenderPhoneNumber}, TargetPhoneNumber: {TargetPhoneNumber}, " +
+            "CabinetName: {CabinetName}, IsHandle: {IsHandle}",
+            currentTime, senderPhoneNumber, targetPhoneNumber, cabinetName, isHandle
+        );
 
         var request = new CabinetRequest
         {
             SenderPhoneNumber = senderPhoneNumber.ToString(),
             TargetPhoneNumber = targetPhoneNumber.ToString(),
+            CabinetName = cabinetName,
             IsHandle = isHandle,
             IsApprove = false, 
             IsSenderSeen = false, 
@@ -391,7 +393,7 @@ public class UserService : IUserService
 
             if (response.IsSuccessStatusCode)
             {
-                if(response.StatusCode == System.Net.HttpStatusCode.NoContent)
+                if (response.StatusCode == System.Net.HttpStatusCode.NoContent)
                 {
                     _logger.LogDebug("No medication found in Moh");
                     return null;
@@ -462,7 +464,6 @@ public class UserService : IUserService
         return true;
     }
 
-
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int phoneNumber, string medicineCabinetName)
     {
         try
@@ -496,7 +497,39 @@ public class UserService : IUserService
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred while getting medications for user with phone number {PhoneNumber}.", phoneNumber);
-            return Enumerable.Empty<MedicationDTO>();
+            throw new InvalidOperationException($"An error occurred while retrieving medications for the user with phone number {phoneNumber}.", ex);
+        }
+    }
+
+    public IEnumerable<MedicationDTO> GetAllMedication(int userPhoneNumber)
+    {
+        try
+        {
+            var user = _dbContext?.Users
+                    ?.Include(u => u.MedicineCabinetUsersList!)
+                        .ThenInclude(mcu => mcu.MedicineCabinet)
+                            .ThenInclude(mc => mc.Medications)
+                    .FirstOrDefault(u => u.PhoneNumber == userPhoneNumber);
+
+            if (user == null)
+            {
+                _logger.LogError("User with phone number {PhoneNumber} not found.", userPhoneNumber);
+                throw new Exception("User not found");
+            }
+
+            var medications = user.MedicineCabinetUsersList
+                ?.Where(mcu => mcu.MedicineCabinet?.Medications != null)
+                .SelectMany(mcu => mcu.MedicineCabinet.Medications ?? Enumerable.Empty<UserMedications>())
+                .Where(m => !m.IsPrivate || m.CreatorId == user.UserId)
+                .ToList();
+
+            return ConvertMedicationsToDTOs(medications ?? new List<UserMedications>());
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while getting medications for user with phone number {userPhoneNumber}.", userPhoneNumber);
+            throw new InvalidOperationException($"An error occurred while retrieving medications for the user with phone number {userPhoneNumber}.", ex);
         }
     }
 
@@ -574,8 +607,7 @@ public class UserService : IUserService
         
         if (medication == null)
         {
-            MedicationDTO? medicationDTO = await SendARequestToMinistryOfHealthService(medicationBarcode)!;
-            
+            MedicationDTO? medicationDTO = await SendARequestToMinistryOfHealthService(medicationBarcode)!; 
             return medicationDTO!;
         }
         
