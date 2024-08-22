@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserServiceApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240815160550_UpdatePhoneMessageTable")]
-    partial class UpdatePhoneMessageTable
+    [Migration("20240820185639_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -156,6 +156,44 @@ namespace UserServiceApp.Migrations
                     b.ToTable("PhoneMessages");
                 });
 
+            modelBuilder.Entity("UserServiceApp.Models.Reminder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRecurring")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<TimeSpan>("RecurrenceInterval")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("ReminderTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserMedicationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("UserMedicationId");
+
+                    b.ToTable("Reminders");
+                });
+
             modelBuilder.Entity("UserServiceApp.Models.User", b =>
                 {
                     b.Property<int>("UserId")
@@ -253,6 +291,25 @@ namespace UserServiceApp.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("UserServiceApp.Models.Reminder", b =>
+                {
+                    b.HasOne("UserServiceApp.Models.User", "User")
+                        .WithMany("Reminders")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("UserServiceApp.Models.UserMedications", "UserMedication")
+                        .WithMany("Reminders")
+                        .HasForeignKey("UserMedicationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("UserMedication");
+                });
+
             modelBuilder.Entity("UserServiceApp.Models.UserMedications", b =>
                 {
                     b.HasOne("UserServiceApp.Models.User", "Creator")
@@ -295,6 +352,13 @@ namespace UserServiceApp.Migrations
             modelBuilder.Entity("UserServiceApp.Models.User", b =>
                 {
                     b.Navigation("MedicineCabinetUsersList");
+
+                    b.Navigation("Reminders");
+                });
+
+            modelBuilder.Entity("UserServiceApp.Models.UserMedications", b =>
+                {
+                    b.Navigation("Reminders");
                 });
 #pragma warning restore 612, 618
         }

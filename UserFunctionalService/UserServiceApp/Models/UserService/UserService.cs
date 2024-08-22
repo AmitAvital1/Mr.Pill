@@ -182,7 +182,7 @@ public class UserService : IUserService
         // After acquiring the SemaphoreSlim, it can release the lock and wait for the asynchronous operation (if any) to complete.
         // The continuation task (code after `await`) is responsible for completing its work and releasing the SemaphoreSlim.
         // This ensures other threads can acquire the SemaphoreSlim and access the critical section when available.
- 
+        
         await _lockSemaphoreSlimForCreateNewMedication.WaitAsync().ConfigureAwait(true);
         
         try
@@ -232,13 +232,40 @@ public class UserService : IUserService
         try
         {
             var user = GetUserByPhoneNumber(phoneNumber);
-            if (user == null) return;
+            if (user == null)
+            {
+                _logger.LogError(
+                    "User not found to by phone number {PhoneNumber}"
+                    ,phoneNumber
+                );
+
+                throw new InvalidOperationException($"Medication not found for barcode {medicationBarcode}.");
+            }
 
             var medication = GetMedicationByBarcodeWithoutReturnADto(medicationBarcode);
-            if (medication == null) return;
+           
+            if (medication == null)
+            {
+                
+                _logger.LogError(
+                    "Error getting medication by barcode {medicationBarcode}"
+                    ,medicationBarcode
+                );
+
+                throw new InvalidOperationException($"Medication not found for barcode {medicationBarcode}.");
+            }
 
             var medicineCabinet = GetMedicineCabinetByName(user, medicineCabinetName);
-            if (medicineCabinet == null) return;
+           
+            if (medicineCabinet == null)
+            {
+                _logger.LogError(
+                    "Error getting medicine cabinet by name - {medicineCabinetName}"
+                    ,medicineCabinetName
+                );
+                
+                throw new InvalidOperationException($"Medicine cabinet not found for name {medicineCabinetName}.");
+            }
 
             AddMedicationToCabinet(user, medication, privacy, medicineCabinet);
 
@@ -261,7 +288,10 @@ public class UserService : IUserService
                 phoneNumber
             );
 
-            throw;
+            throw new InvalidOperationException(
+                $"Failed to add medication with barcode '{medicationBarcode}' to the medicine cabinet '{medicineCabinetName}' for user with phone number '{phoneNumber}'. See inner exception for details.", 
+                ex
+            );
         }
     }
 
@@ -420,7 +450,7 @@ public class UserService : IUserService
         _logger.LogInformation("Checking if medication with barcode {MedicationBarcode} exists in the database.", medicationBarcode);
 
         var medication = _dbContext?.MedicationRepos
-                    .FirstOrDefault(m => m.Barcode == medicationBarcode);
+                .FirstOrDefault(m => m.Barcode == medicationBarcode);
 
         if (medication == null)
         {

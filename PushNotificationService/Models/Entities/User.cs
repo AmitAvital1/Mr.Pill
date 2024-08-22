@@ -1,4 +1,4 @@
-namespace UserServiceApp.Models;
+namespace PN.Models;
 public class User
 {
     public int UserId { get; set; }

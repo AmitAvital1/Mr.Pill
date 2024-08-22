@@ -13,6 +13,7 @@ public class AppDbContext : DbContext
     public DbSet<MedicineCabinetUsers> MedicineCabinetUsers { get; set; }
     public DbSet<CabinetRequest> CabinetRequests{ get; set; }
     public DbSet<PhoneMessage> PhoneMessages { get; set; }
+    public DbSet<Reminder> Reminders { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,5 +55,16 @@ public class AppDbContext : DbContext
             .HasForeignKey(MedicineCabinet => MedicineCabinet.CreatorId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        modelBuilder.Entity<Reminder>()
+            .HasOne(r => r.User)
+            .WithMany(u => u.Reminders)
+            .HasForeignKey(r => r.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
+
+        modelBuilder.Entity<Reminder>()
+            .HasOne(r => r.UserMedication)
+            .WithMany(um => um.Reminders)
+            .HasForeignKey(r => r.UserMedicationId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

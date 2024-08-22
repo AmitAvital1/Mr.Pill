@@ -11,7 +11,7 @@ public interface IUserService
      public  Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode);
     public void SaveMassageToManagerHouseToAddNewUser(LoginComunicationDWrapper loginComunicationDWrapper);
     public int GetUserPhoneNumber(string token);
-     public bool IsUserExistInDb(int PhoneNumber);
+    public bool IsUserExistInDb(int PhoneNumber);
     public int GetPhoneNumberFromToken(string? token);
     public bool NameAlreadyExistInMyInventory(string Name, int phoneNumber);
     public void CreateNewMedicineCabinet(string name, int phoneNumber);

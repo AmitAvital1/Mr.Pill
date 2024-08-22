@@ -136,7 +136,6 @@ public class LoginService : ILoginService
                             mcu.MedicineCabinet.MedicineCabinetName.Equals(medicineCabinetName, StringComparison.OrdinalIgnoreCase) &&
                             mcu?.MedicineCabinet?.Creator?.PhoneNumber == user.PhoneNumber);
 
-
             if (medicineCabinet == null)
             {
                 _logger.LogWarning(
@@ -161,7 +160,6 @@ public class LoginService : ILoginService
         catch (Exception ex)
         {
             _logger.LogError(ex, "An error occurred in AddNewHouseSuccsesfully");
-            
             return false;
         }
     }
@@ -177,16 +175,6 @@ public class LoginService : ILoginService
 
         return Task.CompletedTask;
     }
-
-    // private User? getUserFromPhoneNumber(int phoneNumber)
-    // {
-    //     if (_dbContext.Users == null)
-    //     {
-    //         throw new InvalidOperationException("User table not exist");
-    //     }
-
-    //     return _dbContext.Users.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
-    // }
 
     private User? getUserFromPhoneNumber(int phoneNumber)
     {
@@ -232,14 +220,12 @@ public class LoginService : ILoginService
         }
 
         var timeElapsed = DateTime.UtcNow - latestMessage.SentTime;
-        if (timeElapsed > TimeSpan.FromMinutes(2))
+
+        if (timeElapsed > TimeSpan.FromMinutes(4))
         {
             return false;
         }
 
         return true;
     }
-
-    
-
 }

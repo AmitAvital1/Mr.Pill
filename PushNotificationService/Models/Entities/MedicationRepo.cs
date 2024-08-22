@@ -1,4 +1,4 @@
-namespace UserServiceApp.Models;
+namespace PN.Models;
 public class MedicationRepo
 {
     public int Id { get; set; }
@@ -9,4 +9,5 @@ public class MedicationRepo
     public string? HebrewDescription { get; set; }
     public string? ImagePath { get; set; }
     public ICollection<UserMedications>? Medications { get; set; } 
+    
 }

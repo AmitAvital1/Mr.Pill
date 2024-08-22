@@ -1,6 +1,9 @@
-namespace UserServiceApp.Models;
+using System.ComponentModel.DataAnnotations;
+
+namespace PN.Models;
 public class UserMedications
 {
+    [Key]
     public int Id { get; set; }
     public required string Barcode { get; set; }
     public int? PillSize { get; set; } 
