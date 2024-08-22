@@ -45,7 +45,6 @@ const RemindersPage: React.FC = () => {
   const [ownerId, setOwnerId] = useState<number>(0);
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
-
   useEffect(() => {
     const fetchReminders = async () => {
       try {

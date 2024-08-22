@@ -6,6 +6,7 @@ let user = {
 };
 
 let moveState = 0
+let stateMap = new Map<string, number>();
 
 export default {
   setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
@@ -20,11 +21,11 @@ export default {
   isEmpty() {
     return (user.FirstName == "" || user.LastName == "" || user.PhoneNumber == "" || user.Token == "");
   },
-  getState() {
-    return moveState;
+  getState(key: string) {
+    return stateMap.get(key);
   },
-  setState(input: number) {
-    moveState = input;
+  setState(key: string, value: number) {
+    return stateMap.set(key, value);
   }
 
 };

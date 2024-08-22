@@ -7,6 +7,8 @@ import * as FileSystem from 'expo-file-system';
 import { saveTokenToFile } from '@/components/tokenHandlerFunctions';
 import DataHandler from '@/DataHandler'
 
+import MyCabinets from '../(cabinet)/mycabinets';
+
 const AddPillScreen = () => {
 
   const user = DataHandler.getUser()
@@ -90,32 +92,35 @@ const AddPillScreen = () => {
     }
 
   }
-
+  
   return (
     <SafeAreaView>
-
+      
       <View style={styles.pagetop}>
         <Text style={{fontSize: 32, flex:1}}>
           הוספת תרופה חדשה
         </Text>
       </View>
-
-      <TextInput
-        style={styles.input}
-        onChangeText={onChangeNumber}
-        value={number}
-        placeholder="מספר ברקוד של התרופה"
-        keyboardType="numeric"
-        textAlign='right'
-        onEndEditing={updateButton}
-      />
-
-      <Button 
-        title="הוסף תרופה" 
-        onPress={handleAddPill} 
-        //disabled={isDisabled}
-      />
       
+      <View style={{flex: 1}}>
+        <TextInput
+          style={styles.input}
+          onChangeText={onChangeNumber}
+          value={number}
+          placeholder="מספר ברקוד של התרופה"
+          keyboardType="numeric"
+          textAlign='right'
+          onEndEditing={updateButton}
+        />
+        <View style={{flex: 1, minHeight: 350,}}>
+        <MyCabinets />
+        </View>
+        <Button 
+          title="הוסף תרופה" 
+          onPress={handleAddPill} 
+          //disabled={isDisabled}
+        />
+      </View> 
     </SafeAreaView>
   );
 };

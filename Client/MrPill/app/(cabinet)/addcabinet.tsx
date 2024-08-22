@@ -7,21 +7,23 @@ import * as FileSystem from 'expo-file-system';
 import { saveTokenToFile } from '@/components/tokenHandlerFunctions';
 import DataHandler from '@/DataHandler'
 
+
+
 const AddCabinetScreen = () => {
 
   const user = DataHandler.getUser()
 
-  const [number, onChangeNumber] = React.useState('');
+  const [cabinetName, onChangeCabinetName] = React.useState('');
   const [isDisabled, setDisabled] = React.useState(true);
-  const updateButton = () => setDisabled(number == '')
+  const updateButton = () => setDisabled(cabinetName.length < 3 || cabinetName.length > 20)
  
-  function handleAddPill() {
+  async function handleAddCabinet() {
 
-    let response = sendAddPillRequest();
+    let response = await sendAddCabinetRequest();
     
     if (!response) return false;
 
-    response = sendGetCabinetsRequest();
+    response = await sendGetCabinetsRequest();
 
     if (!response) return false;
 
@@ -36,10 +38,9 @@ const AddCabinetScreen = () => {
       console.log(user.Token)
       const request = {
         method: 'get',
-        url: "http://10.0.2.2:5194/user/medications",
+        url: "http://10.0.2.2:5194/user/cabinet",
         headers: {
             "Authorization": "Bearer " + user.Token, 
-            "privacyStatus": "AllMedications",
         },
         data: {
         }
@@ -47,8 +48,8 @@ const AddCabinetScreen = () => {
 
       const response = await axios(request);
 
-      console.log(response.request._response);
-      console.log(response.request.status);
+      console.log("full: " + response.request._response);
+      console.log("status: " + response.request.status);
 
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -57,7 +58,7 @@ const AddCabinetScreen = () => {
 
   }
 
-  const sendAddPillRequest = async () => {
+  const sendAddCabinetRequest = async () => {
     try {
 
       axios.defaults.validateStatus = function () {
@@ -66,19 +67,14 @@ const AddCabinetScreen = () => {
       
       const request = {
         method: 'post',
-        url: "http://10.0.2.2:5194/medications",
+        url: "http://10.0.2.2:5194/medicine-cabinet?Name=" + cabinetName,
         headers: {
             "Authorization": "Bearer " + user.Token,
         },
-        data: {
-            "medicationBarcode": String(number),
-            //"phoneNumber": "0501231234",
-            "privatcy": false,
-        }
       }
       const response = await axios(request);
-      console.log(response.request._response);
-      console.log(response.request.status);
+      console.log("full: " + response.request._response);
+      console.log("status: " + response.request.status);
 
       if (response.request.status == 200) {
         return true;
@@ -102,17 +98,17 @@ const AddCabinetScreen = () => {
 
       <TextInput
         style={styles.input}
-        onChangeText={onChangeNumber}
-        value={number}
-        placeholder="מספר ברקוד של התרופה"
-        keyboardType="numeric"
+        onChangeText={onChangeCabinetName}
+        value={cabinetName}
+        placeholder="שם של ארון חדש"
+        keyboardType="default"
         textAlign='right'
         onEndEditing={updateButton}
       />
 
       <Button 
-        title="הוסף תרופה" 
-        onPress={handleAddPill} 
+        title="הוסף ארון" 
+        onPress={handleAddCabinet} 
         //disabled={isDisabled}
       />
       

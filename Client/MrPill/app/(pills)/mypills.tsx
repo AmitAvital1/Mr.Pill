@@ -108,6 +108,7 @@ const MyPills: React.FC = () => {
       { Id: 16, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 15", Quantity: 17 },
       { Id: 17, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 16", Quantity: 11 },
     ];
+
     setMyPills(mockPills);
 
   }, []);
@@ -127,11 +128,9 @@ const MyPills: React.FC = () => {
           </View>
         </Pressable>
 
-
         <Text style={styles.itemText}>{pill.Quantity}</Text>
         <Text style={styles.itemText}>{pill.HebrewName}</Text>
         
-
       </View>
     );
   };

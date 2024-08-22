@@ -10,7 +10,7 @@ import DataHandler from '@/DataHandler';
 const LogInScreen = () => {
 
   const user = DataHandler.getUser()
-  const loginType = DataHandler.getState()
+  const loginType = DataHandler.getState('login');
 
   const [phoneNumber, onChangeNumber] = React.useState(loginType == 1 ? user.PhoneNumber : "");
   const [isDisabled, setDisabled] = React.useState(true);

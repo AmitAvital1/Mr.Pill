@@ -11,11 +11,9 @@ import { Pressable } from 'react-native';
 import axios from 'axios';
 
 type Cabinet = {
-    userId: number;
-    reminderTime: string;
-    message?: string;
-    isRecurring: boolean;
-    recurrenceInterval?: string;
+  id: number,
+  medicineCabinetName: string,
+  creatorId: number,
 };
 
 function getFamilyEmoji() {
@@ -30,64 +28,131 @@ const borderColor = "#005a27"
 const MyCabinets: React.FC = () => {
 
     const user = DataHandler.getUser()
+    const status = DataHandler.getState('move')
+
     const dateTime = new Date();
-    const [myCabinets, setMyCabinets] = useState<Cabinet[]>([]);
+    //const [myCabinets, setMyCabinets] = useState<[Cabinet]>();
+
+    let myCabinets: [Cabinet];
+
+    const [cabSelection, setCabSelection] = useState<number>(-1);
+    const [renderedCabinets, setRenderedCabinets] = useState<any>();
+    const [isRequestSent, setIsRequestSent] = useState<boolean>(false);
+
     //const [ownerId, setOwnerId] = useState<number>(0);
     //const [dropdownVisible, setDropdownVisible] = useState(false);
   
     useEffect(() => {
+      
+      if(isRequestSent) return;
+      setIsRequestSent(true);
+      function renderCabinet(cabinet: Cabinet) {
+        
+        return (
+          <Pressable onPress={()=>{console.log('y')}}>
+  
+            <View style={styles.reminderBox}>
+              <View style={{flexDirection: 'row'}}>
+              
+              {status == 0 &&
+              <>
+                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                  <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
+                </View>
+    
+                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                  <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
+                </View>
+                  
+                <View>
+                  <ThemedText>{cabinet.medicineCabinetName}</ThemedText>
+                </View>
+              </>
+              }
 
-        const fetchCabinets = async () => {
-            const request = {
-                method: 'post',
-                url: "http://10.0.2.2:5181/Mr-Pill/user/cabinets",
-                headers: { "Content-Type": "application/json" }, 
-                data: {
-                "UserToken": user.Token,
-                "PrivacyStatus": "AllMedications",
+              {status == 1 &&
+              <Pressable onPress={()=>{setCabSelection(cabinet.id)}}>
+                <View style={[styles.row, {alignItems: 'center'}]}>
+
+                  <View style={[styles.plusMinusButton, {backgroundColor: "#cc4e4e"}]}>
+                    <ThemedText style={[styles.plusMinusText, {paddingTop: 14}]}>✖</ThemedText>
+                  </View>
+
+                  <View style={{borderWidth: 2}}>
+                    <ThemedText style={{marginHorizontal: 50, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
+                  </View>
+
+                </View>
+              </Pressable>
+              }
+        
+              </View>
+            </View>
+  
+          </Pressable>
+        )
+      }
+      const renderCabinetList = (cabinetList: [Cabinet]) => {
+        if (!cabinetList) return [];
+        let renderedCabinets = [];
+  
+        for (let i = 0; i < cabinetList.length; i++) {
+            renderedCabinets.push(renderCabinet(cabinetList[i]));
+        }
+
+        setRenderedCabinets(renderedCabinets);
+      };
+
+      const sendGetCabinetsRequest = async () => {
+
+        // bug when adding medication and then trying to get all user medications
+        try {
+          console.log(user.Token)
+          const request = {
+            method: 'get',
+            url: "http://10.0.2.2:5194/user/cabinet",
+            headers: {
+                "Authorization": "Bearer " + user.Token, 
+            },
+            data: {
             }
           }
+
+          const response = await axios(request);
     
-          try {
-            const response = await axios(request);
-            console.log(response.data);
-            setMyCabinets(response.data);
-          } catch (error) {
-            console.error("Error fetching cart items:", error);
-          }
-        };
-
-        fetchCabinets();
-    })
+          console.log("full: " + response.request._response);
+          console.log("status: " + response.request.status);
+          
+          //setMyCabinets(JSON.parse(response.request._response));
+          myCabinets = JSON.parse(response.request._response);
+          renderCabinetList(myCabinets);
+          console.log(myCabinets);
     
+        } catch (error) {
+          console.error("Error fetching data:", error);
+          return false;
+        }
 
-    function renderCabinet(cabinet?: Cabinet) {
+      }
+      sendGetCabinetsRequest();
+  })
 
+  if (status == 1) {
     return (
-      <Pressable onPress={()=>{console.log('y')}}>
-        <View style={styles.reminderBox}>
-          <View style={{flexDirection: 'row'}}>
-    
-          <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-            <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
-          </View>
-
-          <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-            <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
-          </View>
-            
-          <View>
-            <ThemedText>ארון תרופות פנתרים</ThemedText>
-            <ThemedText>בשעה 14:00 לאחר האוכל </ThemedText>
-          </View>
-    
-          </View>
+      <View style={{flex: 1, minHeight: 50,}}>
+        <View style={styles.pagetop}> 
+          <ThemedText style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 8}}>
+              בחר ארון תרופות להוספה:{"\n"}
+          </ThemedText>
+          <ParallaxScrollView backgroundColor={backgroundColorLight}>
+              {renderedCabinets}
+          </ParallaxScrollView>
         </View>
-      </Pressable>
+      </View>
     )
   }
 
-  return (
+  return (    
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
         <View style={{flex: 1, minHeight: 40}}>
             {MrPillLogo(1)}
@@ -98,16 +163,15 @@ const MyCabinets: React.FC = () => {
                     ארונות תרופות משותפים שלי:{"\n"}
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                    {renderCabinet()}
-                    {renderCabinet()}
-                    {renderCabinet()}
-                    {renderCabinet()}
+                    {renderedCabinets.length > 0 && renderedCabinets}
+                    {renderedCabinets.length == 0 && <ThemedText>אין ארונות תרופות. נא הוסף ארון.</ThemedText>}
+          
                 </ParallaxScrollView>
             </View>
         </View>
         <View style={styles.pagebottom}>
             <View style={styles.row}>
-                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף ארון חדש")} ButtonAction={()=>{router.navigate('/(cabient)/addcabinet')}}/>
+                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף ארון חדש")} ButtonAction={()=>{router.navigate('/(cabinet)/addcabinet')}}/>
             </View>
         </View>
     </View>
@@ -142,7 +206,6 @@ const styles = StyleSheet.create({
     minHeight: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: backgroundColorMain,
     flexDirection: 'row',
   },
   text: {
