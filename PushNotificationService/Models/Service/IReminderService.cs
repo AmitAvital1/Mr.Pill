@@ -8,5 +8,7 @@ public interface IReminderService
     public bool IsUserExistInDb(int PhoneNumber);
     public int GetPhoneNumberFromToken(string? token);
     public IEnumerable<UIReminderDTO> GetUserReminders(int phoneNumber);
+    void EditReminder(ReminderDTO reminderDto, int phoneNumber, int Id);
+    void DeleteReminder(int phoneNumber, int Id);
 
 }

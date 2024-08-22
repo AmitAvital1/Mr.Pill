@@ -66,18 +66,66 @@ public class ReminderController : Controller
         }
     }
 
-    [HttpPost]
+    [HttpPut]
     [Route("EditReminder")]
-    public IActionResult EditReminder([FromBody] ReminderDTO reminderDto)
+    public IActionResult EditReminder([FromBody] ReminderDTO reminderDto, [FromQuery] int Id)
     {
-        return null;
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int phoneNumber = _reminderService.GetPhoneNumberFromToken(token);
+
+            if (!_reminderService.IsUserExistInDb(phoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (checked by userService)", phoneNumber);
+                return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { Message = "Invalid model state for reminder" });
+            }
+
+            _reminderService.EditReminder(reminderDto, phoneNumber, Id);
+            
+            return Ok(new { Message = "Reminder edit successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while setting reminder");
+            return StatusCode(500, "Internal Server Error " + ex.Message);
+        }
     }
     
-    [HttpPost]
+    [HttpDelete]
     [Route("DeleteReminder")]
-    public IActionResult DeleteReminder(int reminderId)
+    public IActionResult DeleteReminder([FromQuery] int Id)
     {
-        return null;
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int phoneNumber = _reminderService.GetPhoneNumberFromToken(token);
+
+            if (!_reminderService.IsUserExistInDb(phoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (checked by userService)", phoneNumber);
+                return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { Message = "Invalid model state for reminder" });
+            }
+
+            _reminderService.DeleteReminder(phoneNumber, Id);
+            
+            return Ok(new { Message = "Reminder deleted successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while setting reminder");
+            return StatusCode(500, "Internal Server Error " + ex.Message);
+        }
     }
 
      private string GetAuthorizationTokenOrThrow()

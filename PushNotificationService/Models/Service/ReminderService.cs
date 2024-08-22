@@ -54,6 +54,77 @@ public class ReminderService : IReminderService
             _dbContext.SaveChanges();
     }
 
+    public void EditReminder(ReminderDTO reminderDto, int phoneNumber, int Id)
+    {
+        var user = _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+
+        if(user == null)
+        {
+            throw new Exception("No user found on phone number " + phoneNumber);
+        }
+        
+        var Reminder = _dbContext.Reminders
+                .Where(r => r.Id == Id)
+                .FirstOrDefault();
+            
+        if(Reminder == null)
+        {
+            throw new Exception("Invalid reminder id " + Id);
+        }
+
+        if(Reminder.UserId != user.UserId)
+        {
+            throw new Exception("Reminder not belong this user");
+        }
+
+        var reminder = new Reminder
+            {
+                UserId = user.UserId,
+                ReminderTime = reminderDto.ReminderTime,
+                //Message = reminderDto.Message,
+                IsRecurring = reminderDto.IsRecurring,
+                RecurrenceInterval = reminderDto.RecurrenceInterval,
+                IsActive = true,
+                UserMedicationId = reminderDto.UserMedicationId
+
+            };
+
+            Reminder.ReminderTime = reminderDto.ReminderTime;
+            Reminder.RecurrenceInterval = reminderDto.RecurrenceInterval;
+            Reminder.Message = reminderDto.Message;
+            
+            _dbContext.SaveChanges();
+    }
+
+    public void DeleteReminder(int phoneNumber, int Id)
+    {
+        var user = _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+
+        if(user == null)
+        {
+            throw new Exception("No user found on phone number " + phoneNumber);
+        }
+        
+        var Reminder = _dbContext.Reminders
+                .Where(r => r.Id == Id)
+                .FirstOrDefault();
+            
+        if(Reminder == null)
+        {
+            throw new Exception("Invalid reminder id " + Id);
+        }
+
+        if(Reminder.UserId != user.UserId)
+        {
+            throw new Exception("Reminder not belong this user");
+        }
+
+        _dbContext.Reminders.Remove(Reminder);
+        _dbContext.SaveChanges();
+    }
+
     public IEnumerable<UIReminderDTO> GetUserReminders(int phoneNumber)
     {
         var user = _dbContext?.Users
