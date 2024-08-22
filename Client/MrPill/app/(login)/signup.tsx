@@ -83,7 +83,7 @@ const SignUpScreen = () => {
     if (response.request.status == 200) {
       setIsSignupSuccessful(true);
       DataHandler.setUser(firstName, lastName, phoneNumber, JSON.parse(response.request._response).token)
-      router.navigate({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
+      router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
     }
     
     return response;

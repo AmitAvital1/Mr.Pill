@@ -72,7 +72,7 @@ public class UserController : Controller
     [HttpPost("medicine-cabinet")]
     public ActionResult CreateNewMedicineCabinet([FromQuery] string Name)
     {
-        try 
+        try
         {
             string? token = GetAuthorizationTokenOrThrow();
             int phoneNumber = _userService.GetPhoneNumberFromToken(token);

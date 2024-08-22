@@ -1,5 +1,5 @@
-import React from "react";
-import { Link } from "expo-router";
+import React, { useEffect } from "react";
+import { Link, router } from "expo-router";
 
 import {
   Pressable,
@@ -9,35 +9,93 @@ import {
   View,
   Text,
 } from "react-native";
-import { PopButton } from "@/components/PopButton";
+
 import { MrPillLogo } from "@/components/MrPillLogo";
-``
+import axios from "axios";
+import DataHandler from "@/DataHandler";
+
+async function handleLoginPress() {
+  const success = await sendAutomaticLoginRequest();
+  if (success) {
+    router.dismissAll();
+    router.push('/(home)/home');
+  } else {
+    router.navigate('/(login)/login');
+  }
+}
+
+async function sendAutomaticLoginRequest() {
+
+  const user = DataHandler.getUser()
+  
+  if (DataHandler.isEmpty()) return false;
+
+  try {
+
+    axios.defaults.validateStatus = function () {
+      return true;
+    };
+
+    const request = {
+      method: 'post',
+      url: "http://10.0.2.2:5181/Mr-Pill/Login",
+      headers: { "Content-Type": "application/json" }, 
+      data: {
+        "PhoneNumber": user.PhoneNumber,
+      }
+    }
+
+    const request2 = {
+      method: 'post',
+      url: "http://10.0.2.2:5181/Mr-Pill/Login",
+      headers: { "Content-Type": "application/json" }, 
+      data: {
+        "PhoneNumber": user.PhoneNumber,
+        "Code": "",
+      }
+    }
+
+    const response = await axios(request);
+
+    if (response.request.status == 200) {
+      return true;
+    }
+    else {
+      console.log(response.request.status)
+      return false;
+    }
+    
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return false;
+  }
+
+}
+
 const WelcomeScreen = () => {
   //const [text, onChangeText] = React.useState('');
 
+
   return (
     <SafeAreaView style={{ backgroundColor: "lavender", flex: 1 }}>
-      <View style={styles.pagetop}>
-      <Text style={styles.title}>ברוכים הבאים!</Text>
-        {MrPillLogo()}
-        
 
+      <View style={styles.pagetop}>
+        <Text style={styles.title}>ברוכים הבאים!</Text>
+        {MrPillLogo()}
       </View>
 
       <View style={styles.button}>
         <Link href="/signup">
-          <Text style={styles.buttontext}>משתמש חדש 🤗</Text>
+            <Text style={styles.buttontext}>משתמש חדש 🤗</Text>
         </Link>
       </View>
 
-      <View style={styles.button}>
-        <Link href="/login">
+      <View style={[styles.button, {marginBottom: 20}]}>
+        <Pressable onPress={handleLoginPress}>
           <Text style={styles.buttontext}>משתמש קיים 😎</Text>
-        </Link>
+        </Pressable>
       </View>
-      <View style={{ marginTop: 50 }}>
 
-      </View>
     </SafeAreaView>
   );
 };

@@ -5,10 +5,15 @@ type AppHomeButtonProps = {
   ButtonContent: FunctionComponent;
   ButtonAction?: Function;
   BackgroundColor?: string;
+  BorderColor?: string;
+  BorderWidth?: number;
 };
 
-export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, ButtonAction }) => {
+export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, ButtonAction, BackgroundColor, BorderColor, BorderWidth }) => {
 
+  if (!BackgroundColor) BackgroundColor = "#c9c9ff";
+  if (!BorderColor) BorderColor = "#8a8aa7";
+  if (!BorderWidth) BorderWidth = 3;
 
   const handleOnPress = () => {
 
@@ -18,7 +23,7 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
 
   return (
     <Pressable onPress={handleOnPress}>
-     <View style={style.button}>
+     <View style={[style.button,{backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
           <ButtonContent />
       </View>
     </Pressable>
@@ -28,14 +33,11 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
 const style = StyleSheet.create({  
   button: {
     minWidth: 150,
-    backgroundColor: "#c9c9ff",
     flex: 1,
     borderRadius: 1000,
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
-    borderColor: "#8a8aa7",
-    borderWidth: 3,
   },
   container: {
     flex: 1,

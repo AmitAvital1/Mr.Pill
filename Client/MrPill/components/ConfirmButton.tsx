@@ -5,7 +5,7 @@ interface ConfirmButtonProps {
 
     title: string;
     onPress: (event: GestureResponderEvent) => void;
-    isDisabled?: boolean; // Optional prop
+    isDisabled?: boolean;
     marginTop?: number;
     marginBottom?: number;
     borderWidth?: number;

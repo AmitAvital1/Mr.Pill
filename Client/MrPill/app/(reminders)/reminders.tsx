@@ -79,7 +79,6 @@ const RemindersPage: React.FC = () => {
 
   }, []);
 
-
   const dropdownItems = [
       '5',
       '6',

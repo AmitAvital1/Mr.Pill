@@ -5,16 +5,26 @@ let user = {
     Token: "",
 };
 
-export default {
+let moveState = 0
 
-  setUser(firstName: string, lastName: string, phoneNumber: string, token: string) {
-    user.FirstName = firstName;
-    user.LastName = lastName;
-    user.PhoneNumber = phoneNumber;
-    user.Token = token;
+export default {
+  setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
+    user.FirstName = firstName? firstName : "";
+    user.LastName = lastName? lastName : "";;
+    user.PhoneNumber = phoneNumber? phoneNumber : "";;
+    user.Token = token? token : "";;
   },
   getUser() {
     return user;
+  },
+  isEmpty() {
+    return (user.FirstName == "" || user.LastName == "" || user.PhoneNumber == "" || user.Token == "");
+  },
+  getState() {
+    return moveState;
+  },
+  setState(input: number) {
+    moveState = input;
   }
 
 };

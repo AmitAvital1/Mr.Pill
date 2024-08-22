@@ -9,11 +9,9 @@ import Animated, {
 
 import { ThemedView } from '@/components/ThemedView';
 
-const HEADER_HEIGHT = 250;
-
 type Props = PropsWithChildren<{
-  headerImage: ReactElement;
-  headerBackgroundColor: { dark: string; light: string };
+  headerImage?: ReactElement;
+  headerBackgroundColor?: { dark: string; light: string };
   backgroundColor: string
 }>;
 
@@ -23,6 +21,9 @@ export default function ParallaxScrollView({
   headerBackgroundColor,
   backgroundColor,
 }: Props) {
+  if (!headerBackgroundColor) headerBackgroundColor = {dark: backgroundColor, light: backgroundColor}
+  const headerHeight = headerImage? 250 : 0;
+  if (!headerImage) headerImage = <></>
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollViewOffset(scrollRef);
@@ -33,12 +34,12 @@ export default function ParallaxScrollView({
         {
           translateY: interpolate(
             scrollOffset.value,
-            [-HEADER_HEIGHT, 0, HEADER_HEIGHT],
-            [-HEADER_HEIGHT / 2, 0, HEADER_HEIGHT * 0.75]
+            [-headerHeight, 0, headerHeight],
+            [-headerHeight / 2, 0, headerHeight * 0.75]
           ),
         },
         {
-          scale: interpolate(scrollOffset.value, [-HEADER_HEIGHT, 0, HEADER_HEIGHT], [2, 1, 1]),
+          scale: interpolate(scrollOffset.value, [-headerHeight, 0, headerHeight], [2, 1, 1]),
         },
       ],
     };
@@ -49,7 +50,7 @@ export default function ParallaxScrollView({
       <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16}>
         <Animated.View
           style={[
-            styles.header,
+            { height: headerHeight, overflow: 'hidden',},
             { backgroundColor: headerBackgroundColor[colorScheme] },
             headerAnimatedStyle,
           ]}>
@@ -62,13 +63,9 @@ export default function ParallaxScrollView({
 }
 
 const styles = StyleSheet.create({
-  header: {
-    height: 180,
-    overflow: 'hidden',
-  },
   content: {
     flex: 1,
-    padding: 16,
+    padding: 5,
     gap: 3,
     overflow: 'hidden',
   },

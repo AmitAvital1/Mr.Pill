@@ -5,65 +5,21 @@ import dns from '../dns.json';
 import { Link, router } from 'expo-router';
 import * as FileSystem from 'expo-file-system';
 import { saveTokenToFile } from '@/components/tokenHandlerFunctions';
-
-
-async function sendAutomaticLoginRequest() {
-  if (!globalThis.userData) return false;
-  if (!globalThis.userData.FirstName) return false;
-  if (!globalThis.userData.LastName) return false;
-  if (!globalThis.userData.PhoneNumber) return false;
-  if (!globalThis.userToken) return false;
-
-  try {
-
-    axios.defaults.validateStatus = function () {
-      return true;
-    };
-
-    const request = {
-      method: 'post',
-      url: "http://10.0.2.2:5181/Mr-Pill/Login",
-      headers: { "Content-Type": "application/json" }, 
-      data: {
-        "PhoneNumber": globalThis.userData.PhoneNumber,
-        "UserToken": globalThis.userToken,
-      }
-    }
-
-    const response = await axios(request);
-
-    if (response.request.status == 200) {
-      globalThis.userToken = JSON.parse(response.request._response).token
-      return true;
-    }
-    else {
-      console.log(response.request.status)
-      return false;
-    }
-    
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return false;
-  }
-
-}
+import DataHandler from '@/DataHandler';
 
 const LogInScreen = () => {
-  
-  async function handleAutoLogin() {
-    const response = await sendAutomaticLoginRequest();
-    if (response == true)
-      return (<Link href='/(home)/home'></Link>)
-  }
-    
-  const [phoneNumber, onChangeNumber] = React.useState('');
+
+  const user = DataHandler.getUser()
+  const loginType = DataHandler.getState()
+
+  const [phoneNumber, onChangeNumber] = React.useState(loginType == 1 ? user.PhoneNumber : "");
   const [isDisabled, setDisabled] = React.useState(true);
-  const updateButton = () => setDisabled(phoneNumber == '')
- 
+  const updateButton = () => setDisabled(phoneNumber == "")
+
   async function handleLogin() {
     let response = await sendLoginRequest();
     if (response)
-      router.navigate({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
+      router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
   }
 
   const sendLoginRequest = async () => {
@@ -79,14 +35,13 @@ const LogInScreen = () => {
         headers: { "Content-Type": "application/json" }, 
         data: {
           "PhoneNumber": phoneNumber,
-          "UserToken": globalThis.userToken,
         }
       }
 
       const response = await axios(request);
 
       if (response.request.status == 200) {
-        globalThis.userToken = JSON.parse(response.request._response).token
+        DataHandler.setUser(undefined, undefined, undefined, JSON.parse(response.request._response).token)
         return true;
       }
       else {
@@ -114,7 +69,7 @@ const LogInScreen = () => {
         style={styles.input}
         onChangeText={onChangeNumber}
         value={phoneNumber}
-        placeholder="מספר טלפון"
+        placeholder={loginType != 1 ? "מספר טלפון" : user.PhoneNumber}
         keyboardType="numeric"
         textAlign='right'
         onEndEditing={updateButton}
