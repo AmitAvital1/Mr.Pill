@@ -15,18 +15,26 @@ import axios from "axios";
 import DataHandler from "@/DataHandler";
 
 async function handleLoginPress() {
+
   const success = await sendAutomaticLoginRequest();
+
   if (success) {
+
+    DataHandler.setState('login', 1);
     router.dismissAll();
     router.push('/(home)/home');
+
   } else {
+
+    DataHandler.setState('login', 0);
     router.navigate('/(login)/login');
+
   }
 }
 
 async function sendAutomaticLoginRequest() {
 
-  const user = DataHandler.getUser()
+  const user = DataHandler.getUser();
   
   if (DataHandler.isEmpty()) return false;
 
@@ -42,16 +50,6 @@ async function sendAutomaticLoginRequest() {
       headers: { "Content-Type": "application/json" }, 
       data: {
         "PhoneNumber": user.PhoneNumber,
-      }
-    }
-
-    const request2 = {
-      method: 'post',
-      url: "http://10.0.2.2:5181/Mr-Pill/Login",
-      headers: { "Content-Type": "application/json" }, 
-      data: {
-        "PhoneNumber": user.PhoneNumber,
-        "Code": "",
       }
     }
 
@@ -73,15 +71,13 @@ async function sendAutomaticLoginRequest() {
 }
 
 const WelcomeScreen = () => {
-  //const [text, onChangeText] = React.useState('');
-
 
   return (
     <SafeAreaView style={{ backgroundColor: "lavender", flex: 1 }}>
 
       <View style={styles.pagetop}>
         <Text style={styles.title}>ברוכים הבאים!</Text>
-        {MrPillLogo()}
+        {MrPillLogo(1)}
       </View>
 
       <View style={styles.button}>

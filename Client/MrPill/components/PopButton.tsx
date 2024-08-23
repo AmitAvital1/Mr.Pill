@@ -12,8 +12,9 @@ export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonActio
   const animatedScale = useRef(new Animated.Value(0)).current;
   const animatedRotation = useRef(new Animated.Value(0)).current;
 
-  if (!ButtonScale) 
+  if (!ButtonScale) {
     ButtonScale = 1
+  }
 
   useEffect(() => {
     animatedScale.setValue(1 * ButtonScale);

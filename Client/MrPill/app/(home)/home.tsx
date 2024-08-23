@@ -31,19 +31,9 @@ type Reminder = {
   recurrenceInterval?: string;
 };
 
-const mockreminder = {
-  "userId": 1,
-  "reminderTime": "2024-08-16T10:00:00Z",
-  "message": "Take your pill",
-  "isRecurring": true,
-  "recurrenceInterval": "PT24H"
-}
-
 const HomePage: React.FC = () => {
 
-  const dateTime = new Date();
-
-  function renderReminder(reminder?: Reminder) {
+  function renderReminder(name: string, comment: string){//(reminder?: Reminder) {
     return (
       <View style={styles.reminderBox}>
         <View style={{flexDirection: 'row'}}>
@@ -60,9 +50,9 @@ const HomePage: React.FC = () => {
           </View>
         </Pressable>
   
-        <View>
-          <ThemedText>Calcium carbonate</ThemedText>
-          <ThemedText>בשעה 14:00 לאחר האוכל </ThemedText>
+        <View style={{flexGrow: 1}}>
+          <ThemedText style={{fontWeight:'bold', textAlign: 'center'}}>{name}</ThemedText>
+          <ThemedText style={{textAlign: 'center'}}>{comment}</ThemedText>
         </View>
   
         </View>
@@ -82,11 +72,10 @@ const HomePage: React.FC = () => {
 
           <ThemedText style={{fontSize: 18, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName + ".\n"}</ThemedText>תזכורות להיום:</ThemedText>
           <ParallaxScrollView backgroundColor={backgroundColorLight}>
-            {renderReminder()}
-            {renderReminder()}
-            {renderReminder()}
-            {renderReminder()}
-            {renderReminder()}
+            {renderReminder("Calcium Carbonate 5mg", "14:00 אחרי האוכל")}
+            {renderReminder("Donepezil 20mg", "21:00 לפני האוכל")}
+            {renderReminder("Donepezil 20mg", "21:00")}
+            {renderReminder("Donepezil 20mg", "21:00")}
           </ParallaxScrollView>
         
         </View>

@@ -21,14 +21,17 @@ const AddCabinetScreen = () => {
 
     let response = await sendAddCabinetRequest();
     
-    if (!response) return false;
+    if (!response) {
+      DataHandler.expireSession();
+    }
 
     response = await sendGetCabinetsRequest();
 
-    if (!response) return false;
+    if (!response) {
+      DataHandler.expireSession();
+    }
 
     return true;
-
   }
 
   const sendGetCabinetsRequest = async () => {

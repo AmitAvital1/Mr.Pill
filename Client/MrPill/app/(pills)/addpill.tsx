@@ -21,11 +21,17 @@ const AddPillScreen = () => {
 
     let response = sendAddPillRequest();
     
-    if (!response) return false;
+    if (!response) {
+      router.dismissAll();
+      router.push('/(login)/welcome');
+    }
 
     response = sendGetPillRequest();
 
-    if (!response) return false;
+    if (!response) {
+      router.dismissAll();
+      router.push('/(login)/welcome');
+    }
 
     return true;
 

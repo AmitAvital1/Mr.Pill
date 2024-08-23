@@ -1,3 +1,5 @@
+import { router } from "expo-router";
+
 let user = {
     FirstName: "",
     LastName: "",
@@ -5,7 +7,6 @@ let user = {
     Token: "",
 };
 
-let moveState = 0
 let stateMap = new Map<string, number>();
 
 export default {
@@ -26,6 +27,11 @@ export default {
   },
   setState(key: string, value: number) {
     return stateMap.set(key, value);
+  },
+  expireSession() {
+    this.setState('session', 0);
+    router.dismissAll();
+    router.navigate('/(login)/welcome');
   }
 
 };

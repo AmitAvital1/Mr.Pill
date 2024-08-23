@@ -36,7 +36,7 @@ const MyCabinets: React.FC = () => {
     let myCabinets: [Cabinet];
 
     const [cabSelection, setCabSelection] = useState<number>(-1);
-    const [renderedCabinets, setRenderedCabinets] = useState<any>();
+    const [renderedCabinets, setRenderedCabinets] = useState<any>([]);
     const [isRequestSent, setIsRequestSent] = useState<boolean>(false);
 
     //const [ownerId, setOwnerId] = useState<number>(0);
@@ -52,7 +52,7 @@ const MyCabinets: React.FC = () => {
           <Pressable onPress={()=>{console.log('y')}}>
   
             <View style={styles.reminderBox}>
-              <View style={{flexDirection: 'row'}}>
+              <View style={{alignItems: 'center', flexDirection: 'row'}}>
               
               {status == 0 &&
               <>
@@ -64,9 +64,14 @@ const MyCabinets: React.FC = () => {
                   <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
                 </View>
                   
-                <View>
-                  <ThemedText>{cabinet.medicineCabinetName}</ThemedText>
+                <View style={{flexGrow: 1}}>
+                  <ThemedText style={{marginHorizontal: 20, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
                 </View>
+
+                <View style={{alignSelf: 'flex-end'}}>
+                  <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>👑</ThemedText>
+                </View>
+
               </>
               }
 
@@ -78,8 +83,8 @@ const MyCabinets: React.FC = () => {
                     <ThemedText style={[styles.plusMinusText, {paddingTop: 14}]}>✖</ThemedText>
                   </View>
 
-                  <View style={{borderWidth: 2}}>
-                    <ThemedText style={{marginHorizontal: 50, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
+                  <View style={{flexGrow: 1, alignContent: 'center'}}>
+                    <ThemedText style={{marginHorizontal: 20, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
                   </View>
 
                 </View>
@@ -93,6 +98,7 @@ const MyCabinets: React.FC = () => {
         )
       }
       const renderCabinetList = (cabinetList: [Cabinet]) => {
+        
         if (!cabinetList) return [];
         let renderedCabinets = [];
   
@@ -123,14 +129,20 @@ const MyCabinets: React.FC = () => {
           console.log("full: " + response.request._response);
           console.log("status: " + response.request.status);
           
-          //setMyCabinets(JSON.parse(response.request._response));
-          myCabinets = JSON.parse(response.request._response);
-          renderCabinetList(myCabinets);
-          console.log(myCabinets);
+          if (response.request.status == 200) {
+            myCabinets = JSON.parse(response.request._response);
+            renderCabinetList(myCabinets);
+            console.log(myCabinets);
+            return true;
+          } else {
+            router.dismissAll();
+            router.push('/(login)/welcome');
+          }
     
         } catch (error) {
           console.error("Error fetching data:", error);
-          return false;
+          router.dismissAll();
+          router.push('/(login)/welcome');
         }
 
       }
@@ -142,11 +154,12 @@ const MyCabinets: React.FC = () => {
       <View style={{flex: 1, minHeight: 50,}}>
         <View style={styles.pagetop}> 
           <ThemedText style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 8}}>
-              בחר ארון תרופות להוספה:{"\n"}
+              בחר ארון להוספת התרופה:{"\n"}
           </ThemedText>
-          <ParallaxScrollView backgroundColor={backgroundColorLight}>
-              {renderedCabinets}
-          </ParallaxScrollView>
+            <ParallaxScrollView backgroundColor={backgroundColorLight}>
+                {renderedCabinets.length > 0 && renderedCabinets}
+                {renderedCabinets.length == 0 && <ThemedText style={{color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
+            </ParallaxScrollView>
         </View>
       </View>
     )
@@ -160,12 +173,11 @@ const MyCabinets: React.FC = () => {
         <View style={{flex: 1, minHeight: 50,}}>
             <View style={styles.pagetop}> 
                 <ThemedText style={{textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
-                    ארונות תרופות משותפים שלי:{"\n"}
+                    ארונות תרופות שלי:{"\n"}
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                     {renderedCabinets.length > 0 && renderedCabinets}
-                    {renderedCabinets.length == 0 && <ThemedText>אין ארונות תרופות. נא הוסף ארון.</ThemedText>}
-          
+                    {renderedCabinets.length == 0 && <ThemedText style={{color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
                 </ParallaxScrollView>
             </View>
         </View>

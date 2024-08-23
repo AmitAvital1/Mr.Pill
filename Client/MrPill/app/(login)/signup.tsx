@@ -54,7 +54,7 @@ const SignUpScreen = () => {
   const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
   const [isSignupClicked, setIsSignupClicked] = React.useState(false);
   const [isSignupSuccessful, setIsSignupSuccessful] = React.useState(false);
-
+  const [isNumberInSystem, setIsNumberInSystem] = React.useState(false);
 
   function isValidData (phoneNumber: string, firstName: string, lastName: string) {
 
@@ -66,11 +66,20 @@ const SignUpScreen = () => {
 
   }
 
-  function handleSubmit() {
+  async function handleSubmit() {
 
-    setIsSignupClicked(true);
-
-    return sendSignupRequest(phoneNumber);
+    const response = await sendSignupRequest(phoneNumber);
+    if (!response) return false;
+    
+    if (response.request.status == 200) {
+      setIsSignupClicked(true);
+    } else if (response.request.status == 409) {
+      setIsNumberInSystem(true);
+    } else {
+      console.log(response.request.status);
+    }
+    
+    return 
   }
 
   async function handleVerify() {
@@ -147,6 +156,7 @@ const SignUpScreen = () => {
 
   function updateButton() {
     setIsButtonDisabled(!isValidData(phoneNumber, firstName, lastName))
+    setIsNumberInSystem(false);
     console.log(isSignupSuccessful)
   }
 
@@ -172,6 +182,8 @@ const SignUpScreen = () => {
         onEndEditing={updateButton}
       />
 
+      {isNumberInSystem && <Text style={{textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000"}}>המספר כבר קיים במערכת</Text>}
+
       {!isSignupClicked && <View>
         <ConfirmButton
           title={isButtonDisabled? "הכנס טלפון": "לחץ להמשך"}
@@ -182,6 +194,8 @@ const SignUpScreen = () => {
           borderColor={"#4c685f"}
         />
       </View>}
+
+      
 
 
       {isSignupClicked && <View>
