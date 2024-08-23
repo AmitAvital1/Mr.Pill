@@ -133,7 +133,6 @@ const LogInScreen = () => {
       const response = await axios(request);
 
       if (response.request.status == 200) {
-        DataHandler.setUser(undefined, undefined, undefined, JSON.parse(response.request._response).token)
         setIsPhoneValid(true);
         return true;
       } else if (response.request.status == 404) {

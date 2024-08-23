@@ -1,13 +1,8 @@
 import React, { useEffect } from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text, Button, Pressable} from 'react-native';
 import axios from 'axios';
-import dns from '../dns.json';
-import { router } from 'expo-router';
-import * as FileSystem from 'expo-file-system';
-import { saveTokenToFile } from '@/components/tokenHandlerFunctions';
 import DataHandler from '@/DataHandler'
-
-import MyCabinets from '../(cabinet)/mycabinets';
+import { router } from 'expo-router';
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { ThemedText } from '@/components/ThemedText';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
@@ -20,101 +15,19 @@ type Cabinet = {
   creatorId: number,
 };
 
+
 const backgroundColorLight = "#ffd8d8";
 const backgroundColorMain = "#ffdf7e";
 const borderColor = "#882c2c";
-
 
 const AddPillScreen = () => {
 
   const user = DataHandler.getUser()
 
   const [number, onChangeNumber] = React.useState('');
-  const [renderedCabinets, setRenderedCabinets] = React.useState<any>([]);
+  const [cabinets, setCabinets] = React.useState<Cabinet[]>([]);
   const [cabSelection, setCabSelection] = React.useState<number>(-1);
   const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
-
-  let myCabinets: [Cabinet];
-
-  function handleAddPill() {
-
-    let response = sendAddPillRequest();
-    
-    if (!response) {
-      DataHandler.expireSession()
-    }
-
-    response = sendGetPillRequest();
-
-    if (!response) {
-      DataHandler.expireSession()
-    }
-
-    return true;
-
-  }
-
-  const sendGetPillRequest = async () => {
-
-    // bug when adding medication and then trying to get all user medications
-    try {
-      console.log(user.Token)
-      const request = {
-        method: 'get',
-        url: "http://10.0.2.2:5194/user/medications",
-        headers: {
-            "Authorization": "Bearer " + user.Token, 
-            "privacyStatus": "AllMedications",
-        },
-        data: {
-        }
-      }
-
-      const response = await axios(request);
-
-      console.log(response.request._response);
-      console.log(response.request.status);
-
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return false;
-    }
-
-  }
-
-  const sendAddPillRequest = async () => {
-    try {
-
-      axios.defaults.validateStatus = function () {
-        return true;
-      };
-      
-      const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5194/medications",
-        headers: {
-            "Authorization": "Bearer " + user.Token,
-        },
-        data: {
-            "medicationBarcode": String(number),
-            //"phoneNumber": "0501231234",
-            "privatcy": false,
-        }
-      }
-      const response = await axios(request);
-      console.log(response.request._response);
-      console.log(response.request.status);
-
-      if (response.request.status == 200) {
-        return true;
-      }
-      
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return false;
-    }
-
-  }
 
   useEffect(() => {
       
@@ -130,7 +43,7 @@ const AddPillScreen = () => {
           method: 'get',
           url: "http://10.0.2.2:5194/user/cabinet",
           headers: {
-              "Authorization": "Bearer " + user.Token, 
+            "Authorization": "Bearer " + user.Token, 
           },
           data: {
           }
@@ -142,9 +55,8 @@ const AddPillScreen = () => {
         console.log("status: " + response.request.status);
         
         if (response.request.status == 200) {
-          myCabinets = JSON.parse(response.request._response);
-          renderCabinetList(myCabinets);
-          console.log(myCabinets);
+          setCabinets(JSON.parse(response.request._response));
+          console.log(cabinets);
           return true;
         } else {
           DataHandler.expireSession();
@@ -159,45 +71,70 @@ const AddPillScreen = () => {
     sendGetCabinetsRequest();
   })
 
-  function renderCabinet(cabinet: Cabinet, isOwnedByMe?: boolean, position?: number) {
+  const sendPostMedicineToCabinetRequest = async () => {
 
-    
-    const color = position == cabSelection ? "lightgreen" : backgroundColorMain;
-    position = position? position : -1;
+    // bug when adding medication and then trying to get all user medications
+    try {
+      console.log(user.Token)
+      const request = {
+        method: 'post',
+        url: "http://10.0.2.2:5194/user/medications?medicineCabinetName=" + cabinets[cabSelection].medicineCabinetName,
+        headers: {
+          "Authorization": "Bearer " + user.Token,
+        },
+        data: {
+          MedicationBarcode: number,
+          Privacy: false
+        }
+      }
 
-    return (
-      <Pressable onPress={()=>{setCabSelection(position);}}>
+      const response = await axios(request);
 
-        <View style={[styles.reminderBox, {backgroundColor: color}]}>
-          <View style={{alignItems: 'center', flexDirection: 'row'}}>
-          
-          <Pressable style={{flex: 1}}onPress={()=>{console.log('1');setCabSelection(cabinet.id)}}>
-            <View style={[styles.row, styles.plusMinusButton, {alignItems: 'center'}]}>
+      console.log("full: " + response.request._response);
+      console.log("status: " + response.request.status);
+      
+      if (response.request.status == 200) {
+        return true;
+      } else {
+        
+      }
 
-              <View style={{flexGrow: 1}}>
-                <ThemedText style={{fontSize: 22, marginHorizontal: 20, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
-              </View>
-
-            </View>
-          </Pressable>
-    
-          </View>
-        </View>
-
-      </Pressable>
-    )
-  }
-  
-  const renderCabinetList = (cabinetList: [Cabinet]) => {
-    
-    if (!cabinetList) return [];
-    let renderedCabinets = [];
-
-    for (let i = 0; i < cabinetList.length; i++) {
-        renderedCabinets.push(renderCabinet(cabinetList[i], i == 1, i));
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      DataHandler.expireSession();
     }
 
-    setRenderedCabinets(renderedCabinets);
+  }
+
+  async function handleButtonPress () { 
+    const response = await sendPostMedicineToCabinetRequest();
+
+    if (response) {
+      router.replace('/(home)/home');
+    }
+    else {
+      setIsRequestSent(true);
+    }
+
+  }
+
+  const renderCabinet = (cabinet: Cabinet, position: number) => {
+    const isSelected = position === cabSelection;
+    const color = isSelected ? "lightgreen" : backgroundColorMain;
+
+    return (
+      <Pressable key={position} onPress={() => {setCabSelection(position);}}>
+
+        <View style={[styles.reminderBox, { backgroundColor: color, minHeight: 50 }]}>
+          <View style={{flexDirection: 'row'}}>
+            <ThemedText style={{fontSize: 22, marginHorizontal: 20, textAlign: 'center' }}>
+              {cabinet.medicineCabinetName}
+            </ThemedText>
+          </View>
+        </View>
+        
+      </Pressable>
+    );
   };
 
   return (
@@ -218,29 +155,26 @@ const AddPillScreen = () => {
       />
 
       <View style={{flexGrow: 1, minHeight: 160,}}>
-          <View style={styles.pagetop}> 
-              <ThemedText style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10}}>
-                  אנא בחר ארון להוספת התרופה:{"\n"}
-              </ThemedText>
+        <View style={styles.pagetop}> 
+            <ThemedText style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10}}>
+                אנא בחר ארון להוספת התרופה:{"\n"}
+            </ThemedText>
 
-              <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                  {renderedCabinets.length > 0 && renderedCabinets}
-                  {renderedCabinets.length == 0 && <ThemedText style={{color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
-              </ParallaxScrollView>
+            <ParallaxScrollView backgroundColor={backgroundColorLight}>
+              {cabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
+            </ParallaxScrollView>
 
-          </View>
+        </View>
       </View>
 
       <View style={styles.pagebottom}>
-          <View style={styles.row}>
-              <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תרופה לארון")} ButtonAction={()=>{}}/>
-          </View>
+        <View style={styles.row}>
+            <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תרופה לארון")} ButtonAction={handleButtonPress}/>
+        </View>
       </View>
+
     </SafeAreaView>
   );
-
-  
-
 };
 
 const styles = StyleSheet.create({
@@ -286,6 +220,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 15,
     paddingVertical: 5,
     minWidth: 300,

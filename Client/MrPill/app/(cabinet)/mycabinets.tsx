@@ -63,22 +63,6 @@ const MyCabinets: React.FC = () => {
                   <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
                   
                 </View>
-
-              {/*
-              <Pressable onPress={()=>{setCabSelection(cabinet.id)}}>
-                <View style={[styles.row, {alignItems: 'center'}]}>
-
-                  <View style={[styles.plusMinusButton, {backgroundColor: "#cc4e4e"}]}>
-                    <ThemedText style={[styles.plusMinusText, {paddingTop: 14}]}>✖</ThemedText>
-                  </View>
-
-                  <View style={{flexGrow: 1, alignContent: 'center'}}>
-                    <ThemedText style={{marginHorizontal: 20, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
-                  </View>
-
-                </View>
-              </Pressable>
-              */}
         
               </View>
             </View>
@@ -123,7 +107,7 @@ const MyCabinets: React.FC = () => {
             renderCabinetList(myCabinets);
             console.log(myCabinets);
             return true;
-          } else {
+          } else if (response.request.status == 401) {
             DataHandler.expireSession();
           }
     

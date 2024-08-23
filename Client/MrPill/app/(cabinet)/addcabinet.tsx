@@ -22,18 +22,10 @@ const AddCabinetScreen = () => {
     let response = await sendAddCabinetRequest();
     
     if (!response) {
-      console.log('wtf');
       DataHandler.expireSession();
     }
-
-    response = await sendGetCabinetsRequest();
-
-    if (!response) {
-      console.log('bacaaa');
-      DataHandler.expireSession();
-    }
-
-    return true;
+    router.dismiss()
+    router.replace('/(cabinet)/mycabinets');
   }
 
   const sendGetCabinetsRequest = async () => {
