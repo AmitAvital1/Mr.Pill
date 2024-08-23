@@ -22,12 +22,14 @@ const AddCabinetScreen = () => {
     let response = await sendAddCabinetRequest();
     
     if (!response) {
+      console.log('wtf');
       DataHandler.expireSession();
     }
 
     response = await sendGetCabinetsRequest();
 
     if (!response) {
+      console.log('bacaaa');
       DataHandler.expireSession();
     }
 

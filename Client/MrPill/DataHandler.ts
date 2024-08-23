@@ -8,13 +8,14 @@ let user = {
 };
 
 let stateMap = new Map<string, number>();
+stateMap.set('session', 1);
 
 export default {
   setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
-    user.FirstName = firstName? firstName : "";
-    user.LastName = lastName? lastName : "";;
-    user.PhoneNumber = phoneNumber? phoneNumber : "";;
-    user.Token = token? token : "";;
+    user.FirstName    = firstName   ? firstName   : user.FirstName    ;
+    user.LastName     = lastName    ? lastName    : user.LastName     ;
+    user.PhoneNumber  = phoneNumber ? phoneNumber : user.PhoneNumber  ;
+    user.Token        = token       ? token       : user.Token        ;
   },
   getUser() {
     return user;

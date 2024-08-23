@@ -19,25 +19,26 @@ async function handleLoginPress() {
   const success = await sendAutomaticLoginRequest();
 
   if (success) {
-
     DataHandler.setState('login', 1);
-    router.dismissAll();
-    router.push('/(home)/home');
-
   } else {
-
     DataHandler.setState('login', 0);
-    router.navigate('/(login)/login');
-
   }
+
+  router.dismissAll();
+  router.push('/(login)/login');
+
 }
 
 async function sendAutomaticLoginRequest() {
 
+  if (DataHandler.getState('session') == 1) {
+    router.navigate('/(home)/home');
+  }
+
   const user = DataHandler.getUser();
   
   if (DataHandler.isEmpty()) return false;
-
+  
   try {
 
     axios.defaults.validateStatus = function () {

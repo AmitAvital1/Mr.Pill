@@ -1,5 +1,5 @@
 import React, {FunctionComponent} from 'react';
-import {View, StyleSheet, Pressable} from 'react-native';
+import {View, StyleSheet, Pressable, Text} from 'react-native';
 
 type AppHomeButtonProps = {
   ButtonContent: FunctionComponent;
@@ -7,9 +7,13 @@ type AppHomeButtonProps = {
   BackgroundColor?: string;
   BorderColor?: string;
   BorderWidth?: number;
+  Type?: number;
 };
 
-export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, ButtonAction, BackgroundColor, BorderColor, BorderWidth }) => {
+const emojis = ["", "🗄", "💊", "⏰", "➕",];
+const padding = [0,20,20,20,10];
+
+export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, ButtonAction, BackgroundColor, BorderColor, BorderWidth, Type }) => {
 
   if (!BackgroundColor) BackgroundColor = "#c9c9ff";
   if (!BorderColor) BorderColor = "#8a8aa7";
@@ -23,7 +27,8 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
 
   return (
     <Pressable onPress={handleOnPress}>
-     <View style={[style.button,{backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
+      <View style={[style.button, {backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
+          {Type && <Text style={{fontSize: 72, position: 'absolute', paddingTop: padding[Type]}}>{emojis[Type]}</Text>}
           <ButtonContent />
       </View>
     </Pressable>
@@ -38,11 +43,5 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
-  },
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    margin: 20,
   },
 });

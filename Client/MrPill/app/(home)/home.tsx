@@ -83,13 +83,13 @@ const HomePage: React.FC = () => {
       <View style={styles.pagebottom}>
 
         <View style={styles.row}>
-          <AppHomeButton ButtonContent={strFC("תרופות משותפות")} ButtonAction={()=>{DataHandler.setState('move', 0); router.navigate('/(cabinet)/mycabinets')}}/>
-          <AppHomeButton ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.navigate('/(pills)/mypills')}}/>
+          <AppHomeButton Type={1} ButtonContent={strFC("הארונות שלי")} ButtonAction={()=>{DataHandler.setState('move', 0); router.navigate('/(cabinet)/mycabinets')}}/>
+          <AppHomeButton Type={2} ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.navigate('/(pills)/mypills')}}/>
         </View>
 
         <View style={styles.row}>
-          <AppHomeButton ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.navigate('/(reminders)/reminders')}}/>
-          <AppHomeButton ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{DataHandler.setState('move', 1); router.navigate('/(pills)/addpill')}}/>
+          <AppHomeButton Type={3} ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.navigate('/(reminders)/reminders')}}/>
+          <AppHomeButton Type={4} ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{DataHandler.setState('move', 1); router.navigate('/(pills)/addpill')}}/>
         </View>
 
       </View>

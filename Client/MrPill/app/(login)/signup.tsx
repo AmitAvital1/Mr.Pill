@@ -195,8 +195,6 @@ const SignUpScreen = () => {
         />
       </View>}
 
-      
-
 
       {isSignupClicked && <View>
       <TextInput
