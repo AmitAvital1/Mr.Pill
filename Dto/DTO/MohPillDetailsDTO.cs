@@ -3,8 +3,8 @@ namespace MrPill.DTOs.DTOs;
 public class MohPillDetailsDTO
 {
     public string Barcode { get; }
-    public string DrugEnglishName { get; }
-    public string DrugHebrewName { get; }
+    public string EnglishName { get; }
+    public string HebrewName { get; }
     public string? EnglishDescription { get; }
     public string? HebrewDescription { get; }
     public string? ImagePath { get; }
@@ -12,8 +12,8 @@ public class MohPillDetailsDTO
     private MohPillDetailsDTO(Builder builder)
     {
         Barcode = builder.Barcode;
-        DrugEnglishName = builder.DrugEnglishName;
-        DrugHebrewName = builder.DrugHebrewName;
+        EnglishName = builder.DrugEnglishName;
+        HebrewName = builder.DrugHebrewName;
         EnglishDescription = builder.EnglishDescription;
         HebrewDescription = builder.HebrewDescription;
         ImagePath = builder.ImagePath;
