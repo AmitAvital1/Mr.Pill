@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, Pressable, Modal } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable, Modal, SafeAreaView } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import * as FileSystem from 'expo-file-system';
 import { Downloader } from "@/components/Downloader";
@@ -8,47 +8,36 @@ import { MrPillLogo } from "@/components/MrPillLogo";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Colors } from '@/constants/Colors';
 import { TouchableOpacity } from "react-native";
+import DataHandler from "@/DataHandler";
+
 
 type Pill = {
-  Id: number;
-  Quantity: number;
-  EnglishName?: string;
-  HebrewName?: string;
-  EnglishDescription?: string;
-  HebrewDescription?: string;
-  Validity?: string; // DateTime type in C#
-  UserId: number;
-  MedicationRepoId: number;
-  ImagePath?: string;
-  PrivacyStatusDTO?: boolean; // IsPrivate type in C#
-};
+  id: number;
+  englishName: string | null;
+  hebrewName: string | null;
+  englishDescription: string | null;
+  hebrewDescription: string | null;
+  validity: string | null;
+  userId: number;
+  medicationRepoId: number;
+  imagePath: string;
+  isPrivate: boolean;
+}
 
+/*
+
+"message":"Medications retrieved successfully.",
+   "userPhoneNumber":529994444,
+   "medications":[
+      {
+
+      }
+
+*/
 
 const MyPills: React.FC = () => {
 
-  // mock user Id data for shared cabinets
-  /*
-  const userIds = [
-    '5',
-    '6',
-    '7',
-  ];
-  const jsonData = JSON.stringify(userIds);
-  const filePath = FileSystem.documentDirectory + 'userIds.json';
-  const saveFile = async () => {
-    try {
-        await FileSystem.writeAsStringAsync(filePath, jsonData);
-        console.log('User IDs saved successfully!');
-    } catch (error) {
-        console.error('Error saving user IDs:', error);
-    }
-  };
-  saveFile();
-  */
-
-  // for downloading image asset
-  // Downloader(uri, pill.Id);
-
+  const user = DataHandler.getUser();
   const [myPills, setMyPills] = useState<Pill[]>([]);
   const [ownerId, setOwnerId] = useState<number>(0);
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -69,19 +58,23 @@ const MyPills: React.FC = () => {
     const fetchPills = async () => {
 
       const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5181/Mr-Pill/user/medications",
-        headers: { "Content-Type": "application/json" }, 
+        method: 'get',
+        url: "http://10.0.2.2:5194/user/all/medications",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + user.Token,
+        }, 
         data: {
-          "UserToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiR2VuZXJhbC1Vc2VyIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiVXNlciIsIlBob25lTnVtYmVyIjoiMDUwMDExMTIyMiIsImV4cCI6MTcyMjk3NDAxNCwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo1MjIxL01yX1BpbGxfQXBwIiwiYXVkIjoiaHR0cDovL2xvY2FsaG9zdDo1MjIxL01yX1BpbGxfQXBwIn0._c4HO-CKGuXaS-h2EzV89X9eYYGqXaZiyqbqyPyGWYw",
-          "PrivacyStatus": "AllMedications",
+          
         }
       }
 
       try {
         const response = await axios(request);
-        console.log(response.data);
-        setMyPills(response.data);
+        if (response.request.status == 200) {
+          setMyPills(JSON.parse(response.request._response).medications);
+        }
+        
       } catch (error) {
         console.error("Error fetching cart items:", error);
       }
@@ -89,49 +82,31 @@ const MyPills: React.FC = () => {
 
     fetchPills();
 
-    // mock pill inventory data
-    const mockPills = [
-      { Id: 1, UserId: 10, MedicationRepoId: 0, HebrewName: "תרופה 1", Quantity: 10 },
-      { Id: 2, UserId: 10, MedicationRepoId: 0, HebrewName: "תרופה 2", Quantity: 15 },
-      { Id: 3, UserId: 10, MedicationRepoId: 0, HebrewName: "תרופה 3", Quantity: 20 },
-      { Id: 4, UserId: 10, MedicationRepoId: 5, HebrewName: "תרופה 4", Quantity: 12 },
-      { Id: 5, UserId: 10, MedicationRepoId: 5, HebrewName: "תרופה 5", Quantity: 30 },
-      { Id: 6, UserId: 10, MedicationRepoId: 5, HebrewName: "תרופה 6", Quantity: 25 },
-      { Id: 7, UserId: 10, MedicationRepoId: 6, HebrewName: "תרופה 7", Quantity: 18 },
-      { Id: 8, UserId: 10, MedicationRepoId: 6, HebrewName: "תרופה 8", Quantity: 22 },
-      { Id: 9, UserId: 10, MedicationRepoId: 6, HebrewName: "תרופה 9", Quantity: 28 },
-      { Id: 11, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 10", Quantity: 14 },
-      { Id: 12, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 11", Quantity: 16 },
-      { Id: 13, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 12", Quantity: 13 },
-      { Id: 14, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 13", Quantity: 19 },
-      { Id: 15, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 14", Quantity: 21 },
-      { Id: 16, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 15", Quantity: 17 },
-      { Id: 17, UserId: 10, MedicationRepoId: 7, HebrewName: "תרופה 16", Quantity: 11 },
-    ];
-
-    setMyPills(mockPills);
-
+    
   }, []);
 
   const handleImagePress = (pillId: number) => {
     console.log(pillId);
   };
 
-  const renderPill = (pill: Pill) => {
+  const renderPill = (pill: Pill, index: number) => {
 
     return ( 
-      <View key={pill.Id} style={styles.lineContainer}>
+      <SafeAreaView key={pill.id} style={[styles.pillContainer, {backgroundColor: index % 2 == 0? "#b3b3b3" : "#d4d4d4",}]}>
         
-        <Pressable onPress={() => handleImagePress(pill.Id)}>
-          <View style={styles.imageContainer}>
-          <Image source={{uri: FileSystem.documentDirectory + pill.Id.toString() + '.jpg'}} style={styles.image} />
-          </View>
-        </Pressable>
+        <View>
+          <Pressable onPress={() => handleImagePress(pill.id)}>
+            <View style={styles.imageContainer}>
+            <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+            </View>
+          </Pressable>
+        </View>
 
-        <Text style={styles.itemText}>{pill.Quantity}</Text>
-        <Text style={styles.itemText}>{pill.HebrewName}</Text>
-        
-      </View>
+        <View style={{maxWidth: 220, minWidth: 220}}>
+          {/*<Text style={styles.itemText}>{pill.quantity}</Text>*/}
+          <Text style={styles.itemText}>{pill.hebrewName}</Text>
+        </View>
+      </SafeAreaView>
     );
   };
 
@@ -139,8 +114,8 @@ const MyPills: React.FC = () => {
   
     let pillItems = [];
     for (let i = 0; i < myPills.length; i++) {
-      if (ownerId == 1 || myPills[i].MedicationRepoId == ownerId)
-        pillItems.push(renderPill(myPills[i]));
+      if (ownerId == 1 || myPills[i].medicationRepoId == ownerId)
+        pillItems.push(renderPill(myPills[i], i));
     }
     return pillItems;
   };
@@ -151,7 +126,7 @@ const MyPills: React.FC = () => {
   }
 
   return (
-    <ParallaxScrollView headerBackgroundColor={{ light: "white", dark: "white" }} headerImage={MrPillLogo()} backgroundColor="white">
+    <ParallaxScrollView headerBackgroundColor={{ light: "#fceeff", dark: "rgb(77, 52, 60)" }} headerImage={MrPillLogo()} backgroundColor="#fceeff">
       
       <View style={styles.lineContainer}>
 
@@ -190,6 +165,7 @@ const MyPills: React.FC = () => {
       </>
 
       {renderPillItems(ownerId)}
+
   </ParallaxScrollView>
   );
 };
@@ -215,7 +191,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#cccccc",
   },
   itemText: {
-    fontSize: 32,
+    fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'right',
     marginHorizontal: 25,
@@ -231,7 +207,15 @@ const styles = StyleSheet.create({
     padding: 0,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f3aacd",
+    backgroundColor: "#ffddaa",
+    borderRadius: 15,
+  },
+  pillContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    padding: 0,
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 15,
   },
   imageContainer: {
@@ -240,6 +224,8 @@ const styles = StyleSheet.create({
     width: 90,
     borderRadius: 20,
     borderWidth: 3,
+    borderColor: "#747474",
+    backgroundColor: "#bdddf3",
     overflow: 'hidden',
   },
   dropdown: {

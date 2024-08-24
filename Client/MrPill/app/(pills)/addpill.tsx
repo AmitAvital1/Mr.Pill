@@ -59,7 +59,7 @@ const AddPillScreen = () => {
           console.log(cabinets);
           return true;
         } else {
-          DataHandler.expireSession();
+          //DataHandler.expireSession();
         }
   
       } catch (error) {
@@ -72,13 +72,13 @@ const AddPillScreen = () => {
   })
 
   const sendPostMedicineToCabinetRequest = async () => {
-
+    
     // bug when adding medication and then trying to get all user medications
     try {
       console.log(user.Token)
       const request = {
         method: 'post',
-        url: "http://10.0.2.2:5194/user/medications?medicineCabinetName=" + cabinets[cabSelection].medicineCabinetName,
+        url: "http://10.0.2.2:5194/medications?medicineCabinetName=" + cabinets[cabSelection].medicineCabinetName,
         headers: {
           "Authorization": "Bearer " + user.Token,
         },
