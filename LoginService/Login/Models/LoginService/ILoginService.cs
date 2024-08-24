@@ -12,4 +12,5 @@ public interface ILoginService
     public bool ValidateVerificationCode(int phoneNumber, string? code);
     public IEnumerable<CabinetRequestDTO> GetAllRequestByUserToken(string token);
     public void HandleNotification(string token, int requestId, bool approve);
+    public User GetUserByPhoneNumber(int phoneNumber);
 }

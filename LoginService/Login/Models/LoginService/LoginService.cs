@@ -366,4 +366,10 @@ public class LoginService : ILoginService
 
         return true;
     }
+
+    public User GetUserByPhoneNumber(int phoneNumber)
+    {
+        return _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+    }
 }

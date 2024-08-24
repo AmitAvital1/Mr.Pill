@@ -107,8 +107,9 @@ public class LoginController : Controller
             if (isValid)
             {
                 string UserToken = _loginService.GenerateUserToken(validationDto.PhoneNumber);
+                var user = _loginService.GetUserByPhoneNumber(phoneNumberValue);
                 _logger.LogInformation("Code validation successful for phone number {PhoneNumber}", validationDto.PhoneNumber);
-                return Ok(new { token = UserToken });
+                return Ok(new { token = UserToken, FirstName = user.FirstName, LastName = user.LastName });
             }
 
             _logger.LogWarning("Invalid code for phone number {PhoneNumber}", validationDto.PhoneNumber);
