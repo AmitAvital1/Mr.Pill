@@ -92,7 +92,7 @@ const MyPills: React.FC = () => {
   const renderPill = (pill: Pill, index: number) => {
 
     return ( 
-      <SafeAreaView key={pill.id} style={[styles.pillContainer, {backgroundColor: index % 2 == 0? "#b3b3b3" : "#d4d4d4",}]}>
+      <SafeAreaView key={pill.id} style={[styles.pillContainer, {backgroundColor: index % 2 == 0? "#bfbfbf" : "#d4d4d4",}]}>
         
         <View>
           <Pressable onPress={() => handleImagePress(pill.id)}>
@@ -102,10 +102,16 @@ const MyPills: React.FC = () => {
           </Pressable>
         </View>
 
-        <View style={{maxWidth: 220, minWidth: 220}}>
+        <View style={{maxWidth: 50, minWidth: 50, marginLeft: 25}}>
+        <Text style={{textAlign: 'center', fontSize: 36, fontWeight: 'bold'}}>{Math.floor(Math.random()*30)}</Text>
+        </View>
+
+        <View style={{maxWidth: 170, minWidth: 170,}}>
           {/*<Text style={styles.itemText}>{pill.quantity}</Text>*/}
           <Text style={styles.itemText}>{pill.hebrewName}</Text>
+          {pill.isPrivate && <Text style={styles.itemText}>אישי</Text>}
         </View>
+
       </SafeAreaView>
     );
   };
@@ -126,7 +132,7 @@ const MyPills: React.FC = () => {
   }
 
   return (
-    <ParallaxScrollView headerBackgroundColor={{ light: "#fceeff", dark: "rgb(77, 52, 60)" }} headerImage={MrPillLogo()} backgroundColor="#fceeff">
+    <ParallaxScrollView headerHeight={130} headerBackgroundColor={{ light: "#fceeff", dark: "rgb(77, 52, 60)" }} headerImage={MrPillLogo(0.5)} backgroundColor="#fceeff">
       
       <View style={styles.lineContainer}>
 
@@ -152,7 +158,13 @@ const MyPills: React.FC = () => {
         </View>
 
       </View>
-      <>
+
+      <View style={[styles.lineContainer, {backgroundColor: "#fceeff",gap: 45}]}>
+        <Text style={styles.text}>    </Text>
+        <Text style={styles.text}>כמות במלאי</Text>
+        <Text style={styles.text}>תרופה</Text>
+      </View>
+      
       {dropdownVisible && (
           <View style={styles.dropdown}>
               {dropdownItems.map((item, index) => (
@@ -162,10 +174,11 @@ const MyPills: React.FC = () => {
               ))}
           </View>
       )}
-      </>
+      
 
-      {renderPillItems(ownerId)}
-
+      <View style={{gap: 5}}>
+        {renderPillItems(ownerId)}
+      </View>
   </ParallaxScrollView>
   );
 };
@@ -202,16 +215,16 @@ const styles = StyleSheet.create({
     width: 100,
   }, 
   lineContainer: {
-    flex: 1,
+    flexGrow: 1,
     flexDirection: 'row',
-    padding: 0,
+    padding: 5,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#ffddaa",
     borderRadius: 15,
   },
   pillContainer: {
-    flex: 1,
+    flexGrow: 1,
     flexDirection: 'row',
     padding: 0,
     justifyContent: "center",

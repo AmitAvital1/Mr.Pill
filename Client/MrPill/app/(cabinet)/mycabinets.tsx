@@ -122,10 +122,8 @@ const MyCabinets: React.FC = () => {
 
   return (    
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
-        <View style={{flex: 1, minHeight: 40}}>
-            {MrPillLogo(1)}
-        </View>
-        <View style={{flex: 1, minHeight: 50,}}>
+        <View style={{flex: 1}}>
+        {MrPillLogo(0.5)}
             <View style={styles.pagetop}> 
                 <ThemedText style={{textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
                     ארונות תרופות שלי:{"\n"}
@@ -136,11 +134,13 @@ const MyCabinets: React.FC = () => {
                 </ParallaxScrollView>
             </View>
         </View>
+
         <View style={styles.pagebottom}>
             <View style={styles.row}>
                 <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף ארון חדש")} ButtonAction={()=>{router.navigate('/(cabinet)/addcabinet')}}/>
             </View>
         </View>
+
     </View>
   );
 };
