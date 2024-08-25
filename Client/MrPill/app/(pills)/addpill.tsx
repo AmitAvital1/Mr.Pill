@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
-import {SafeAreaView, StyleSheet, TextInput, View, Text, Button, Pressable} from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { SafeAreaView, StyleSheet, TextInput, View, Text, Pressable, Alert, TouchableOpacity } from 'react-native';
 import axios from 'axios';
-import DataHandler from '@/DataHandler'
+import DataHandler from '@/DataHandler';
 import { router } from 'expo-router';
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { ThemedText } from '@/components/ThemedText';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { AppHomeButton } from '@/components/AppHomeButton';
 import { strFC } from '@/components/strFC';
+import { BarCodeScanner, BarCodeEvent } from 'expo-barcode-scanner';
+import { MaterialIcons } from '@expo/vector-icons';
 
 type Cabinet = {
   id: number,
@@ -15,67 +17,58 @@ type Cabinet = {
   creatorId: number,
 };
 
-
 const backgroundColorLight = "#ffd8d8";
 const backgroundColorMain = "#ffdf7e";
 const borderColor = "#882c2c";
 
 const AddPillScreen = () => {
-
-  const user = DataHandler.getUser()
-
-  const [number, onChangeNumber] = React.useState('');
-  const [cabinets, setCabinets] = React.useState<Cabinet[]>([]);
-  const [cabSelection, setCabSelection] = React.useState<number>(-1);
-  const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
+  const user = DataHandler.getUser();
+  const [number, onChangeNumber] = useState('');
+  const [cabinets, setCabinets] = useState<Cabinet[]>([]);
+  const [cabSelection, setCabSelection] = useState<number>(-1);
+  const [isRequestSent, setIsRequestSent] = useState<boolean>(false);
+  const [hasPermission, setHasPermission] = useState<boolean | null>(null);
+  const [scanned, setScanned] = useState<boolean>(false);
+  const [cameraVisible, setCameraVisible] = useState<boolean>(false);
 
   useEffect(() => {
-      
-    if(isRequestSent) return;
-    setIsRequestSent(true);
-  
-    const sendGetCabinetsRequest = async () => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
 
-      // bug when adding medication and then trying to get all user medications
+  useEffect(() => {
+    if (isRequestSent) return;
+    setIsRequestSent(true);
+
+    const sendGetCabinetsRequest = async () => {
       try {
-        console.log(user.Token)
         const request = {
           method: 'get',
           url: "http://10.0.2.2:5194/user/cabinet",
           headers: {
-            "Authorization": "Bearer " + user.Token, 
+            "Authorization": "Bearer " + user.Token,
           },
-          data: {
-          }
-        }
+        };
 
         const response = await axios(request);
-  
-        console.log("full: " + response.request._response);
-        console.log("status: " + response.request.status);
-        
+
         if (response.request.status == 200) {
           setCabinets(JSON.parse(response.request._response));
-          console.log(cabinets);
           return true;
-        } else {
-          //DataHandler.expireSession();
         }
-  
+
       } catch (error) {
         console.error("Error fetching data:", error);
         DataHandler.expireSession();
       }
-
-    }
+    };
     sendGetCabinetsRequest();
-  })
+  }, [isRequestSent]);
 
   const sendPostMedicineToCabinetRequest = async () => {
-    
-    // bug when adding medication and then trying to get all user medications
     try {
-      console.log(user.Token)
       const request = {
         method: 'post',
         url: "http://10.0.2.2:5194/medications?medicineCabinetName=" + cabinets[cabSelection].medicineCabinetName,
@@ -86,93 +79,123 @@ const AddPillScreen = () => {
           MedicationBarcode: number,
           Privacy: false
         }
-      }
+      };
 
       const response = await axios(request);
 
-      console.log("full: " + response.request._response);
-      console.log("status: " + response.request.status);
-      
       if (response.request.status == 200) {
         return true;
-      } else {
-        
       }
 
     } catch (error) {
       console.error("Error fetching data:", error);
       DataHandler.expireSession();
     }
+  };
 
-  }
-
-  async function handleButtonPress () { 
+  async function handleButtonPress() {
     const response = await sendPostMedicineToCabinetRequest();
 
     if (response) {
       router.replace('/(home)/home');
-    }
-    else {
+    } else {
       setIsRequestSent(true);
     }
-
   }
+
+  const handleBarCodeScanned = ({ type, data }: BarCodeEvent) => {
+    setScanned(true);
+    onChangeNumber(data);
+    setCameraVisible(false);
+    Alert.alert("סריקת הברקוד הושלמה בהצלחה!\nאנא בחר ארון והמשך להוספת התרופה", `ברקוד: ${data}`, [{ text: "המשך" }]);
+  };
+
+  const toggleCamera = () => {
+    setCameraVisible(!cameraVisible);
+    setScanned(false); // Reset scanned status when opening camera
+  };
+
+  const closeCamera = () => {
+    setCameraVisible(false);
+    setScanned(false); // Reset scanned status if closing camera
+  };
 
   const renderCabinet = (cabinet: Cabinet, position: number) => {
     const isSelected = position === cabSelection;
     const color = isSelected ? "lightgreen" : backgroundColorMain;
 
     return (
-      <Pressable key={position} onPress={() => {setCabSelection(position);}}>
-
+      <Pressable key={position} onPress={() => { setCabSelection(position); }}>
         <View style={[styles.reminderBox, { backgroundColor: color, minHeight: 50 }]}>
-          <View style={{flexDirection: 'row'}}>
-            <ThemedText style={{fontSize: 22, marginHorizontal: 20, textAlign: 'center' }}>
+          <View style={{ flexDirection: 'row' }}>
+            <ThemedText style={{ fontSize: 22, marginHorizontal: 20, textAlign: 'center' }}>
               {cabinet.medicineCabinetName}
             </ThemedText>
           </View>
         </View>
-        
       </Pressable>
     );
   };
 
+  if (hasPermission === null) {
+    return <Text>Requesting camera permission...</Text>;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
   return (
-    <SafeAreaView style={{backgroundColor: backgroundColorMain, flex: 1}}>
-      
-      <View style={{minHeight: 180}}>
-          {MrPillLogo(1)}
+    <SafeAreaView style={{ backgroundColor: backgroundColorMain, flex: 1 }}>
+      <View style={{ minHeight: 180 }}>
+        {MrPillLogo(1)}
       </View>
 
+      {cameraVisible && (
+        <View style={styles.cameraContainer}>
+          <BarCodeScanner
+            onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <TouchableOpacity style={styles.closeButton} onPress={closeCamera}>
+            <MaterialIcons name="close" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      )}
+
+      {!cameraVisible && (
+        <TouchableOpacity style={styles.scanButton} onPress={toggleCamera}>
+          <MaterialIcons name="scanner" size={24} color="white" />
+          <Text style={styles.scanButtonText}>סרוק ברקוד התרופה</Text>
+        </TouchableOpacity>
+      )}
+
       <TextInput
-        style={styles.input}
+        style={[styles.input, { backgroundColor: scanned ? 'lightgreen' : backgroundColorLight }]}
         onChangeText={onChangeNumber}
         value={number}
         placeholder="מספר ברקוד של תרופה"
         keyboardType="default"
         textAlign='center'
-        onEndEditing={()=>{}}
+        editable={!scanned} // Allow manual input if barcode is not scanned
       />
 
-      <View style={{flexGrow: 1, minHeight: 160,}}>
-        <View style={styles.pagetop}> 
-            <ThemedText style={{textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10}}>
-                אנא בחר ארון להוספת התרופה:{"\n"}
-            </ThemedText>
+      <View style={{ flexGrow: 1, minHeight: 160 }}>
+        <View style={styles.pagetop}>
+          <ThemedText style={{ textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>
+            אנא בחר ארון להוספת התרופה:{"\n"}
+          </ThemedText>
 
-            <ParallaxScrollView backgroundColor={backgroundColorLight}>
-              {cabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
-            </ParallaxScrollView>
-
+          <ParallaxScrollView backgroundColor={backgroundColorLight}>
+            {cabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
+          </ParallaxScrollView>
         </View>
       </View>
 
       <View style={styles.pagebottom}>
         <View style={styles.row}>
-            <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תרופה לארון")} ButtonAction={handleButtonPress}/>
+          <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תרופה לארון")} ButtonAction={handleButtonPress} />
         </View>
       </View>
-
     </SafeAreaView>
   );
 };
@@ -187,7 +210,6 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: borderColor,
     minHeight: 100,
-    
     marginHorizontal: 15,
     padding: 5,
   },
@@ -209,10 +231,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
   },
-  text: {
-    fontSize: 20,
-    color: '#000',
-  },
   reminderBox: {
     borderWidth: 2,
     borderColor: borderColor,
@@ -225,19 +243,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     minWidth: 300,
   },
-  plusMinusButton: {
-    minWidth: 50,
-    minHeight: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  plusMinusText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    position: 'absolute',
-  }, 
   input: {
-    backgroundColor: backgroundColorLight,
     height: 60,
     margin: 8,
     borderWidth: 2,
@@ -246,7 +252,41 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 25,
   },
+  scanButton: {
+    backgroundColor: '#ff7f7f',
+    padding: 15,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#ff5c5c',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginVertical: 10,
+    marginHorizontal: 20,
+    elevation: 5, // Adds shadow for better visibility
+  },
+  scanButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginLeft: 10,
+  },
+  cameraContainer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'black',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000, // Ensure it is on top of other components
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 10,
+    borderRadius: 50,
+    zIndex: 1001, // Ensure it is on top of camera view
+  },
 });
-
 
 export default AddPillScreen;

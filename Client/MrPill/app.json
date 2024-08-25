@@ -23,7 +23,8 @@
       },
       "permissions": [
         "INTERNET",
-        "ACCESS_NETWORK_STATE"
+        "ACCESS_NETWORK_STATE",
+        "CAMERA"
       ],
       "package": "com.anonymous.MrPill"
     },
