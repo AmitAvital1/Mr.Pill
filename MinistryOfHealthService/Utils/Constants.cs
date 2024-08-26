@@ -13,6 +13,7 @@ public class Constants
     public static readonly string MOH_JSON_REG_DATE_KEY = "dragRegDate";
     public static readonly string MOH_JSON_BITUL_DATE_KEY = "bitulDate";
     public static readonly string MOH_IMAGE_BASE_URL = "https://mohpublic.z6.web.core.windows.net/IsraelDrugs/";
+    public static readonly string MOA_LEAFLET_BASE_URL = "https://israeldrugs.health.gov.il/GovServiceList/IDRServer/GetSpecificDrug";
 
 }
 

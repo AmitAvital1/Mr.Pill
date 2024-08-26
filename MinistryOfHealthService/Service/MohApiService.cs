@@ -57,12 +57,12 @@ namespace MOHService.service
 
             return 
                 new MohPillDetailsDTO.Builder()
-                    .SetBarcode(pillJsonDetails[MOH_JSON_BARCODES_KEY]?.ToString())
-                    .SetDrugHebrewName(pillJsonDetails[MOH_JSON_DRAG_HEB_NAME_KEY]?.ToString())
-                    .SetDrugEnglishName(pillJsonDetails[MOH_JSON_DRAG_ENG_NAME_KEY]?.ToString())
-                    .SetEnglishDescription(pillJsonDetails[MOH_JSON_DRAG_ENG_DESC_KEY]?.ToString())
+                    .SetBarcode(pillJsonDetails[MOH_JSON_BARCODES_KEY]?.ToString() ?? string.Empty)
+                    .SetDrugHebrewName(pillJsonDetails[MOH_JSON_DRAG_HEB_NAME_KEY]?.ToString() ?? string.Empty)
+                    .SetDrugEnglishName(pillJsonDetails[MOH_JSON_DRAG_ENG_NAME_KEY]?.ToString() ?? string.Empty)
+                    .SetEnglishDescription(pillJsonDetails[MOH_JSON_DRAG_ENG_DESC_KEY]?.ToString() ?? string.Empty)
                     .SetHebrewDescription(pillJsonDetails[MOH_JSON_DRAG_HEB_DESC_KEY]?.ToString())
-                    .SetImagePath(MOH_IMAGE_BASE_URL + pillJsonDetails[MOH_JSON_DRAG_IMG_PATH_KEY][0]["url"].ToString())
+                    .SetImagePath(MOH_IMAGE_BASE_URL + pillJsonDetails[MOH_JSON_DRAG_IMG_PATH_KEY][0]["url"].ToString() ?? string.Empty)
                     .SetPackageSize(largestPackage ?? 0)
                     .Build();
                     
