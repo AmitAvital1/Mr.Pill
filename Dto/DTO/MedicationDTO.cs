@@ -20,6 +20,8 @@ public class MedicationDTO
     public int MedicationRepoId { get; set; }
     public string? ImagePath { get; set; }
     public bool IsPrivate { get; set; }
+    public int NumberOfPills { get; set; }
+    public string? MedicineCabinetName { get; set; }
 
     public class MedicationDTOBuilder
     {
@@ -39,6 +41,18 @@ public class MedicationDTO
         public MedicationDTOBuilder WithEnglishName(string? name)
         {
             _medicationDTO.EnglishName = name;
+            return this;
+        } 
+
+        public MedicationDTOBuilder WithMedicineCabinetName(string? medicineCabinetName)
+        {
+            _medicationDTO.MedicineCabinetName = medicineCabinetName;
+            return this;
+        }
+
+        public MedicationDTOBuilder WithNumberOfPills(int numberOfPills)
+        {
+            _medicationDTO.NumberOfPills = numberOfPills;
             return this;
         }
 

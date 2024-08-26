@@ -224,20 +224,28 @@ public class UserController : Controller
         return Ok(medication);
     }
 
-    [HttpPut("medications/{medicationId}")]
-    public ActionResult UpdateMedication(int medicationId, [FromBody] MedicationDTO medicationDto)
+    [HttpPut("medications/update")]
+    public ActionResult UpdateMedication([FromBody] UpdateMedicationDTO updateMedication)
     {
         try
         {
             string? token = GetAuthorizationTokenOrThrow();
-            _userService.UpdateMedication(medicationDto);
-            _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", medicationId);
+            _userService.UpdateMedication(updateMedication);
+            _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", updateMedication.MedicationId);
 
-            return Ok();
+            var response = new 
+            {
+                Message = "Medication updated successfully.",
+                MedicationId = updateMedication.MedicationId,
+                MedicationRepoId = updateMedication.MedicationRepoId,
+                Timestamp = DateTime.UtcNow
+            };
+
+            return Ok(response);
         }
         catch(Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while updating medication with ID {MedicationId}.", medicationId);
+            _logger.LogError(ex, "An error occurred while updating medication with ID {MedicationId}.", updateMedication.MedicationId);
             return StatusCode(500, "An unexpected error occurred. Please try again later.");
         } 
     }
@@ -255,7 +263,6 @@ public class UserController : Controller
         }
         catch (Exception ex)
         {
-           
             _logger.LogError(ex, $"An error occurred at {GetCurrentFormattedTime()} while deleting medication");
             return StatusCode(500, new { message = "An error occurred while deleting medication" });
         }
