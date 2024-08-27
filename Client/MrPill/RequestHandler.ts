@@ -75,6 +75,7 @@ function createRequest(requestType: string) {
             }; return;
 
         case "addPill":
+            console.log( DataHandler.getState("medicineCabinetName"));
             request = {
                 method: 'post',
                 url: "http://10.0.2.2:5194/medications?medicineCabinetName=" + DataHandler.getState('medicineCabinetName'),
@@ -99,14 +100,14 @@ function createRequest(requestType: string) {
             }; return;
 
         case "addCabinet":
+            
             request = {
-                method: 'get',
-                url: "http://10.0.2.2:5194/user/cabinet",
+                method: 'post',
+                url: "http://10.0.2.2:5194/medicine-cabinet?Name=" + DataHandler.getState("medicineCabinetName"),
                 headers: {
-                    "Authorization": "Bearer " + user.Token, 
+                    "Authorization": "Bearer " + user.Token,
                 },
-                data: {
-                }
+                data: {}
             }; return;
 
 
@@ -133,7 +134,7 @@ export default {
             createRequest(requestType);
     
             response = await axios(request);
-    
+            
             if (response.request.status == 200) {
                 return true;
             } else if (response.request.status == 401) {

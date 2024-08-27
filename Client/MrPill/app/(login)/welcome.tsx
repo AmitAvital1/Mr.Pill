@@ -5,7 +5,6 @@ import {
   Pressable,
   SafeAreaView,
   StyleSheet,
-  Image,
   View,
   Text,
 } from "react-native";
@@ -13,6 +12,7 @@ import {
 import { MrPillLogo } from "@/components/MrPillLogo";
 import axios from "axios";
 import DataHandler from "@/DataHandler";
+import RequestHandler from "@/RequestHandler";
 
 async function handleLoginPress() {
 
@@ -35,39 +35,9 @@ async function sendAutomaticLoginRequest() {
     router.navigate('/(home)/home');
   }
 
-  const user = DataHandler.getUser();
-  
   if (DataHandler.isEmpty()) return false;
   
-  try {
-
-    axios.defaults.validateStatus = function () {
-      return true;
-    };
-
-    const request = {
-      method: 'post',
-      url: "http://10.0.2.2:5181/Mr-Pill/Login",
-      headers: { "Content-Type": "application/json" }, 
-      data: {
-        "PhoneNumber": user.PhoneNumber,
-      }
-    }
-
-    const response = await axios(request);
-
-    if (response.request.status == 200) {
-      return true;
-    }
-    else {
-      console.log(response.request.status)
-      return false;
-    }
-    
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    return false;
-  }
+  return (await RequestHandler.sendRequest('login'));
 
 }
 

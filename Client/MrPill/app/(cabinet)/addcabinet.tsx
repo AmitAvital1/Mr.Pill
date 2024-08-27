@@ -1,13 +1,10 @@
 import React from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
-import axios from 'axios';
-import dns from '../dns.json';
+
 import { router } from 'expo-router';
-import * as FileSystem from 'expo-file-system';
-import { saveTokenToFile } from '@/components/tokenHandlerFunctions';
+
 import DataHandler from '@/DataHandler'
-
-
+import RequestHandler from '@/RequestHandler';
 
 const AddCabinetScreen = () => {
 
@@ -28,59 +25,10 @@ const AddCabinetScreen = () => {
     router.replace('/(cabinet)/mycabinets');
   }
 
-  const sendGetCabinetsRequest = async () => {
-
-    // bug when adding medication and then trying to get all user medications
-    try {
-      console.log(user.Token)
-      const request = {
-        method: 'get',
-        url: "http://10.0.2.2:5194/user/cabinet",
-        headers: {
-            "Authorization": "Bearer " + user.Token, 
-        },
-        data: {
-        }
-      }
-
-      const response = await axios(request);
-
-      console.log("full: " + response.request._response);
-      console.log("status: " + response.request.status);
-
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return false;
-    }
-
-  }
-
   const sendAddCabinetRequest = async () => {
-    try {
 
-      axios.defaults.validateStatus = function () {
-        return true;
-      };
-      
-      const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5194/medicine-cabinet?Name=" + cabinetName,
-        headers: {
-            "Authorization": "Bearer " + user.Token,
-        },
-      }
-      const response = await axios(request);
-      console.log("full: " + response.request._response);
-      console.log("status: " + response.request.status);
-
-      if (response.request.status == 200) {
-        return true;
-      }
-      
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return false;
-    }
+    DataHandler.setState('medicineCabinetName', cabinetName);
+    return await RequestHandler.sendRequest('addCabinet');
 
   }
 
@@ -106,7 +54,7 @@ const AddCabinetScreen = () => {
       <Button 
         title="הוסף ארון" 
         onPress={handleAddCabinet} 
-        //disabled={isDisabled}
+        disabled={isDisabled}
       />
       
     </SafeAreaView>

@@ -1,8 +1,5 @@
 import React, { useEffect } from "react";
-import axios from 'axios'; 
 import { MrPillLogo } from "@/components/MrPillLogo";
-import { saveTokenToFile, readTokenFromFile } from "@/components/tokenHandlerFunctions";
-import { AppHomeButton } from "@/components/AppHomeButton";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import DataHandler from "@/DataHandler";
 
@@ -21,9 +18,9 @@ import {
   TextInput,
   View,
   Text,
-  Button,
 } from "react-native";
 import { router } from "expo-router";
+import RequestHandler from "@/RequestHandler";
 
 
 const isValidPhoneNumber = (phoneNumber: string) => {
@@ -68,90 +65,53 @@ const SignUpScreen = () => {
 
   async function handleSubmit() {
 
-    const response = await sendSignupRequest(phoneNumber);
-    if (!response) return false;
+    if (!await sendSignupRequest(phoneNumber)) return false;
     
-    if (response.request.status == 200) {
+    const statusCode = RequestHandler.getResponse().request.status
+
+    if (statusCode == 200) {
       setIsSignupClicked(true);
-    } else if (response.request.status == 409) {
+    } else if (statusCode == 409) {
       setIsNumberInSystem(true);
     } else {
-      console.log(response.request.status);
+      console.log(statusCode);
     }
     
-    return 
   }
 
   async function handleVerify() {
+    console.log('verifying');
     
-    const response = await sendValidationRequest(phoneNumber, firstName, lastName, validationCode);
-    
-    if (!response) return null;
-    if (!response.request) return null;
+    if (!await sendValidationRequest(phoneNumber, firstName, lastName, validationCode)) {
+      return null;
+    } else {
 
-    if (response.request.status == 200) {
       setIsSignupSuccessful(true);
-      DataHandler.setUser(firstName, lastName, phoneNumber, JSON.parse(response.request._response).token)
+      DataHandler.setToken(JSON.parse(RequestHandler.getResponse().request._response).token);
       router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
-    }
-    
-    return response;
 
+    }
   }
 
   const sendValidationRequest = async (phoneNumber: string, firstName: string, lastName: string, validationCode: string) => {
-    try {
-
-      // for debugging
-      axios.defaults.validateStatus = function () {
-        return true;
-      }; //
-
-      const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5181/Mr-Pill/Register",
-        headers: { }, 
-        data: {
-          FirstName: firstName,
-          LastName: lastName,
-          PhoneNumber: phoneNumber,
-          Code: validationCode
-        }
-      }
-      const response = await axios(request)
-      return response;
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return null;
+    
+    DataHandler.setUser(firstName, lastName, phoneNumber, undefined);
+    DataHandler.setState('validationCode', validationCode);
+    
+    if (await RequestHandler.sendRequest('verifySignup')) {
+      return true;
+    } else {
+      return false;
     }
   }
 
   const sendSignupRequest = async (phnumber: string) => {
-
-    try {
-      // for debugging
-      axios.defaults.validateStatus = function () {
-        return true;
-      }; //
-
-      const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5181/Mr-Pill/GenerateRegistrationCode",
-        headers: { }, 
-        data: {
-          PhoneNumber: phnumber,
-        }
-      }
-
-      const response = await axios(request);
-      return response;
-      
-    } catch (error) {
-      
-      console.error("Error fetching data:", error);
-      return null;
-
+    
+    DataHandler.setPhone(phnumber);
+    if (await RequestHandler.sendRequest('signup')) {
+      return true;
     }
+    return false;
   }
 
   function updateButton() {

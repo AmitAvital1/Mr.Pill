@@ -2,13 +2,13 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, Pressable, Modal, SafeAreaView } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import * as FileSystem from 'expo-file-system';
-import { Downloader } from "@/components/Downloader";
+
 import axios from "axios";
 import { MrPillLogo } from "@/components/MrPillLogo";
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Colors } from '@/constants/Colors';
-import { TouchableOpacity } from "react-native";
+
 import DataHandler from "@/DataHandler";
+import RequestHandler from "@/RequestHandler";
 
 
 type Pill = {
@@ -22,18 +22,9 @@ type Pill = {
   medicationRepoId: number;
   imagePath: string;
   isPrivate: boolean;
+  numberOfPills: number;
+  medicineCabinetName: string | null;
 }
-
-/*
-
-"message":"Medications retrieved successfully.",
-   "userPhoneNumber":529994444,
-   "medications":[
-      {
-
-      }
-
-*/
 
 const MyPills: React.FC = () => {
 
@@ -56,34 +47,15 @@ const MyPills: React.FC = () => {
   useEffect(() => {
 
     const fetchPills = async () => {
-
-      const request = {
-        method: 'get',
-        url: "http://10.0.2.2:5194/user/all/medications",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": "Bearer " + user.Token,
-        }, 
-        data: {
-          
-        }
-      }
-
-      try {
-        const response = await axios(request);
-        if (response.request.status == 200) {
-          setMyPills(JSON.parse(response.request._response).medications);
-        }
-        
-      } catch (error) {
-        console.error("Error fetching cart items:", error);
+      if (await RequestHandler.sendRequest('getMyPills')) {
+        setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
       }
     };
 
     fetchPills();
-
-    
+    console.log(myPills);
   }, []);
+
 
   const handleImagePress = (pillId: number) => {
     console.log(pillId);

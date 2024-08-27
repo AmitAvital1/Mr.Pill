@@ -8,7 +8,7 @@ import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from "@/DataHandler";
 import { Pressable } from 'react-native';
-import axios from 'axios';
+
 import RequestHandler from '@/RequestHandler';
 
 type Cabinet = {
@@ -17,9 +17,9 @@ type Cabinet = {
   creatorId: number,
 };
 
-function getFamilyEmoji() {
+function getFamilyEmoji(type?: number) {
     const familyEmojis = ["👪","👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👩‍👩‍👧‍👧","👩‍👩‍👦‍👦","👩‍👩‍👧‍👦","👩‍👩‍👧","👩‍👩‍👦","👨‍👨‍👧‍👧","👨‍👨‍👦‍👦","👨‍👨‍👧‍👦","👨‍👧‍👦","👨‍👧","👨‍👦","👩‍👧‍👧","👩‍👦‍👦","👩‍👧‍👦","👩‍👧","👩‍👦","👨‍👦‍👦","👨‍👧‍👧"];
-    return familyEmojis[Math.floor(Math.random() * 26)];
+    return familyEmojis[type? type % 26 : Math.floor(Math.random() * 26)];
 }
 
 const backgroundColorLight = "#71bfe9"
@@ -27,9 +27,6 @@ const backgroundColorMain = "#e6c8c8"
 const borderColor = "#005a27"
 
 const MyCabinets: React.FC = () => {
-
-    const user = DataHandler.getUser()
-    const dateTime = new Date();
 
     let myCabinets: [Cabinet];
 
@@ -93,6 +90,8 @@ const MyCabinets: React.FC = () => {
       sendGetCabinetsRequest();
   })
 
+
+  // MAIN PAGE LAYOUT
   return (    
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
         <View style={{flex: 1}}>

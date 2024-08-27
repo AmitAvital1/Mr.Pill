@@ -32,10 +32,11 @@ type Reminder = {
 };
 
 const HomePage: React.FC = () => {
-
+  let reminderId = -1;
   function renderReminder(name: string, comment: string){//(reminder?: Reminder) {
+    reminderId++;
     return (
-      <View style={styles.reminderBox}>
+      <View key={reminderId} style={styles.reminderBox}>
         <View style={{flexDirection: 'row'}}>
   
         <Pressable onPress={()=>{}}>
@@ -83,13 +84,13 @@ const HomePage: React.FC = () => {
       <View style={styles.pagebottom}>
 
         <View style={styles.row}>
-          <AppHomeButton Type={1} ButtonContent={strFC("הארונות שלי")} ButtonAction={()=>{DataHandler.setState('move', 0); router.navigate('/(cabinet)/mycabinets')}}/>
-          <AppHomeButton Type={2} ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.navigate('/(pills)/mypills')}}/>
+          <AppHomeButton Type={1} ButtonContent={strFC("הארונות שלי")} ButtonAction={()=>{router.push('/(cabinet)/mycabinets')}}/>
+          <AppHomeButton Type={2} ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.push('/(pills)/mypills')}}/>
         </View>
 
         <View style={styles.row}>
-          <AppHomeButton Type={3} ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.navigate('/(reminders)/reminders')}}/>
-          <AppHomeButton Type={4} ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{DataHandler.setState('move', 1); router.navigate('/(pills)/addpill')}}/>
+          <AppHomeButton Type={3} ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.push('/(reminders)/reminders')}}/>
+          <AppHomeButton Type={4} ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{router.push('/(pills)/addpill')}}/>
         </View>
 
       </View>

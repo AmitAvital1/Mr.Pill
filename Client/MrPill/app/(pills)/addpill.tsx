@@ -10,6 +10,7 @@ import { AppHomeButton } from '@/components/AppHomeButton';
 import { strFC } from '@/components/strFC';
 import { BarCodeScanner, BarCodeEvent } from 'expo-barcode-scanner';
 import { MaterialIcons } from '@expo/vector-icons';
+import RequestHandler from '@/RequestHandler';
 
 type Cabinet = {
   id: number,
@@ -22,7 +23,7 @@ const backgroundColorMain = "#ffdf7e";
 const borderColor = "#882c2c";
 
 const AddPillScreen = () => {
-  const user = DataHandler.getUser();
+
   const [number, onChangeNumber] = useState('');
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
   const [cabSelection, setCabSelection] = useState<number>(-1);
@@ -39,58 +40,31 @@ const AddPillScreen = () => {
   }, []);
 
   useEffect(() => {
+
     if (isRequestSent) return;
+
     setIsRequestSent(true);
 
     const sendGetCabinetsRequest = async () => {
-      try {
-        const request = {
-          method: 'get',
-          url: "http://10.0.2.2:5194/user/cabinet",
-          headers: {
-            "Authorization": "Bearer " + user.Token,
-          },
-        };
-
-        const response = await axios(request);
-
-        if (response.request.status == 200) {
-          setCabinets(JSON.parse(response.request._response));
-          return true;
-        }
-
-      } catch (error) {
-        console.error("Error fetching data:", error);
-        DataHandler.expireSession();
+      if (await RequestHandler.sendRequest('getMyCabinets')) {
+        setCabinets(JSON.parse(RequestHandler.getResponse().request._response));
       }
     };
+
     sendGetCabinetsRequest();
   }, [isRequestSent]);
 
+
   const sendPostMedicineToCabinetRequest = async () => {
-    try {
-      const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5194/medications?medicineCabinetName=" + cabinets[cabSelection].medicineCabinetName,
-        headers: {
-          "Authorization": "Bearer " + user.Token,
-        },
-        data: {
-          MedicationBarcode: number,
-          Privacy: false
-        }
-      };
-
-      const response = await axios(request);
-
-      if (response.request.status == 200) {
-        return true;
-      }
-
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      DataHandler.expireSession();
+    
+    DataHandler.setState('medicineCabinetName', cabinets[cabSelection].medicineCabinetName);
+    DataHandler.setState('medicationBarcode', number);
+    
+    if (await RequestHandler.sendRequest('addPill')) {
+      return true;
     }
+    return false;
+  
   };
 
   async function handleButtonPress() {
