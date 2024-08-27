@@ -5,7 +5,7 @@ namespace UserServiceApp.Models.UserService;
 public interface IUserService
 {
     public Task<bool> CreateNewMedication(string medicationBarcode, int phoneNumber, bool privatcy, string medicineCabinetName);
-    public void UpdateMedication(MedicationDTO medicationDTO);
+    public void UpdateMedication( UpdateMedicationDTO updateMedication);
     public void DeleteMedication(int userPhoneNumber, int medicationId, string medicineCabinetName);
     public IEnumerable<MedicationDTO> GetAllMedicationByUserId(int phoneNumber, string medicineCabinetName);
     public IEnumerable<MedicationDTO> GetAllMedication(int userPhoneNumer);

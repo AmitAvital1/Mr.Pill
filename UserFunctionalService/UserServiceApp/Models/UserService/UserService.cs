@@ -11,6 +11,7 @@ public class UserService : IUserService
     private readonly AppDbContext _dbContext;
     private readonly ILogger _logger;
     private readonly SemaphoreSlim _lockSemaphoreSlimForCreateNewMedication = new(1, 1);
+    private static readonly object _lockForUpdateMedication = new();
     private readonly string _baseUrlMOHservice;
     public static string mohServiceUrl = "http://mohservice:8080/moh-service/pill-details";
 
@@ -25,7 +26,8 @@ public class UserService : IUserService
     public bool NameAlreadyExistInMyInventory(string Name, int phoneNumber)
     {
         _logger.LogInformation( "Checking if medicine cabinet name '{Name}' already exists for user with phone number {PhoneNumber}.", 
-                    Name, phoneNumber);
+                    Name, phoneNumber
+        );
 
         var user = _dbContext?.Users?
             .Include(u => u.MedicineCabinetUsersList!)
@@ -36,7 +38,9 @@ public class UserService : IUserService
         if (user == null)
         {
             _logger.LogWarning("User with phone number {PhoneNumber} not found when checking for medicine cabinet name '{Name}'.", 
-                phoneNumber, Name);
+                phoneNumber, Name
+            );
+
             return false;
         }
 
@@ -86,18 +90,22 @@ public class UserService : IUserService
             _dbContext!.MedicineCabinets.Add(newMedicineCabinet);
             _dbContext.SaveChanges();
 
-            _logger.LogInformation("Successfully created a new medicine cabinet with name '{Name}' for user with phone number {PhoneNumber}.", name, phoneNumber);
+            _logger.LogInformation(
+                "Successfully created a new medicine cabinet with name '{Name}' for user with phone number {PhoneNumber}.", 
+                name, 
+                phoneNumber
+            );
         }
         catch (Exception ex)
         {
-            _logger.LogError(
+            _logger.LogError (
                 ex, 
                 "An error occurred while creating a new medicine cabinet with name '{Name}' for user with phone number {PhoneNumber}.", 
                 name, 
                 phoneNumber
             );
 
-            throw new InvalidOperationException(
+            throw new InvalidOperationException (
                 $"An error occurred while creating the medicine cabinet '{name}' for user with phone number {phoneNumber}.", 
                 ex
             );
@@ -120,7 +128,8 @@ public class UserService : IUserService
          _logger.LogInformation(
             "Starting to process the request to add a new user to the manager's house. ManagerPhone: {SourcePhoneNumber}, " +
             "SenderPhoneNumber: {TargetPhoneNumber}, MedicineCabinetName: {MedicineCabinetName}",
-            loginComunicationDWrapper.SourcePhoneNumber, loginComunicationDWrapper.TargetPhoneNumber, loginComunicationDWrapper.MedicineCabinetName);
+            loginComunicationDWrapper.SourcePhoneNumber, loginComunicationDWrapper.TargetPhoneNumber, loginComunicationDWrapper.MedicineCabinetName
+        );
 
         int senderPhoneNumber = loginComunicationDWrapper.SourcePhoneNumber;
         int targetPhoneNumber = loginComunicationDWrapper.TargetPhoneNumber;
@@ -245,7 +254,6 @@ public class UserService : IUserService
             }
 
             var medication = GetMedicationByBarcodeWithoutReturnADto(medicationBarcode);
-           
             if (medication == null)
             {
                 
@@ -258,7 +266,6 @@ public class UserService : IUserService
             }
 
             var medicineCabinet = GetMedicineCabinetByName(user, medicineCabinetName);
-           
             if (medicineCabinet == null)
             {
                 _logger.LogError(
@@ -291,7 +298,8 @@ public class UserService : IUserService
             );
 
             throw new InvalidOperationException(
-                $"Failed to add medication with barcode '{medicationBarcode}' to the medicine cabinet '{medicineCabinetName}' for user with phone number '{phoneNumber}'. See inner exception for details.", 
+                $"Failed to add medication with barcode '{medicationBarcode}' to the medicine cabinet '{medicineCabinetName}' " +
+                $"for user with phone number '{phoneNumber}'. See inner exception for details.", 
                 ex
             );
         }
@@ -344,10 +352,11 @@ public class UserService : IUserService
         var userMedication = new UserMedications
         {
             Barcode = medication.Barcode,
-            Validity = DateTime.Now,
+            Validity = DateTime.Now.AddMonths(6),
             Creator = user,
             MedicineCabinet = medicineCabinet,
             IsPrivate = privacy,
+            NumberOfPills = medication.largestPackage,
             MedicationRepo = medication
         };
 
@@ -494,10 +503,18 @@ public class UserService : IUserService
             return ConvertMedicationsToDTOs(filteredMedications);
 
         }
-        catch (Exception ex)
+       catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while getting medications for user with phone number {PhoneNumber}.", phoneNumber);
-            throw new InvalidOperationException($"An error occurred while retrieving medications for the user with phone number {phoneNumber}.", ex);
+            _logger.LogError(
+                ex, 
+                "An error occurred while getting medications for user with phone number {PhoneNumber}.", 
+                phoneNumber
+            );
+
+            throw new InvalidOperationException(
+                $"An error occurred while retrieving medications for the user with phone number {phoneNumber}.", 
+                ex
+            );
         }
     }
 
@@ -528,8 +545,16 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while getting medications for user with phone number {userPhoneNumber}.", userPhoneNumber);
-            throw new InvalidOperationException($"An error occurred while retrieving medications for the user with phone number {userPhoneNumber}.", ex);
+            _logger.LogError(
+                ex, 
+                "An error occurred while getting medications for user with phone number {userPhoneNumber}.", 
+                userPhoneNumber
+            );
+
+            throw new InvalidOperationException(
+                $"An error occurred while retrieving medications for the user with phone number {userPhoneNumber}.", 
+                ex
+            );
         }
     }
 
@@ -546,6 +571,7 @@ public class UserService : IUserService
                 .WithValidity(m.Validity)
                 .WithUserId(m.CreatorId)
                 .WithMedicationRepoId(m.MedicationRepoId)
+                .WithMedicineCabinetName(m.MedicineCabinet.MedicineCabinetName)
                 .WithImagePath(m.MedicationRepo.ImagePath)
                 .WithIsPrivate(m.IsPrivate);
 
@@ -661,9 +687,55 @@ public class UserService : IUserService
         _dbContext?.SaveChanges();
     }
 
-    public void UpdateMedication(MedicationDTO medicationDTO)
+    public void UpdateMedication( UpdateMedicationDTO updateMedication)
     {
-        
-    }
+        var medicineCabinet = _dbContext.MedicineCabinets
+            .Include(mc => mc.Medications)
+            .FirstOrDefault(mc => mc.Id == updateMedication.MedicationRepoId);
 
+        if (medicineCabinet == null)
+        {
+            _logger.LogWarning(
+                "Medicine cabinet with ID {MedicineCabinetId} not found.",
+                updateMedication.MedicationRepoId
+            );
+
+            throw new Exception("Medicine cabinet not found.");
+        }
+
+        var medication = medicineCabinet?.Medications
+            ?.FirstOrDefault(m => m.Id == updateMedication.MedicationId);
+
+        if (medication == null)
+        {
+             _logger.LogWarning(
+                "Medication with ID {MedicationId} not found in Medicine Cabinet ID {MedicineCabinetId}.",
+                updateMedication.MedicationId,
+                updateMedication.MedicationId
+            );
+
+            throw new Exception("Medication not found in the specified medicine cabinet.");
+        }
+
+        lock (_lockForUpdateMedication)
+        {
+
+            if (medication.NumberOfPills > 0)
+            {
+                medication.NumberOfPills -= 1;
+            }
+            else
+            {
+                throw new Exception("No pills left to decrease.");
+            }
+
+            _dbContext.SaveChanges();
+        }
+
+        _logger.LogInformation(
+            "Database updated successfully for MedicationId {MedicationId} in Medicine Cabinet ID {MedicineCabinetId}.",
+            medication.Id,
+            medicineCabinet?.Id
+        );  
+    }
 }

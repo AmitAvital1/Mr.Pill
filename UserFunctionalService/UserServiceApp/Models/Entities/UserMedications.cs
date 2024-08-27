@@ -13,10 +13,6 @@ public class UserMedications
     public int MedicationRepoId { get; set; }
     public  required MedicationRepo MedicationRepo { get; set; }
     public ICollection<Reminder>? Reminders { get; set; } 
+    public int NumberOfPills { get; set; }
 }
 
-
-// need to add validity and duration
-// boolean that check if the user takes it daily 
-// the number of pills in the pill
-// how many times a day the pill been taken

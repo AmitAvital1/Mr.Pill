@@ -17,42 +17,53 @@ namespace MOHService.service
 
         public async Task<MohPillDetailsDTO> GetPillDetailsAPI(string barcode)
         {
-                string apiUrl = MOH_API_URL;
+            string apiUrl = MOH_API_URL;
+            var content = new StringContent(createJsonBodyToMohWithBarcode(barcode), Encoding.UTF8, "application/json");
+            HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
 
-                var content = new StringContent(createJsonBodyToMohWithBarcode(barcode), Encoding.UTF8, "application/json");
-            
-                HttpResponseMessage response = await _httpClient.PostAsync(apiUrl, content);
-
-                if (response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
+            {
+                string pillDetails = await response.Content.ReadAsStringAsync();
+                
+                if (JArray.Parse(pillDetails).Count() > 0)
                 {
-                    string pillDetails = await response.Content.ReadAsStringAsync();
-                    if(JArray.Parse(pillDetails).Count() > 0)
-                    {
-                        JToken pillJsonDetails = JArray.Parse(pillDetails)[0];
-                        MohPillDetailsDTO dtoToReturn = createPillDetailsDtoFromJson(pillJsonDetails);
-                        return dtoToReturn;
-                    }
-                    else
-                    {
-                        throw new UnsupportedContentTypeException("Bad barode: Medication not exist in Moh");
-                    }
+                    JToken pillJsonDetails = JArray.Parse(pillDetails)[0];
+                    MohPillDetailsDTO dtoToReturn = createPillDetailsDtoFromJson(pillJsonDetails);
+                    return dtoToReturn;
                 }
                 else
                 {
-                    throw new HttpRequestException($"Failed to post data to the API. Status code: {response.StatusCode}");
+                    throw new UnsupportedContentTypeException("Bad barode: Medication not exist in Moh");
                 }
+            }
+            else
+            {
+                throw new HttpRequestException($"Failed to post data to the API. Status code: {response.StatusCode}");
+            }
         }
 
         private MohPillDetailsDTO createPillDetailsDtoFromJson(JToken pillJsonDetails)
         {
+            var packages = pillJsonDetails[MOH_JSON_PACKAGES_KEY]
+                ?.Select(package => package.ToString())
+                .ToList();
+
+            var largestPackage = packages?
+                .Select(p => int.Parse(p.Split(' ')[0]))  
+                .Max();  
+
+            DateTime? registrationDate = pillJsonDetails[MOH_JSON_REG_DATE_KEY]?.ToObject<DateTime>();
+            DateTime? cancellationDate = pillJsonDetails[MOH_JSON_BITUL_DATE_KEY]?.ToObject<DateTime>();
+
             return 
                 new MohPillDetailsDTO.Builder()
-                    .SetBarcode(pillJsonDetails[MOH_JSON_BARCODES_KEY]?.ToString())
-                    .SetDrugHebrewName(pillJsonDetails[MOH_JSON_DRAG_HEB_NAME_KEY]?.ToString())
-                    .SetDrugEnglishName(pillJsonDetails[MOH_JSON_DRAG_ENG_NAME_KEY]?.ToString())
-                    .SetEnglishDescription(pillJsonDetails[MOH_JSON_DRAG_ENG_DESC_KEY]?.ToString())
+                    .SetBarcode(pillJsonDetails[MOH_JSON_BARCODES_KEY]?.ToString() ?? string.Empty)
+                    .SetDrugHebrewName(pillJsonDetails[MOH_JSON_DRAG_HEB_NAME_KEY]?.ToString() ?? string.Empty)
+                    .SetDrugEnglishName(pillJsonDetails[MOH_JSON_DRAG_ENG_NAME_KEY]?.ToString() ?? string.Empty)
+                    .SetEnglishDescription(pillJsonDetails[MOH_JSON_DRAG_ENG_DESC_KEY]?.ToString() ?? string.Empty)
                     .SetHebrewDescription(pillJsonDetails[MOH_JSON_DRAG_HEB_DESC_KEY]?.ToString())
-                    .SetImagePath(MOH_IMAGE_BASE_URL + pillJsonDetails[MOH_JSON_DRAG_IMG_PATH_KEY][0]["url"].ToString())
+                    .SetImagePath(MOH_IMAGE_BASE_URL + pillJsonDetails[MOH_JSON_DRAG_IMG_PATH_KEY][0]["url"].ToString() ?? string.Empty)
+                    .SetPackageSize(largestPackage ?? 0)
                     .Build();
                     
         }
@@ -80,9 +91,9 @@ namespace MOHService.service
                                     ""types"": ""9""
                                     }";
 
-
             JObject jsonObject = JObject.Parse(originalJson);
             jsonObject["val"] = barcode;
+
             return jsonObject.ToString();
         }
     }
