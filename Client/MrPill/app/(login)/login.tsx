@@ -2,7 +2,10 @@ import React, { useEffect } from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text} from 'react-native';
 import axios from 'axios';
 import { router } from 'expo-router';
+
 import DataHandler from '@/DataHandler';
+import RequestHandler from '@/RequestHandler';
+
 import { MrPillLogo } from '@/components/MrPillLogo';
 import ConfirmButton from '@/components/ConfirmButton';
 
@@ -51,6 +54,7 @@ const LogInScreen = () => {
 
   async function handleVerify() {
     let response = await sendVerifyLoginRequest();
+    console.log(response);
     if (response)
       router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
   }
@@ -79,74 +83,34 @@ const LogInScreen = () => {
   validationCode
 
   const sendVerifyLoginRequest = async () => {
-    try {
 
-      axios.defaults.validateStatus = function () {
+      // send phone number to DataHandler
+      DataHandler.setPhone(phoneNumber);
+      DataHandler.setState('validationCode', validationCode);
+
+      if (await RequestHandler.sendRequest("verifyLogin")) {
+        DataHandler.setUser(undefined, undefined, undefined, JSON.parse(RequestHandler.getResponse().request._response).token)
         return true;
-      };
-
-      const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5181/Mr-Pill/ValidateCode",
-        headers: { "Content-Type": "application/json" }, 
-        data: {
-          "PhoneNumber": phoneNumber,
-          "Code": validationCode,
-        }
-      }
-
-      const response = await axios(request);
-
-      if (response.request.status == 200) {
-        DataHandler.setUser(undefined, undefined, undefined, JSON.parse(response.request._response).token)
-        console.log(response);
-        return true;
-      }
-      else {
-        console.log(response.request.status)
-        return false;
       }
       
-    } catch (error) {
-      console.error("Error fetching data:", error);
       return false;
-    }
-
   }
 
   const sendLoginRequest = async () => {
-    try {
 
-      axios.defaults.validateStatus = function () {
-        return true;
-      };
+      // send phone number to DataHandler
+      DataHandler.setPhone(phoneNumber);
 
-      const request = {
-        method: 'post',
-        url: "http://10.0.2.2:5181/Mr-Pill/Login",
-        headers: { "Content-Type": "application/json" }, 
-        data: {
-          "PhoneNumber": phoneNumber,
-        }
-      }
+      if (await RequestHandler.sendRequest("login")) {
 
-      const response = await axios(request);
-
-      if (response.request.status == 200) {
         setIsPhoneValid(true);
         return true;
-      } else if (response.request.status == 404) {
+
+      } else if (RequestHandler.getResponse().request.status == 404) {
+
         setIsNumberInSystem(false);
+
       }
-      else {
-        console.log(response.request.status)
-        return false;
-      }
-      
-    } catch (error) {
-      console.error("Error fetching data:", error);
-      return false;
-    }
 
   }
   

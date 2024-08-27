@@ -9,6 +9,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from "@/DataHandler";
 import { Pressable } from 'react-native';
 import axios from 'axios';
+import RequestHandler from '@/RequestHandler';
 
 type Cabinet = {
   id: number,
@@ -83,39 +84,11 @@ const MyCabinets: React.FC = () => {
       };
 
       const sendGetCabinetsRequest = async () => {
-
-        // bug when adding medication and then trying to get all user medications
-        try {
-          console.log(user.Token)
-          const request = {
-            method: 'get',
-            url: "http://10.0.2.2:5194/user/cabinet",
-            headers: {
-                "Authorization": "Bearer " + user.Token, 
-            },
-            data: {
-            }
-          }
-
-          const response = await axios(request);
-    
-          console.log("full: " + response.request._response);
-          console.log("status: " + response.request.status);
           
-          if (response.request.status == 200) {
-            myCabinets = JSON.parse(response.request._response);
+          if (await RequestHandler.sendRequest('getMyCabinets')) {
+            myCabinets = JSON.parse(RequestHandler.getResponse().request._response);
             renderCabinetList(myCabinets);
-            console.log(myCabinets);
-            return true;
-          } else if (response.request.status == 401) {
-            DataHandler.expireSession();
           }
-    
-        } catch (error) {
-          console.error("Error fetching data:", error);
-          DataHandler.expireSession();
-        }
-
       }
       sendGetCabinetsRequest();
   })

@@ -101,7 +101,7 @@ const RemindersPage: React.FC = () => {
 
 
   return (
-    <ParallaxScrollView headerBackgroundColor={{ light: bgc, dark: bgc }} headerImage={MrPillLogo()} backgroundColor={bgc}>
+    <ParallaxScrollView headerHeight={120} headerBackgroundColor={{ light: bgc, dark: bgc }} headerImage={MrPillLogo(0.5)} backgroundColor={bgc}>
       <View style={styles.lineContainer}>
       
       <View style={{alignItems: 'center'}}>
