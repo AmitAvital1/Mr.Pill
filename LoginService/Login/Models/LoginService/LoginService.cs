@@ -177,8 +177,14 @@ public class LoginService : ILoginService
             throw new InvalidOperationException($"User with phone number '{phoneNumber}' not found.");
         }
 
-        var cabinetRequestDTOs = _dbContext.CabinetRequests
-            .Where(request => request.TargetPhoneNumber == phoneNumber && request.IsHandle == false)
+        var normalizedPhoneNumber = phoneNumber.StartsWith("0") ? phoneNumber.Substring(1) : phoneNumber;
+        
+        var cabinetRequests = _dbContext.CabinetRequests
+                .Where(request => request.TargetPhoneNumber == normalizedPhoneNumber && request.IsHandle == false)
+                .ToList();
+
+        var cabinetRequestDTOs = cabinetRequests
+            .Where(request => request.TargetPhoneNumber == normalizedPhoneNumber && request.IsHandle == false)
             .Select(request => CabinetRequestDTO.Builder()
                 .WithId(request.Id)
                 .WithTargetPhoneNumber(request.TargetPhoneNumber)
@@ -273,9 +279,36 @@ public class LoginService : ILoginService
             MedicineCabinetId = medicineCabinet.Id
         };
 
-        user.MedicineCabinetUsersList?.Add(medicineCabinetUser);
-        medicineCabinet.MedicineCabinetUsers?.Add(medicineCabinetUser);
-        _dbContext.SaveChanges();
+       // user.MedicineCabinetUsersList?.Add(medicineCabinetUser);
+       // medicineCabinet.MedicineCabinetUsers?.Add(medicineCabinetUser);
+       // _dbContext.SaveChanges();
+
+       user.MedicineCabinetUsersList?.Add(medicineCabinetUser);
+
+        if (!_dbContext.Entry(user).IsKeySet)
+        {
+            _dbContext.Users?.Attach(user);
+        }
+
+        if (!_dbContext.Entry(medicineCabinet).IsKeySet)
+        {
+            _dbContext.MedicineCabinets.Attach(medicineCabinet);
+        }
+
+        try
+        {
+            _dbContext.SaveChanges();
+        }
+        catch (DbUpdateConcurrencyException ex)
+        {
+            _logger.LogError(ex, "A concurrency error occurred while saving changes. {Message}", ex.Message);
+            throw new InvalidOperationException("The data was modified or deleted by another process. Please try again.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving changes: {Message}", ex.Message);
+            throw;
+        }
     }
 
     private void updateCabinetRequestByRequestId(User user, int requestId, bool approve)
@@ -298,9 +331,20 @@ public class LoginService : ILoginService
         cabinetRequest.IsApprove = approve;
         cabinetRequest.IsHandle = true;
         cabinetRequest.DateEnd = DateTime.Now;
-        _dbContext.SaveChanges();
 
-        _logger.LogInformation("Cabinet request with ID {RequestId} has been updated. Approved: {Approve}", requestId, approve);
+        _dbContext.Attach(cabinetRequest);
+        _dbContext.Entry(cabinetRequest).State = EntityState.Modified;
+
+        try
+        {
+            _dbContext.SaveChanges();
+            _logger.LogInformation("Cabinet request with ID {RequestId} has been updated. Approved: {Approve}", requestId, approve);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to update cabinet request with ID {RequestId}", requestId);
+            throw;
+        }
     }
 
     private Task sendRequestToRabbitMQ(User user, int targetPhoneNumber, int sourcePhoneNumber, string medicineCabinetName)
@@ -326,6 +370,7 @@ public class LoginService : ILoginService
             .ThenInclude(mcu => mcu.MedicineCabinet) 
             .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
     }
+    
     public string GenerateVerificationCode()
     {
         Random random = new Random();
@@ -359,7 +404,7 @@ public class LoginService : ILoginService
 
         var timeElapsed = DateTime.UtcNow - latestMessage.SentTime;
 
-        if (timeElapsed > TimeSpan.FromMinutes(4))
+        if (timeElapsed > TimeSpan.FromMinutes(6))
         {
             return false;
         }

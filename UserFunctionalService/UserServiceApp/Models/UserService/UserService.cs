@@ -524,8 +524,9 @@ public class UserService : IUserService
         {
             var user = _dbContext?.Users
                     ?.Include(u => u.MedicineCabinetUsersList!)
-                        .ThenInclude(mcu => mcu.MedicineCabinet)
-                            .ThenInclude(mc => mc.Medications)
+                        ?.ThenInclude(mcu => mcu.MedicineCabinet)
+                            ?.ThenInclude(mc => mc.Medications)
+                                ?.ThenInclude(m => m.MedicationRepo)
                     .FirstOrDefault(u => u.PhoneNumber == userPhoneNumber);
 
             if (user == null)
@@ -559,25 +560,31 @@ public class UserService : IUserService
     }
 
     private IEnumerable<MedicationDTO> ConvertMedicationsToDTOs(IEnumerable<UserMedications> medications)
+{
+    return medications.Select(m =>
     {
-        return medications.Select(m =>
+        if (m == null)
         {
-            var medicationDTOBuilder = MedicationDTO.Builder()
-                .WithId(m.Id)
-                .WithEnglishName(m.MedicationRepo.DrugEnglishName)
-                .WithHebrewName(m.MedicationRepo.DrugHebrewName)
-                .WithEnglishDescription(m.MedicationRepo.EnglishDescription)
-                .WithHebrewDescription(m.MedicationRepo.HebrewDescription)
-                .WithValidity(m.Validity)
-                .WithUserId(m.CreatorId)
-                .WithMedicationRepoId(m.MedicationRepoId)
-                .WithMedicineCabinetName(m.MedicineCabinet.MedicineCabinetName)
-                .WithImagePath(m.MedicationRepo.ImagePath)
-                .WithIsPrivate(m.IsPrivate);
+            throw new ArgumentNullException(nameof(m), "UserMedications instance is null.");
+        }
 
-            return medicationDTOBuilder.Build();
-        });
-    }
+        var medicationDTOBuilder = MedicationDTO.Builder()
+            .WithId(m.Id)
+            .WithEnglishName(m.MedicationRepo?.DrugEnglishName ?? string.Empty) 
+            .WithHebrewName(m.MedicationRepo?.DrugHebrewName ?? string.Empty)  
+            .WithEnglishDescription(m.MedicationRepo?.EnglishDescription ?? string.Empty) 
+            .WithHebrewDescription(m.MedicationRepo?.HebrewDescription ?? string.Empty) 
+            .WithValidity(m.Validity)
+            .WithUserId(m.CreatorId)
+            .WithMedicationRepoId(m.MedicationRepoId)
+            .WithMedicineCabinetName(m.MedicineCabinet?.MedicineCabinetName ?? string.Empty) 
+            .WithImagePath(m.MedicationRepo?.ImagePath ?? string.Empty) 
+            .WithIsPrivate(m.IsPrivate);
+
+        return medicationDTOBuilder.Build();
+    });
+}
+
 
     private List<UserMedications> FilterMedications(User user, MedicineCabinet medicineCabinet)
     {
