@@ -18,6 +18,7 @@ import {
   TextInput,
   View,
   Text,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import RequestHandler from "@/RequestHandler";
@@ -48,9 +49,10 @@ const SignUpScreen = () => {
   const [lastName, onChangeLastName] = React.useState("");
   const [phoneNumber, onChangePhoneNumber] = React.useState("");
   const [validationCode, onChangeValidationCode] = React.useState("");
+
   const [isButtonDisabled, setIsButtonDisabled] = React.useState(true);
   const [isSignupClicked, setIsSignupClicked] = React.useState(false);
-  const [isSignupSuccessful, setIsSignupSuccessful] = React.useState(false);
+  const [isVerifyClicked, setIsVerifyClicked] = React.useState(false);
   const [isNumberInSystem, setIsNumberInSystem] = React.useState(false);
 
   function isValidData (phoneNumber: string, firstName: string, lastName: string) {
@@ -80,15 +82,16 @@ const SignUpScreen = () => {
   }
 
   async function handleVerify() {
-    console.log('verifying');
     
-    if (!await sendValidationRequest(phoneNumber, firstName, lastName, validationCode)) {
-      return null;
-    } else {
+    if (await sendValidationRequest(phoneNumber, firstName, lastName, validationCode)) {
 
-      setIsSignupSuccessful(true);
+      console.log(RequestHandler.getResponse());
       DataHandler.setToken(JSON.parse(RequestHandler.getResponse().request._response).token);
       router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
+    
+    } else {
+
+      setIsVerifyClicked(true);
 
     }
   }
@@ -97,12 +100,8 @@ const SignUpScreen = () => {
     
     DataHandler.setUser(firstName, lastName, phoneNumber, undefined);
     DataHandler.setState('validationCode', validationCode);
-    
-    if (await RequestHandler.sendRequest('verifySignup')) {
-      return true;
-    } else {
-      return false;
-    }
+
+    return await RequestHandler.sendRequest('verifySignup');
   }
 
   const sendSignupRequest = async (phnumber: string) => {
@@ -117,7 +116,7 @@ const SignUpScreen = () => {
   function updateButton() {
     setIsButtonDisabled(!isValidData(phoneNumber, firstName, lastName))
     setIsNumberInSystem(false);
-    console.log(isSignupSuccessful)
+    setIsVerifyClicked(false);
   }
 
   useEffect(() => {
@@ -195,6 +194,11 @@ const SignUpScreen = () => {
           marginBottom={15}
           borderColor={"#4c685f"}
         />
+
+        {isVerifyClicked && 
+        <Text style={{textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000"}}>קוד SMS שגוי, אנא נסה שנית.</Text>
+        }
+
       </View>}
 
     </SafeAreaView>

@@ -47,7 +47,7 @@ const MyPills: React.FC = () => {
   useEffect(() => {
 
     const fetchPills = async () => {
-      if (await RequestHandler.sendRequest('getMyPills')) {
+      if (await RequestHandler.sendRequest('getAllPills')) {
         setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
       }
     };

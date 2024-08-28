@@ -7,10 +7,27 @@ let user = {
     Token: "",
 };
 
-let stateMap = new Map<string, number | string>();
-stateMap.set('session', 1);
+let stateMap = new Map<string, string>();
+stateMap.set('session', 'true');
+
+let reminder: any = undefined;
 
 export default {
+
+  reset() {
+    user = {
+      FirstName: "",
+      LastName: "",
+      PhoneNumber: "",
+      Token: "",
+    };
+
+    stateMap = new Map<string, string>();
+    stateMap.set('session', 'true');
+
+    reminder = undefined;
+  },
+
   setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
     user.FirstName    = firstName   ? firstName   : user.FirstName    ;
     user.LastName     = lastName    ? lastName    : user.LastName     ;
@@ -33,13 +50,18 @@ export default {
   getState(key: string) {
     return stateMap.get(key);
   },
-  setState(key: string, value: number | string) {
+  setState(key: string, value: string) {
     return stateMap.set(key, value);
   },
   expireSession() {
-    this.setState('session', 0);
+    this.setState('session', 'false');
     router.dismissAll();
-    router.navigate('/(login)/welcome');
+    router.push('/(login)/welcome');
+  },
+  getReminder() {
+    return reminder;
+  },
+  setReminder(inputReminder: any) {
+    reminder = inputReminder;
   }
-
 };

@@ -61,7 +61,7 @@ function createRequest(requestType: string) {
                 }
             }; return;
         
-        case "getMyPills":
+        case "getAllPills":
             request = {
                 method: 'get',
                 url: "http://10.0.2.2:5194/user/all/medications",
@@ -73,6 +73,19 @@ function createRequest(requestType: string) {
                   
                 }
             }; return;
+
+        case "getPills":
+            request = {
+                method: 'get',
+                url: "http://10.0.2.2:5194/user/medications?medicineCabinetName=" + DataHandler.getState("medicineCabinetName"),
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + user.Token,
+                }, 
+                data: {
+                    
+                }
+        }; return;
 
         case "addPill":
             console.log( DataHandler.getState("medicineCabinetName"));
@@ -113,8 +126,28 @@ function createRequest(requestType: string) {
 
         case "getMyReminders":
 
+            request = {
+                method: 'get',
+                url: "http://10.0.2.2:5194/Reminders",
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {}
+            }; return;
+
         case "addReminder":
             
+            request = {
+                method: 'post',
+                url: "http://10.0.2.2:5194/SetReminder",
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {
+                    reminderDto: DataHandler.getReminder(),
+                }
+            }; return;
+
         default:
 
     }
@@ -138,7 +171,9 @@ export default {
             if (response.request.status == 200) {
                 return true;
             } else if (response.request.status == 401) {
-                DataHandler.expireSession();
+                if (requestType != "verifySignup" && requestType != "verifyLogin") {
+                    DataHandler.expireSession();
+                }
                 return false;
             } else {
                 console.log(response.request.status)

@@ -38,10 +38,10 @@ const MyCabinets: React.FC = () => {
       if(isRequestSent) return;
       setIsRequestSent(true);
 
-      function renderCabinet(cabinet: Cabinet, isOwnedByMe?: boolean) {
+      function renderCabinet(cabinet: Cabinet, id: number, isOwnedByMe?: boolean) {
         
         return (
-          <Pressable onPress={()=>{console.log('y')}}>
+          <Pressable key={id} onPress={()=>{console.log('y')}}>
   
             <View style={styles.reminderBox}>
               <View style={{alignItems: 'center', flexDirection: 'row'}}>
@@ -74,7 +74,7 @@ const MyCabinets: React.FC = () => {
         let renderedCabinets = [];
   
         for (let i = 0; i < cabinetList.length; i++) { // for debugging i == 1 is the condition
-            renderedCabinets.push(renderCabinet(cabinetList[i], i == 1));
+            renderedCabinets.push(renderCabinet(cabinetList[i], i, i == 1));
         }
 
         setRenderedCabinets(renderedCabinets);
@@ -102,7 +102,7 @@ const MyCabinets: React.FC = () => {
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                     {renderedCabinets.length > 0 && renderedCabinets}
-                    {renderedCabinets.length == 0 && <ThemedText style={{color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
+                    {renderedCabinets.length == 0 && <ThemedText style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
                 </ParallaxScrollView>
             </View>
         </View>

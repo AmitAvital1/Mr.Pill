@@ -1,222 +1,185 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, Pressable, Modal } from "react-native";
-import * as FileSystem from 'expo-file-system';
-import { MrPillLogo } from "@/components/MrPillLogo";
-import Ionicons from '@expo/vector-icons/Ionicons';
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 
-const bgc = "#5deca2";
+import React, { useEffect, useState } from 'react';
+import { router } from 'expo-router';
+import { ThemedText } from '@/components/ThemedText';
+import { View, StyleSheet } from 'react-native';
+import { AppHomeButton } from "@/components/AppHomeButton";
+import { MrPillLogo } from '@/components/MrPillLogo';
+import { strFC } from "@/components/strFC";
+import ParallaxScrollView from "@/components/ParallaxScrollView";
+import DataHandler from "@/DataHandler";
+import { Pressable } from 'react-native';
+
+import RequestHandler from '@/RequestHandler';
+
+function getFamilyEmoji(type?: number) {
+    const familyEmojis = ["👪","👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👩‍👩‍👧‍👧","👩‍👩‍👦‍👦","👩‍👩‍👧‍👦","👩‍👩‍👧","👩‍👩‍👦","👨‍👨‍👧‍👧","👨‍👨‍👦‍👦","👨‍👨‍👧‍👦","👨‍👧‍👦","👨‍👧","👨‍👦","👩‍👧‍👧","👩‍👦‍👦","👩‍👧‍👦","👩‍👧","👩‍👦","👨‍👦‍👦","👨‍👧‍👧"];
+    return familyEmojis[type? type % 26 : Math.floor(Math.random() * 26)];
+}
 
 type Reminder = {
-  Id: number,
-  PillId: number,
-  Hour: number,
-  Minute: number,
-  OwnerId: number,
-};
+  reminderTime: any;
+  message: string | null ;
+  isRecurring: boolean;
+  recurrenceInterval: string;
+  userMedicationId: number;
+}
 
-const handleImagePress = (pillId: number) => {
-  console.log(pillId);
-};
+const backgroundColorLight = "#71bfe9"
+const backgroundColorMain = "#e6c8c8"
+const borderColor = "#005a27"
 
-const renderReminder = (reminder: Reminder) => {
+const MyReminders: React.FC = () => {
 
-  return ( 
-    <View key={reminder.Id} style={styles.lineContainer}>
+    let myReminders: [Reminder];
+
+    const [renderedReminders, setRenderedReminders] = React.useState<any>([]);
+    const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
+  
+    useEffect(() => {
       
-      <Pressable onPress={() => handleImagePress(reminder.Id)}>
-        <View style={styles.imageContainer}>
-        <Image source={{uri: FileSystem.documentDirectory + reminder.PillId.toString() + '.jpg'}} style={styles.image} />
+      if(isRequestSent) return;
+      setIsRequestSent(true);
+
+      function renderReminder(reminder: Reminder, id: number) {
+        
+        return (
+          <Pressable key={id} onPress={()=>{console.log('y')}}>
+  
+            <View style={styles.reminderBox}>
+              <View style={{alignItems: 'center', flexDirection: 'row'}}>
+          
+                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                  <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
+                </View>
+    
+                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                  <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
+                </View>
+                  
+                <View style={{flexGrow: 1}}>
+                  {
+                    <ThemedText style={[styles.plusMinusText, {alignSelf: 'flex-end', paddingTop: 5}]}>👑</ThemedText>
+                  }
+                  <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>
+                  
+                </View>
+        
+              </View>
+            </View>
+  
+          </Pressable>
+        )
+      }
+      const renderReminderList = (reminderList: [Reminder]) => {
+        
+        if (!reminderList) return [];
+        let result = [];
+  
+        for (let i = 0; i < reminderList.length; i++) { 
+            result.push(renderReminder(reminderList[i], i));
+        }
+
+        setRenderedReminders(result);
+      };
+
+      const sendGetCabinetsRequest = async () => {
+          
+          if (await RequestHandler.sendRequest('getMyReminders')) {
+            myReminders = JSON.parse(RequestHandler.getResponse().request._response);
+            renderReminderList(myReminders);
+          }
+      }
+      sendGetCabinetsRequest();
+  })
+
+
+  // MAIN PAGE LAYOUT
+  return (    
+    <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
+        <View style={{flex: 1}}>
+        {MrPillLogo(0.5)}
+            <View style={styles.pagetop}> 
+                <ThemedText style={{textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
+                    התזכורות שלי:{"\n"}
+                </ThemedText>
+                <ParallaxScrollView backgroundColor={backgroundColorLight}>
+                    {renderedReminders.length > 0 && renderedReminders}
+                </ParallaxScrollView>
+            </View>
         </View>
-      </Pressable>
-      <View>
-      <Text style={styles.itemText}>תרופה מספר {reminder.PillId}</Text>
-      <Text style={styles.bigItemText}>{reminder.Hour}:{reminder.Minute}{reminder.Minute == 0 ? 0 : ""}</Text>
-      </View>
+
+        <View style={styles.pagebottom}>
+            <View style={styles.row}>
+                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תזכורת חדשה")} ButtonAction={()=>{router.navigate('/(reminders)/chooselist')}}/>
+            </View>
+        </View>
 
     </View>
   );
 };
 
-
-const RemindersPage: React.FC = () => {
-  
-  const [myReminders, setMyReminders] = useState<Reminder[]>([]);
-  const [ownerId, setOwnerId] = useState<number>(0);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
-
-  useEffect(() => {
-    const fetchReminders = async () => {
-      try {
-        //const response = await axios.get<Pill[]>('YOUR_SERVER_ENDPOINT');
-        //setMyPills(response.data);
-      } catch (error) {
-        console.error("Error fetching cart items:", error);
-      }
-    };
-
-    fetchReminders();
-
-    // mock pill inventory data
-    const mockReminders = [
-      { Id: 1, PillId: 3, Hour: 7, Minute: 30, OwnerId: 5},
-      { Id: 2, PillId: 4, Hour: 7, Minute: 30, OwnerId: 5},
-      { Id: 3, PillId: 5, Hour: 8, Minute: 30, OwnerId: 5},
-      { Id: 4, PillId: 1, Hour: 8, Minute: 30, OwnerId: 6},
-      { Id: 5, PillId: 2, Hour: 12, Minute: 30, OwnerId: 6},
-      { Id: 6, PillId: 6, Hour: 12, Minute: 30, OwnerId: 6},
-      { Id: 7, PillId: 7, Hour: 16, Minute: 30, OwnerId: 6},
-      { Id: 8, PillId: 8, Hour: 16, Minute: 0, OwnerId: 7},
-      { Id: 9, PillId: 9, Hour: 20, Minute: 30, OwnerId: 7},
-      { Id: 10, PillId: 10, Hour: 20, Minute: 30, OwnerId: 7},
-      { Id: 11, PillId: 11, Hour: 21, Minute: 30, OwnerId: 0},
-      { Id: 12, PillId: 12, Hour: 21, Minute: 30, OwnerId: 0},
-      { Id: 13, PillId: 13, Hour: 22, Minute: 0, OwnerId: 0},
-      { Id: 14, PillId: 14, Hour: 22, Minute: 30, OwnerId: 0},
-    ];
-    setMyReminders(mockReminders);
-
-  }, []);
-
-  const dropdownItems = [
-      '5',
-      '6',
-      '7',
-  ];
-
-  const toggleDropdown = () => {
-      setDropdownVisible(!dropdownVisible);
-  };
-
-  const renderReminderItems = (ownerId: number) => {
-
-    let reminderItems = [];
-    for (let i = 0; i < myReminders.length; i++) {
-      if (ownerId == 1 || myReminders[i].OwnerId == ownerId)
-        reminderItems.push(renderReminder(myReminders[i]));
-    }
-
-    return reminderItems;
-  };
-
-
-  return (
-    <ParallaxScrollView headerHeight={120} headerBackgroundColor={{ light: bgc, dark: bgc }} headerImage={MrPillLogo(0.5)} backgroundColor={bgc}>
-      <View style={styles.lineContainer}>
-      
-      <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>בחר מקור</Text>
-          <Pressable onPress={() => {}}>
-            <Ionicons name={'list-circle-outline'} size={ownerId >= 2 ? 90 : 80} color={ownerId >= 2 ? '#000000' : '#777777'}/>
-          </Pressable>
-        </View>
-
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>הצג הכל</Text>
-          <Pressable onPress={()=>{setOwnerId(1); setDropdownVisible(false)}}>
-            <Ionicons name={'people-circle-outline'} size={ownerId == 1 ? 90 : 80} color={ownerId == 1 ? '#000000' : '#777777'}/>
-          </Pressable>
-        </View>
-
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>אישי</Text>
-          <Pressable onPress={()=>{setOwnerId(0); setDropdownVisible(false)}}>
-            <Ionicons name={'person-circle-outline'} size={ownerId == 0 ? 90 : 80} color={ownerId == 0 ? '#000000' : '#777777'}/>
-          </Pressable>
-        </View>
-
-      </View>
-      
-      
-      <>
-      {dropdownVisible && (
-          <View style={styles.dropdown}>
-              {dropdownItems.map((item, index) => (
-                  <Pressable key={index} style={styles.dropdownItem} onPress={()=>{setOwnerId(Number(item)); setDropdownVisible(false)}}>
-                      <Text>{item}</Text>
-                  </Pressable>
-              ))}
-          </View>
-      )}
-      </>
-
-      {renderReminderItems(ownerId)}
-  </ParallaxScrollView>
-  );
-};
-
-
 const styles = StyleSheet.create({
-  container: {
+  pagetop: {
     flex: 1,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    backgroundColor: backgroundColorLight,
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: borderColor,
+    minHeight: 100,
+    marginHorizontal: 15,
+    padding: 5,
+  },
+  pagebottom: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    marginHorizontal: 15,
+    marginVertical: 20,
+    padding: 5,
+    maxHeight: 180
+  },
+  row: {
+    flex: 1,
+    minHeight: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
     flexDirection: 'row',
-    padding: 16,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f2fdbb",
-    borderRadius: 15,
   },
   text: {
-    fontSize: 16,
-    marginHorizontal: 20,
-    fontWeight: 'bold',
-  },
-  itemContainer: {
-    padding: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: "#cccccc",
-  },
-  itemText: {
     fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'right',
-    marginHorizontal: 30,
+    color: '#000',
   },
-  bigItemText: {
-    fontSize: 50,
-    fontWeight: 'bold',
-    textAlign: 'right',
-    marginHorizontal: 30,
-  },
-  image: {
-    alignSelf: "center",
-    height: 100,
-    width: 100,
-  }, 
-  lineContainer: {
+  reminderBox: {
+    backgroundColor: 'pink',
+    borderWidth: 2,
+    borderColor: borderColor,
+    borderRadius: 12,
     flex: 1,
-    flexDirection: 'row',
-    padding: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#f2fdbb",
-    borderRadius: 15,
+    justifyContent: 'center',
+    alignContent: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    minWidth: 300,
   },
-  imageContainer: {
-    margin: 8,
-    height: 90,
-    width: 90,
-    borderRadius: 20,
-    borderWidth: 3,
-    overflow: 'hidden',
+  plusMinusButton: {
+    minWidth: 50,
+    minHeight: 50,
+    borderRadius: 25,
+    borderWidth: 2,
+    borderColor: backgroundColorLight,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
-  dropdown: {
-      position: 'absolute',
-      top: 50, 
-      width: 100,
-      backgroundColor: '#ffffff',
-      borderWidth: 1,
-      borderColor: '#cccccc',
-      borderRadius: 5,
-      elevation: 3, 
-      zIndex: 2, 
-  },
-  dropdownItem: {
-      padding: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: '#cccccc',
-      zIndex: 3,
-  },
+  plusMinusText: {
+    fontSize: 30,
+    fontWeight: 'bold',
+    position: 'absolute',
+  }
 });
 
-export default RemindersPage;
+export default MyReminders;

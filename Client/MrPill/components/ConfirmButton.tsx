@@ -27,6 +27,7 @@ export const ConfirmButton: React.FC<ConfirmButtonProps> = ({ title, onPress, is
         alignSelf: 'center',
         alignItems: 'center',
         width: 250,
+        elevation: 5,
     };
 
     return (

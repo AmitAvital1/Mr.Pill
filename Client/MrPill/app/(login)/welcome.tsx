@@ -19,9 +19,9 @@ async function handleLoginPress() {
   const success = await sendAutomaticLoginRequest();
 
   if (success) {
-    DataHandler.setState('login', 1);
+    DataHandler.setState('login', 'true');
   } else {
-    DataHandler.setState('login', 0);
+    DataHandler.setState('login', 'false');
   }
 
   router.dismissAll();
@@ -31,7 +31,7 @@ async function handleLoginPress() {
 
 async function sendAutomaticLoginRequest() {
 
-  if (DataHandler.getState('session') == 1) {
+  if (DataHandler.getState('session') == 'true') {
     router.navigate('/(home)/home');
   }
 
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     margin: 10,
     borderColor: "black",
+    elevation: 5,
   },
   buttontext: {
     fontSize: 42,

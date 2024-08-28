@@ -138,8 +138,7 @@ const AddPillScreen = () => {
 
       {!cameraVisible && (
         <TouchableOpacity style={styles.scanButton} onPress={toggleCamera}>
-          <MaterialIcons name="scanner" size={24} color="white" />
-          <Text style={styles.scanButtonText}>סרוק ברקוד התרופה</Text>
+          <Text style={styles.scanButtonText}>סרוק ברקוד התרופה 📷</Text>
         </TouchableOpacity>
       )}
 
@@ -158,7 +157,11 @@ const AddPillScreen = () => {
           <ThemedText style={{ textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>
             אנא בחר ארון להוספת התרופה:{"\n"}
           </ThemedText>
-
+          {cabinets.length < 1 &&
+          <ThemedText style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000" }}>
+          לא נמצאו ארונות למשתמש. אנא הוסף תחילה ארון אחד לפחות.{"\n"}
+          </ThemedText>
+          }
           <ParallaxScrollView backgroundColor={backgroundColorLight}>
             {cabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
           </ParallaxScrollView>
@@ -181,7 +184,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: backgroundColorLight,
     borderRadius: 20,
-    borderWidth: 2,
+    borderWidth: 0,
     borderColor: borderColor,
     minHeight: 100,
     marginHorizontal: 15,
@@ -229,7 +232,7 @@ const styles = StyleSheet.create({
   scanButton: {
     backgroundColor: '#ff7f7f',
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 30,
     borderWidth: 2,
     borderColor: '#ff5c5c',
     flexDirection: 'row',

@@ -26,7 +26,7 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
   };
 
   return (
-    <Pressable onPress={handleOnPress}>
+    <Pressable key={Type} onPress={handleOnPress}>
       <View style={[style.button, {backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
           {Type && <Text style={{fontSize: 72, position: 'absolute', paddingTop: padding[Type]}}>{emojis[Type]}</Text>}
           <ButtonContent />
@@ -43,5 +43,6 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
+    elevation: 10
   },
 });

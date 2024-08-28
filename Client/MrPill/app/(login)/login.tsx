@@ -33,10 +33,10 @@ const LogInScreen = () => {
   const user = DataHandler.getUser()
   const loginType = DataHandler.getState('login');
 
-  const [phoneNumber, onChangePhoneNumber] = React.useState<string>(loginType == 1 ? user.PhoneNumber : "");
+  const [phoneNumber, onChangePhoneNumber] = React.useState<string>(loginType == 'true' ? user.PhoneNumber : "");
   const [validationCode, setValidationCode] = React.useState<string>("");
  
-  const [isPhoneValid, setIsPhoneValid] = React.useState<boolean>(loginType == 1);
+  const [isPhoneValid, setIsPhoneValid] = React.useState<boolean>(loginType == 'true');
   const [isNumberInSystem, setIsNumberInSystem] = React.useState<boolean>(true);
 
   const [isInitialButtonDisabled, setIsInitialButtonDisabled] = React.useState(true);
@@ -55,8 +55,10 @@ const LogInScreen = () => {
   async function handleVerify() {
     let response = await sendVerifyLoginRequest();
     console.log(response);
-    if (response)
+    if (response) {
+      DataHandler.setState('session', 'true');
       router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
+    }
   }
 
   async function handleLogin() {
@@ -128,7 +130,7 @@ const LogInScreen = () => {
         style={styles.input}
         onChangeText={(input: any) => {onChangePhoneNumber(input); setIsNumberInSystem(true); updateButton();}}
         value={phoneNumber}
-        placeholder={loginType != 1 ? "מספר טלפון" : user.PhoneNumber}
+        placeholder={loginType != 'true' ? "מספר טלפון" : user.PhoneNumber}
         keyboardType="numeric"
         textAlign="right"
         onEndEditing={()=>{}}
@@ -187,6 +189,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 12,
     fontSize: 25,
+    elevation: 5,
   },
   pagetop: {
     height: 180,
