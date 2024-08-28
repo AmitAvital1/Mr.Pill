@@ -52,9 +52,6 @@ namespace MOHService.service
                 .Select(p => int.Parse(p.Split(' ')[0]))  
                 .Max();  
 
-            DateTime? registrationDate = pillJsonDetails[MOH_JSON_REG_DATE_KEY]?.ToObject<DateTime>();
-            DateTime? cancellationDate = pillJsonDetails[MOH_JSON_BITUL_DATE_KEY]?.ToObject<DateTime>();
-
             return 
                 new MohPillDetailsDTO.Builder()
                     .SetBarcode(pillJsonDetails[MOH_JSON_BARCODES_KEY]?.ToString() ?? string.Empty)
