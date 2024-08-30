@@ -450,7 +450,8 @@ public class UserService : IUserService
             EnglishDescription = medicationDTO.EnglishDescription,
             HebrewDescription = medicationDTO.HebrewDescription,
             ImagePath = medicationDTO.ImagePath,
-            largestPackage = medicationDTO.NumberOfPills
+            largestPackage = medicationDTO.NumberOfPills,
+            BrochurePath = medicationDTO.BrochurePath
         };
 
         _dbContext.MedicationRepos.Add(medicationRepo);

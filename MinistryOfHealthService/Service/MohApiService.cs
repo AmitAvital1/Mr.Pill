@@ -64,7 +64,8 @@ namespace MOHService.service
             try
             {
                  var dto = new MohPillDetailsDTO.Builder()
-                 .SetPackageSize(0);
+                 .SetPackageSize(0)
+                 .SetBrochure(null);
 
                 _logger.LogInformation("Starting to create MohPillDetailsDTO from JSON.");
                 if(extraPillJsonDetails != null)
@@ -87,6 +88,26 @@ namespace MOHService.service
                         int size = int.Parse(package[MOH_JSON_CAPLETSIZE_KEY].ToString().Split(' ')[0]);
                         dto.SetPackageSize(size);
                         _logger.LogInformation($"Found {size} packages.");
+                    }
+
+                    JToken brochure = null;
+                    foreach (JToken b in extraPillJsonDetails[MOH_JSON_BROCHURE_KEY])
+                    {
+                        if (b["display"] != null && b["display"].ToString() == MOH_JSON_ALONZARHAN_KEY)
+                        {
+                            brochure = b;
+                            break;
+                        }
+                    }
+                    if (brochure == null)
+                    {
+                         _logger.LogWarning("No brochure found in the JSON extra data.");
+                    }
+                    else
+                    {
+                        string brochureUrl = MOH_BROCHURE_BASE_URL + brochure["url"].ToString();
+                        dto.SetBrochure(brochureUrl);
+                        _logger.LogInformation($"Found {brochureUrl}.");
                     }
 
                 }

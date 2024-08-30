@@ -9,6 +9,7 @@ public class MohPillDetailsDTO
     public string? HebrewDescription { get; }
     public string? ImagePath { get; }
     public int NumberOfPills { get; }
+    public string? BrochurePath { get; }
 
     private MohPillDetailsDTO(Builder builder)
     {
@@ -19,6 +20,7 @@ public class MohPillDetailsDTO
         HebrewDescription = builder.HebrewDescription;
         ImagePath = builder.ImagePath;
         NumberOfPills = builder.PackageSize;
+        BrochurePath = builder.BrochurePath;
     }
     public class Builder
     {
@@ -29,6 +31,7 @@ public class MohPillDetailsDTO
         public string? HebrewDescription { get; set; }
         public string? ImagePath { get; set; }
          public int PackageSize { get; set;}
+         public string? BrochurePath { get; set;}
 
         public Builder SetBarcode(string barcode)
         {
@@ -67,6 +70,11 @@ public class MohPillDetailsDTO
         public Builder SetImagePath(string? imagePath)
         {
             ImagePath = imagePath;
+            return this;
+        }
+        public Builder SetBrochure(string brochure)
+        {
+            BrochurePath = brochure;
             return this;
         }
 

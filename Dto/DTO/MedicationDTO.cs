@@ -22,6 +22,7 @@ public class MedicationDTO
     public bool IsPrivate { get; set; }
     public int NumberOfPills { get; set; }
     public string? MedicineCabinetName { get; set; }
+    public string? BrochurePath { get; set; }
 
     public class MedicationDTOBuilder
     {
@@ -101,6 +102,11 @@ public class MedicationDTO
         public MedicationDTOBuilder WithMedicationRepoId(int medicationRepoId)
         {
             _medicationDTO.MedicationRepoId = medicationRepoId;
+            return this;
+        }
+        public MedicationDTOBuilder SetBrochurePath(string brochurePath)
+        {
+            _medicationDTO.BrochurePath = brochurePath;
             return this;
         }
 

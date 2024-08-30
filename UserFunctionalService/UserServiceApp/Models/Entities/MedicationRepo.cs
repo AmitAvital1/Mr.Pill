@@ -10,4 +10,5 @@ public class MedicationRepo
     public string? ImagePath { get; set; }
     public ICollection<UserMedications>? Medications { get; set; } 
     public int largestPackage { get; set; }
+    public string? BrochurePath { get; set; }
 }
