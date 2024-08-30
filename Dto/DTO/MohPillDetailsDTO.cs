@@ -8,7 +8,7 @@ public class MohPillDetailsDTO
     public string? EnglishDescription { get; }
     public string? HebrewDescription { get; }
     public string? ImagePath { get; }
-     public int PackageSize { get; }
+    public int NumberOfPills { get; }
 
     private MohPillDetailsDTO(Builder builder)
     {
@@ -18,7 +18,7 @@ public class MohPillDetailsDTO
         EnglishDescription = builder.EnglishDescription;
         HebrewDescription = builder.HebrewDescription;
         ImagePath = builder.ImagePath;
-        PackageSize = builder.PackageSize;
+        NumberOfPills = builder.PackageSize;
     }
     public class Builder
     {

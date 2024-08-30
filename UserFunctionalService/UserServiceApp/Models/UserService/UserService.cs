@@ -449,7 +449,8 @@ public class UserService : IUserService
             DrugHebrewName = medicationDTO.HebrewName ?? "DefaultHebrewName",
             EnglishDescription = medicationDTO.EnglishDescription,
             HebrewDescription = medicationDTO.HebrewDescription,
-            ImagePath = medicationDTO.ImagePath
+            ImagePath = medicationDTO.ImagePath,
+            largestPackage = medicationDTO.NumberOfPills
         };
 
         _dbContext.MedicationRepos.Add(medicationRepo);
