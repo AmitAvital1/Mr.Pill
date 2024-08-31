@@ -20,7 +20,7 @@ builder.Services.AddCors(options => {
 
     options.AddPolicy("AllowOrigin", builder => {
 
-        builder.WithOrigins("http://10.0.2.16:8081")
+        builder.WithOrigins("http://10.0.2.16:8081", "http://10.100.102.7:8081")
         .AllowAnyHeader()
         .AllowAnyMethod()
         .WithExposedHeaders("X-Total-Count")

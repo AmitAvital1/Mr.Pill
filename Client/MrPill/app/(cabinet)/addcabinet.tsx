@@ -48,7 +48,7 @@ const AddCabinetScreen = () => {
         placeholder="שם של ארון חדש"
         keyboardType="default"
         textAlign='right'
-        onEndEditing={updateButton}
+        onChange={updateButton}
       />
 
       <Button 
