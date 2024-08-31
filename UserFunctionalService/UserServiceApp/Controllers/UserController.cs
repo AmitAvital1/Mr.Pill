@@ -115,6 +115,7 @@ public class UserController : Controller
             {
                 return StatusCode(405, "Invalid medicine cabinet name");
             }
+            
             string medicationBarcode = addMedicationDto.MedicationBarcode;
             bool privacy = addMedicationDto.Privacy;
             string? token = GetAuthorizationTokenOrThrow();

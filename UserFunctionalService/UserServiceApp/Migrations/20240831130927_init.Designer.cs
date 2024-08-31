@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserServiceApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240830141559_AddBrochureUrl")]
-    partial class AddBrochureUrl
+    [Migration("20240831130927_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,6 +95,9 @@ namespace UserServiceApp.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("ShelfLife")
+                        .HasColumnType("int");
+
                     b.Property<int>("largestPackage")
                         .HasColumnType("int");
 
@@ -134,7 +137,10 @@ namespace UserServiceApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("UserId", "MedicineCabinetId");
 
@@ -261,7 +267,7 @@ namespace UserServiceApp.Migrations
                     b.Property<int?>("PillSize")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Validity")
+                    b.Property<DateTime?>("Validity")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
