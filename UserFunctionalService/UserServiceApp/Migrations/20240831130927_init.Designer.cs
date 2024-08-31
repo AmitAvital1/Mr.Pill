@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace UserServiceApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240822171930_add-cabinet-name-to-request-table")]
-    partial class addcabinetnametorequesttable
+    [Migration("20240831130927_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -75,6 +75,9 @@ namespace UserServiceApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BrochurePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DrugEnglishName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -91,6 +94,12 @@ namespace UserServiceApp.Migrations
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ShelfLife")
+                        .HasColumnType("int");
+
+                    b.Property<int>("largestPackage")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -128,7 +137,10 @@ namespace UserServiceApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("UserId", "MedicineCabinetId");
 
@@ -249,10 +261,13 @@ namespace UserServiceApp.Migrations
                     b.Property<int>("MedicineCabinetId")
                         .HasColumnType("int");
 
+                    b.Property<int>("NumberOfPills")
+                        .HasColumnType("int");
+
                     b.Property<int?>("PillSize")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Validity")
+                    b.Property<DateTime?>("Validity")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

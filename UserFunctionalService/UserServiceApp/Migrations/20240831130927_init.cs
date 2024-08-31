@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace UserServiceApp.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -19,6 +19,7 @@ namespace UserServiceApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TargetPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SenderPhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CabinetName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsHandle = table.Column<bool>(type: "bit", nullable: false),
                     IsApprove = table.Column<bool>(type: "bit", nullable: false),
                     IsSenderSeen = table.Column<bool>(type: "bit", nullable: false),
@@ -41,7 +42,10 @@ namespace UserServiceApp.Migrations
                     DrugHebrewName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EnglishDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HebrewDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    largestPackage = table.Column<int>(type: "int", nullable: false),
+                    BrochurePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShelfLife = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -105,6 +109,7 @@ namespace UserServiceApp.Migrations
                     UserId = table.Column<int>(type: "int", nullable: false),
                     MedicineCabinetId = table.Column<int>(type: "int", nullable: false),
                     Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1")
                 },
                 constraints: table =>
                 {
@@ -129,11 +134,12 @@ namespace UserServiceApp.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Barcode = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PillSize = table.Column<int>(type: "int", nullable: true),
-                    Validity = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Validity = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatorId = table.Column<int>(type: "int", nullable: false),
                     MedicineCabinetId = table.Column<int>(type: "int", nullable: false),
                     IsPrivate = table.Column<bool>(type: "bit", nullable: false),
-                    MedicationRepoId = table.Column<int>(type: "int", nullable: false)
+                    MedicationRepoId = table.Column<int>(type: "int", nullable: false),
+                    NumberOfPills = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

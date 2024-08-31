@@ -65,7 +65,7 @@ if (!app.Environment.IsDevelopment())
 else
 {
     RabbitMqConstants.Uri = "amqp://guest:guest@localhost:5672";
-    UserService.mohServiceUrl = "http://localhost:5200/moh-service/pill-details";
+    UserService.mohServiceUrl = "http://localhost:5032/moh-service/pill-details";
 }
 
 app.UseHttpsRedirection();

@@ -72,6 +72,9 @@ namespace UserServiceApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("BrochurePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DrugEnglishName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -88,6 +91,9 @@ namespace UserServiceApp.Migrations
 
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ShelfLife")
+                        .HasColumnType("int");
 
                     b.Property<int>("largestPackage")
                         .HasColumnType("int");
@@ -128,7 +134,10 @@ namespace UserServiceApp.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.HasKey("UserId", "MedicineCabinetId");
 
@@ -255,7 +264,7 @@ namespace UserServiceApp.Migrations
                     b.Property<int?>("PillSize")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("Validity")
+                    b.Property<DateTime?>("Validity")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");

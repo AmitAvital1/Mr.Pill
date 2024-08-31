@@ -21,6 +21,10 @@ public class AppDbContext : DbContext
             .HasKey(MedicineCabinetUsersTable => new { MedicineCabinetUsersTable.UserId, MedicineCabinetUsersTable.MedicineCabinetId });
 
         modelBuilder.Entity<MedicineCabinetUsers>()
+            .Property(mcu => mcu.Id)
+            .ValueGeneratedOnAdd();
+
+        modelBuilder.Entity<MedicineCabinetUsers>()
             .HasOne(MedicineCabinetUsersTable => MedicineCabinetUsersTable.User)
             .WithMany(user => user.MedicineCabinetUsersList)
             .HasForeignKey(MedicineCabinetUsersTable => MedicineCabinetUsersTable.UserId)

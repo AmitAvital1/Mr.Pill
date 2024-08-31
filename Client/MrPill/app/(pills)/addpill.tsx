@@ -23,7 +23,6 @@ const backgroundColorMain = "#ffdf7e";
 const borderColor = "#882c2c";
 
 const AddPillScreen = () => {
-
   const [number, onChangeNumber] = useState('');
   const [cabinets, setCabinets] = useState<Cabinet[]>([]);
   const [cabSelection, setCabSelection] = useState<number>(-1);
@@ -33,14 +32,15 @@ const AddPillScreen = () => {
   const [cameraVisible, setCameraVisible] = useState<boolean>(false);
 
   useEffect(() => {
-    (async () => {
-      const { status } = await BarCodeScanner.requestPermissionsAsync();
+    const checkCameraPermissions = async () => {
+      const { status } = await BarCodeScanner.getPermissionsAsync();
       setHasPermission(status === 'granted');
-    })();
+    };
+
+    checkCameraPermissions();
   }, []);
 
   useEffect(() => {
-
     if (isRequestSent) return;
 
     setIsRequestSent(true);
@@ -54,17 +54,14 @@ const AddPillScreen = () => {
     sendGetCabinetsRequest();
   }, [isRequestSent]);
 
-
   const sendPostMedicineToCabinetRequest = async () => {
-    
     DataHandler.setState('medicineCabinetName', cabinets[cabSelection].medicineCabinetName);
     DataHandler.setState('medicationBarcode', number);
-    
+
     if (await RequestHandler.sendRequest('addPill')) {
       return true;
     }
     return false;
-  
   };
 
   async function handleButtonPress() {
@@ -84,8 +81,18 @@ const AddPillScreen = () => {
     Alert.alert("סריקת הברקוד הושלמה בהצלחה!\nאנא בחר ארון והמשך להוספת התרופה", `ברקוד: ${data}`, [{ text: "המשך" }]);
   };
 
-  const toggleCamera = () => {
-    setCameraVisible(!cameraVisible);
+  const toggleCamera = async () => {
+    if (hasPermission === null || hasPermission === false) {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      if (status === 'granted') {
+        setHasPermission(true);
+        setCameraVisible(true);
+      } else {
+        Alert.alert("אין גישה למצלמה", "כדי לסרוק ברקוד, יש לאשר גישה למצלמה.", [{ text: "הבנתי" }]);
+      }
+    } else {
+      setCameraVisible(true);
+    }
     setScanned(false); // Reset scanned status when opening camera
   };
 
@@ -110,13 +117,6 @@ const AddPillScreen = () => {
       </Pressable>
     );
   };
-
-  if (hasPermission === null) {
-    return <Text>Requesting camera permission...</Text>;
-  }
-  if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
-  }
 
   return (
     <SafeAreaView style={{ backgroundColor: backgroundColorMain, flex: 1 }}>
@@ -158,9 +158,9 @@ const AddPillScreen = () => {
             אנא בחר ארון להוספת התרופה:{"\n"}
           </ThemedText>
           {cabinets.length < 1 &&
-          <ThemedText style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000" }}>
-          לא נמצאו ארונות למשתמש. אנא הוסף תחילה ארון אחד לפחות.{"\n"}
-          </ThemedText>
+            <ThemedText style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000" }}>
+              לא נמצאו ארונות למשתמש. אנא הוסף תחילה ארון אחד לפחות.{"\n"}
+            </ThemedText>
           }
           <ParallaxScrollView backgroundColor={backgroundColorLight}>
             {cabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
@@ -235,18 +235,13 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     borderWidth: 2,
     borderColor: '#ff5c5c',
-    flexDirection: 'row',
+    margin: 10,
     alignItems: 'center',
-    justifyContent: 'center',
-    marginVertical: 10,
-    marginHorizontal: 20,
-    elevation: 5, // Adds shadow for better visibility
   },
   scanButtonText: {
-    color: 'white',
-    fontSize: 18,
+    fontSize: 22,
+    color: '#ffffff',
     fontWeight: 'bold',
-    marginLeft: 10,
   },
   cameraContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -259,10 +254,10 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 40,
     right: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: '#ff5c5c',
     padding: 10,
-    borderRadius: 50,
-    zIndex: 1001, // Ensure it is on top of camera view
+    borderRadius: 20,
+    zIndex: 1001, // Ensure close button is above the camera view
   },
 });
 

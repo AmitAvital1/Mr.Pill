@@ -17,14 +17,13 @@ let request = {
     data: {}
 };
 
-let response: AxiosResponse<any,any>;
-
+let response: AxiosResponse<any, any>;
 
 function createRequest(requestType: string) {
 
     const user = DataHandler.getUser();
 
-    switch(requestType) {
+    switch (requestType) {
 
         case "login":
             request = {
@@ -32,7 +31,7 @@ function createRequest(requestType: string) {
                 url: URL + "5181/Mr-Pill/Login",
                 headers: { "Content-Type": "application/json" }, 
                 data: {
-                  "PhoneNumber": user.PhoneNumber,
+                    "PhoneNumber": user.PhoneNumber,
                 }
             }; return;
 
@@ -42,8 +41,8 @@ function createRequest(requestType: string) {
                 url: URL + "5181/Mr-Pill/ValidateCode",
                 headers: { "Content-Type": "application/json" }, 
                 data: {
-                  "PhoneNumber": user.PhoneNumber,
-                  "Code": DataHandler.getState('validationCode'),
+                    "PhoneNumber": user.PhoneNumber,
+                    "Code": DataHandler.getState('validationCode'),
                 }
             }; return;
 
@@ -53,7 +52,7 @@ function createRequest(requestType: string) {
                 url: URL + "5181/Mr-Pill/GenerateRegistrationCode",
                 headers: { }, 
                 data: {
-                  PhoneNumber: user.PhoneNumber,
+                    PhoneNumber: user.PhoneNumber,
                 }
             }; return;
         
@@ -75,12 +74,10 @@ function createRequest(requestType: string) {
                 method: 'get',
                 url: URL + "5194/user/all/medications",
                 headers: { 
-                  "Content-Type": "application/json",
-                  "Authorization": "Bearer " + user.Token,
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + user.Token,
                 }, 
-                data: {
-                  
-                }
+                data: {}
             }; return;
 
         case "getPills":
@@ -91,10 +88,8 @@ function createRequest(requestType: string) {
                     "Content-Type": "application/json",
                     "Authorization": "Bearer " + user.Token,
                 }, 
-                data: {
-                    
-                }
-        }; return;
+                data: {}
+            }; return;
 
         case "addPill":
 
@@ -102,11 +97,11 @@ function createRequest(requestType: string) {
                 method: 'post',
                 url: URL + "5194/medications?medicineCabinetName=" + DataHandler.getState('medicineCabinetName'),
                 headers: {
-                  "Authorization": "Bearer " + user.Token,
+                    "Authorization": "Bearer " + user.Token,
                 },
                 data: {
-                  MedicationBarcode: DataHandler.getState('medicationBarcode'),
-                  Privacy: false
+                    MedicationBarcode: DataHandler.getState('medicationBarcode'),
+                    Privacy: false
                 }
             }; return;
 
@@ -117,12 +112,10 @@ function createRequest(requestType: string) {
                 headers: {
                     "Authorization": "Bearer " + user.Token, 
                 },
-                data: {
-                }
+                data: {}
             }; return;
 
         case "addCabinet":
-            
             request = {
                 method: 'post',
                 url: URL + "5194/medicine-cabinet?Name=" + DataHandler.getState("medicineCabinetName"),
@@ -132,9 +125,7 @@ function createRequest(requestType: string) {
                 data: {}
             }; return;
 
-
         case "getMyReminders":
-
             request = {
                 method: 'get',
                 url: URL + "5194/Reminders",
@@ -145,7 +136,6 @@ function createRequest(requestType: string) {
             }; return;
 
         case "addReminder":
-            
             request = {
                 method: 'post',
                 url: URL + "5194/SetReminder",
@@ -157,23 +147,20 @@ function createRequest(requestType: string) {
             }; return;
 
         default:
-
+            console.error("Invalid request type");
     }
-
 }
 
 export default {
- 
     async sendRequest(requestType: string) {
 
         try {
-    
             axios.defaults.validateStatus = function () {
                 return true;
             };
-    
+
             createRequest(requestType);
-    
+
             response = await axios(request);
             
             if (response.request.status == 200) {
@@ -184,7 +171,7 @@ export default {
                 }
                 return false;
             } else {
-                console.log(response.request.status)
+                console.log(response.request.status);
                 return false;
             }
             
@@ -202,5 +189,4 @@ export default {
     getResponse() {
         return response;
     }
-
 };
