@@ -1,14 +1,15 @@
 import React from "react";
-import { Image } from "react-native";
+import { Image, View } from "react-native";
 import { PopButton } from "./PopButton";
 
 export function MrPillLogo(scale?: number) {
+  scale = scale || 1;
   const logo = () => {
     return (
-      <Image
-        source={require("@/assets/images/icon.png")}
-        style={{ alignSelf: "center", marginTop: 20 }}
-      />
+        <Image
+          source={require("@/assets/images/icon.png")}
+          style={{ alignSelf: "center", marginTop: 20 }}
+        />
     );
   };
 

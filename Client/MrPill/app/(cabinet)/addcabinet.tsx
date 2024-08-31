@@ -1,28 +1,35 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, TextInput, View, Text, Button} from 'react-native';
+import {SafeAreaView, StyleSheet, TextInput, View, Text} from 'react-native';
 
 import { router } from 'expo-router';
 
 import DataHandler from '@/DataHandler'
 import RequestHandler from '@/RequestHandler';
+import { MrPillLogo } from '@/components/MrPillLogo';
+import { AppHomeButton } from '@/components/AppHomeButton';
+import { strFC } from '@/components/strFC';
+
+const bgc = "#c9e7ff"
 
 const AddCabinetScreen = () => {
 
   const user = DataHandler.getUser()
 
-  const [cabinetName, onChangeCabinetName] = React.useState('');
-  const [isDisabled, setDisabled] = React.useState(true);
-  const updateButton = () => setDisabled(cabinetName.length < 3 || cabinetName.length > 20)
+  const [cabinetName, setCabinetName] = React.useState<string>('');
+  const [isNameTaken, setIsNameTaken] = React.useState<boolean>(false);
+
  
-  async function handleAddCabinet() {
+  async function handleButtonPress() {
 
     let response = await sendAddCabinetRequest();
     
-    if (!response) {
-      DataHandler.expireSession();
+    if (response) {
+      router.dismiss()
+      router.replace('/(cabinet)/mycabinets');
+    } else if (RequestHandler.getResponse().request.status == 400) {
+      setIsNameTaken(true);
     }
-    router.dismiss()
-    router.replace('/(cabinet)/mycabinets');
+    
   }
 
   const sendAddCabinetRequest = async () => {
@@ -32,47 +39,70 @@ const AddCabinetScreen = () => {
 
   }
 
-  return (
-    <SafeAreaView>
-
+  return (    
+    <SafeAreaView style={{flex: 1, backgroundColor: bgc }}>
+  
       <View style={styles.pagetop}>
-        <Text style={{fontSize: 32, flex:1}}>
-          הוספת תרופה חדשה
+        {MrPillLogo(0.5)}
+        <Text style={{textAlign: 'center', fontSize: 40, flex:1, marginTop: 50}}>
+          הוספת ארון חדש
         </Text>
       </View>
 
+      <View style={{flex: 1}}>
       <TextInput
         style={styles.input}
-        onChangeText={onChangeCabinetName}
+        onChangeText={(text)=>{setCabinetName(text); setIsNameTaken(false)}}
         value={cabinetName}
-        placeholder="שם של ארון חדש"
+        placeholder="הארון החדש שלי"
         keyboardType="default"
         textAlign='right'
-        onEndEditing={updateButton}
       />
+      {isNameTaken && <Text style={{textAlign: 'center', fontSize: 28, color: "#FF0000"}}>כבר קיים ארון בשם זה, אנא בחר שם אחר.</Text>}
+      </View>
+      <View style={styles.pagebottom}>
+          <AppHomeButton 
+            BackgroundColor={cabinetName.length < 4 ? bgc : "#aaffd3"} 
+            BorderColor={"#000"} 
+            ButtonContent={strFC(cabinetName.length < 4 ? "בחר שם לארון" : "הוסף ארון חדש")} 
+            ButtonAction={cabinetName.length < 4 ? ()=>{} : handleButtonPress} />
+      </View>
 
-      <Button 
-        title="הוסף ארון" 
-        onPress={handleAddCabinet} 
-        disabled={isDisabled}
-      />
-      
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   input: {
-    height: 40,
-    margin: 12,
-    borderWidth: 1,
+    backgroundColor: "#fff9c2",
+    height: 60,
+    margin: 8,
+    borderWidth: 2,
+    borderColor: "#dcfff4",
     padding: 10,
+    borderRadius: 12,
+    fontSize: 25,
+    elevation: 5,
   },
   pagetop: {
-    height: 100, 
+    height: 180,
     padding: 10,
-    backgroundColor: 'lavender'
+    backgroundColor: bgc,
+    marginBottom: 10,
+    marginTop: 8
   },
+  pagebottom: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 20,
+    marginHorizontal: 15,
+    marginVertical: 20,
+    padding: 5,
+    minHeight: 180,
+    maxHeight: 180,
+  },
+  
 });
 
 

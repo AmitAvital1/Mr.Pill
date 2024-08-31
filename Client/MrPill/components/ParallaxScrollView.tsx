@@ -1,33 +1,35 @@
-import type { PropsWithChildren, ReactElement } from 'react';
-import { StyleSheet, useColorScheme } from 'react-native';
+import React, { forwardRef, PropsWithChildren, ReactElement, useImperativeHandle, useRef } from 'react';
+import { StyleSheet, useColorScheme, LayoutChangeEvent, Button } from 'react-native';
 import Animated, {
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
   useScrollViewOffset,
+  runOnUI,
+  scrollTo,
 } from 'react-native-reanimated';
 
 import { ThemedView } from '@/components/ThemedView';
 
 type Props = PropsWithChildren<{
-  headerImage?: ReactElement;
+  backgroundColor?: string;
   headerBackgroundColor?: { dark: string; light: string };
-  backgroundColor: string;
+  headerImage?: ReactElement;
   headerHeight?: number;
 }>;
 
-export default function ParallaxScrollView({
-  children,
-  headerImage,
-  headerBackgroundColor,
-  backgroundColor,
-  headerHeight,
-}: Props) {
-  if (!headerBackgroundColor) headerBackgroundColor = {dark: backgroundColor, light: backgroundColor}
-  headerHeight = headerHeight? headerHeight : (headerImage? 250 : 0);
-  if (!headerImage) headerImage = <></>
+const ParallaxScrollView = forwardRef(function ParallaxScrollView(
+  { children, headerImage, headerBackgroundColor, backgroundColor, headerHeight }: Props,
+  ref
+) {
+  backgroundColor = backgroundColor || "#FFF";
+  if (!headerBackgroundColor) headerBackgroundColor = { dark: backgroundColor, light: backgroundColor };
+  headerHeight = headerHeight ? headerHeight : headerImage ? 250 : 0;
+  if (!headerImage) headerImage = <></>;
+
   const colorScheme = useColorScheme() ?? 'light';
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
+  const childPositions = useRef<number[]>([]).current;
   const scrollOffset = useScrollViewOffset(scrollRef);
 
   const headerAnimatedStyle = useAnimatedStyle(() => {
@@ -47,22 +49,45 @@ export default function ParallaxScrollView({
     };
   });
 
+  const handleLayout = (event: LayoutChangeEvent, index: number) => {
+    const { height } = event.nativeEvent.layout;
+    childPositions[index] = (childPositions[index - 1] || 0) + height;
+  };
+
+  const scrollToChild = (index: number) => {
+    const offset = childPositions[index] || 0;
+    runOnUI(() => {
+      scrollTo(scrollRef, 0, offset, true);
+    })();
+  };
+
+  useImperativeHandle(ref, () => ({
+    scrollToChild,
+  }));
+
   return (
-    <ThemedView style={{flex: 1, backgroundColor: backgroundColor}}>
-      <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16}>
+    <ThemedView style={{ flex: 1, backgroundColor: backgroundColor }}>
+      <Animated.ScrollView ref={scrollRef} scrollEventThrottle={16} keyboardShouldPersistTaps='always'>
         <Animated.View
           style={[
-            { height: headerHeight, overflow: 'hidden',},
+            { height: headerHeight, overflow: 'hidden' },
             { backgroundColor: headerBackgroundColor[colorScheme] },
             headerAnimatedStyle,
-          ]}>
+          ]}
+        >
           {headerImage}
         </Animated.View>
-        <ThemedView style={[styles.content, {backgroundColor: backgroundColor}]}>{children}</ThemedView>
+        <ThemedView style={[styles.content, { backgroundColor: backgroundColor }]}>
+          {React.Children.map(children, (child, index) => (
+            <Animated.View key={index} onLayout={(event) => handleLayout(event, index)}>
+              {child}
+            </Animated.View>
+          ))}
+        </ThemedView>
       </Animated.ScrollView>
     </ThemedView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   content: {
@@ -72,3 +97,5 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 });
+
+export default ParallaxScrollView;

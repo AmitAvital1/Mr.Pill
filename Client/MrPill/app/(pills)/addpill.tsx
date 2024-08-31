@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { SafeAreaView, StyleSheet, TextInput, View, Text, Pressable, Alert, TouchableOpacity } from 'react-native';
-import axios from 'axios';
+
 import DataHandler from '@/DataHandler';
 import { router } from 'expo-router';
 import { MrPillLogo } from '@/components/MrPillLogo';

@@ -6,7 +6,7 @@ import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import DataHandler from "@/DataHandler";
+
 import { Pressable } from 'react-native';
 
 import RequestHandler from '@/RequestHandler';
@@ -28,68 +28,55 @@ const borderColor = "#005a27"
 
 const MyCabinets: React.FC = () => {
 
-    let myCabinets: [Cabinet];
-
     const [renderedCabinets, setRenderedCabinets] = React.useState<any>([]);
     const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
+    const [myCabinets, setMyCabinets] = React.useState<[Cabinet?]>([]);
   
     useEffect(() => {
-      
-      if(isRequestSent) return;
+
+      if (isRequestSent) return;
+  
       setIsRequestSent(true);
-
-      function renderCabinet(cabinet: Cabinet, id: number, isOwnedByMe?: boolean) {
-        
-        return (
-          <Pressable key={id} onPress={()=>{console.log('y')}}>
   
-            <View style={styles.reminderBox}>
-              <View style={{alignItems: 'center', flexDirection: 'row'}}>
-          
-                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                  <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
-                </View>
-    
-                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                  <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
-                </View>
-                  
-                <View style={{flexGrow: 1}}>
-                  {isOwnedByMe &&
-                    <ThemedText style={[styles.plusMinusText, {alignSelf: 'flex-end', paddingTop: 5}]}>👑</ThemedText>
-                  }
-                  <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
-                  
-                </View>
-        
-              </View>
-            </View>
-  
-          </Pressable>
-        )
-      }
-      const renderCabinetList = (cabinetList: [Cabinet]) => {
-        
-        if (!cabinetList) return [];
-        let renderedCabinets = [];
-  
-        for (let i = 0; i < cabinetList.length; i++) { // for debugging i == 1 is the condition
-            renderedCabinets.push(renderCabinet(cabinetList[i], i, i == 1));
-        }
-
-        setRenderedCabinets(renderedCabinets);
-      };
-
       const sendGetCabinetsRequest = async () => {
-          
-          if (await RequestHandler.sendRequest('getMyCabinets')) {
-            myCabinets = JSON.parse(RequestHandler.getResponse().request._response);
-            renderCabinetList(myCabinets);
-          }
-      }
+        if (await RequestHandler.sendRequest('getMyCabinets')) {
+          setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
+        }
+      };
+  
       sendGetCabinetsRequest();
-  })
+    }, [isRequestSent]);
 
+    function renderCabinet(cabinet: Cabinet | undefined, id: number, isOwnedByMe?: boolean) {
+      if (!cabinet) return;
+      return (
+        <Pressable key={id} onPress={()=>{console.log('y')}}>
+
+          <View style={styles.reminderBox}>
+            <View style={{alignItems: 'center', flexDirection: 'row'}}>
+        
+              <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
+              </View>
+  
+              <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
+              </View>
+                
+              <View style={{flexGrow: 1}}>
+                {isOwnedByMe &&
+                  <ThemedText style={[styles.plusMinusText, {alignSelf: 'flex-end', paddingTop: 5}]}>👑</ThemedText>
+                }
+                <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
+                
+              </View>
+      
+            </View>
+          </View>
+
+        </Pressable>
+      )
+    }
 
   // MAIN PAGE LAYOUT
   return (    
@@ -101,11 +88,13 @@ const MyCabinets: React.FC = () => {
                     ארונות תרופות שלי:{"\n"}
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                    {renderedCabinets.length > 0 && renderedCabinets}
-                    {renderedCabinets.length == 0 && <ThemedText style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
+                    {myCabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
+                    {myCabinets.length == 0 && <ThemedText style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
                 </ParallaxScrollView>
             </View>
         </View>
+
+        
 
         <View style={styles.pagebottom}>
             <View style={styles.row}>

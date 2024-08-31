@@ -26,6 +26,7 @@ async function handleLoginPress() {
 
   router.dismissAll();
   router.push('/(login)/login');
+  //router.push('/(reminders)/ask');
 
 }
 

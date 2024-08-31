@@ -33,19 +33,19 @@ type Reminder = {
 
 const HomePage: React.FC = () => {
   let reminderId = -1;
-  function renderReminder(name: string, comment: string){//(reminder?: Reminder) {
+  function renderReminder(name: string, comment: string) {//(reminder?: Reminder) {
     reminderId++;
     return (
       <View key={reminderId} style={styles.reminderBox}>
         <View style={{flexDirection: 'row'}}>
   
-        <Pressable onPress={()=>{}}>
+        <Pressable key={reminderId+"pressable"+1} onPress={()=>{}}>
           <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
             <ThemedText style={[styles.plusMinusText, {paddingTop: 21.5}]}>✔</ThemedText>
           </View>
         </Pressable>
   
-        <Pressable onPress={()=>{}}>
+        <Pressable key={reminderId+"pressable"+2} onPress={()=>{}}>
           <View style={[styles.plusMinusButton, {backgroundColor: "#cc4e4e"}]}>
             <ThemedText style={[styles.plusMinusText, {paddingTop: 18}]}>✖</ThemedText>
           </View>
@@ -73,10 +73,10 @@ const HomePage: React.FC = () => {
 
           <ThemedText style={{fontSize: 18, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName + ".\n"}</ThemedText>תזכורות להיום:</ThemedText>
           <ParallaxScrollView backgroundColor={backgroundColorLight}>
-            {renderReminder("Calcium Carbonate 5mg", "14:00 אחרי האוכל")}
+            {/*renderReminder("Calcium Carbonate 5mg", "14:00 אחרי האוכל")}
             {renderReminder("Donepezil 20mg", "21:00 לפני האוכל")}
             {renderReminder("Donepezil 20mg", "21:00")}
-            {renderReminder("Donepezil 20mg", "21:00")}
+            {renderReminder("Donepezil 20mg", "21:00")*/}
           </ParallaxScrollView>
         
         </View>
@@ -84,13 +84,13 @@ const HomePage: React.FC = () => {
       <View style={styles.pagebottom}>
 
         <View style={styles.row}>
-          <AppHomeButton Type={1} ButtonContent={strFC("הארונות שלי")} ButtonAction={()=>{router.push('/(cabinet)/mycabinets')}}/>
-          <AppHomeButton Type={2} ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.push('/(pills)/mypills')}}/>
+          <AppHomeButton key={1} Type={1} ButtonContent={strFC("הארונות שלי")} ButtonAction={()=>{router.push('/(cabinet)/mycabinets')}}/>
+          <AppHomeButton key={2} Type={2} ButtonContent={strFC("התרופות שלי")} ButtonAction={()=>{router.push('/(pills)/mypills')}}/>
         </View>
 
         <View style={styles.row}>
-          <AppHomeButton Type={3} ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.push('/(reminders)/reminders')}}/>
-          <AppHomeButton Type={4} ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{router.push('/(pills)/addpill')}}/>
+          <AppHomeButton key={3} Type={3} ButtonContent={strFC("תזכורות")} ButtonAction={()=>{router.push('/(reminders)/reminders')}}/>
+          <AppHomeButton key={4} Type={4} ButtonContent={strFC("הוסף תרופה חדשה")} ButtonAction={()=>{router.push('/(pills)/addpill')}}/>
         </View>
 
       </View>

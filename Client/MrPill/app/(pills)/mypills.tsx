@@ -53,10 +53,9 @@ const MyPills: React.FC = () => {
     };
 
     fetchPills();
-    console.log(myPills);
+    
   }, []);
-
-
+  
   const handleImagePress = (pillId: number) => {
     console.log(pillId);
   };
@@ -75,7 +74,7 @@ const MyPills: React.FC = () => {
         </View>
 
         <View style={{maxWidth: 50, minWidth: 50, marginLeft: 25}}>
-        <Text style={{textAlign: 'center', fontSize: 36, fontWeight: 'bold'}}>{Math.floor(Math.random()*30)}</Text>
+          <Text style={{textAlign: 'center', fontSize: 36, fontWeight: 'bold'}}>{pill.numberOfPills}</Text>
         </View>
 
         <View style={{maxWidth: 170, minWidth: 170,}}>
