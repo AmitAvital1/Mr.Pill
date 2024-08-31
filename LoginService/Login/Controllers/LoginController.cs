@@ -26,15 +26,6 @@ public class LoginController : Controller
 
     [AllowAnonymous]
     [HttpPost]
-    [Route("Body")]
-    public IActionResult Body([FromBody] string name)
-    {
-        Console.WriteLine(name);
-        return Ok($"arrive! : {name}");
-    }
-
-    [AllowAnonymous]
-    [HttpPost]
     [Route("Login")]
     public IActionResult Login([FromBody] PhoneNumberDTO UserLogin)
     {
@@ -59,6 +50,7 @@ public class LoginController : Controller
                 // Generate 6-digit code
                 var code = _loginService.GenerateVerificationCode();
                 _logger.LogInformation("validation code: {Code}", code);
+        
                 // Save the code and timestamp in the database
                 _loginService.SaveVerificationCode(phoneNumberValue, code);
 

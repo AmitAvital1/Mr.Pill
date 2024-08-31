@@ -107,6 +107,7 @@ public class LoginService : ILoginService
     private string getPhoneNumberFromToken(string token)
     {
         _logger.LogInformation("Attempting to extract phone number from token.");
+
         var jwtHandler = new JwtSecurityTokenHandler();
         var jwtToken = jwtHandler.ReadToken(token) as JwtSecurityToken;
         var phoneNumberClaim = jwtToken?.Claims.FirstOrDefault(claim => claim.Type == "PhoneNumber");
@@ -279,10 +280,6 @@ public class LoginService : ILoginService
             MedicineCabinetId = medicineCabinet.Id
         };
 
-       // user.MedicineCabinetUsersList?.Add(medicineCabinetUser);
-       // medicineCabinet.MedicineCabinetUsers?.Add(medicineCabinetUser);
-       // _dbContext.SaveChanges();
-
        user.MedicineCabinetUsersList?.Add(medicineCabinetUser);
 
         if (!_dbContext.Entry(user).IsKeySet)
@@ -367,7 +364,7 @@ public class LoginService : ILoginService
 
         return _dbContext.Users
             ?.Include(u => u.MedicineCabinetUsersList!) 
-            .ThenInclude(mcu => mcu.MedicineCabinet) 
+                .ThenInclude(mcu => mcu.MedicineCabinet) 
             .FirstOrDefault(u => u.PhoneNumber == phoneNumber);
     }
     
@@ -415,6 +412,6 @@ public class LoginService : ILoginService
     public User GetUserByPhoneNumber(int phoneNumber)
     {
         return _dbContext?.Users
-                ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+            ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber)!;
     }
 }
