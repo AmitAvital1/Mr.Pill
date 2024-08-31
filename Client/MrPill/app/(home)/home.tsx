@@ -15,7 +15,7 @@ const borderColor = "#8a8aa7"
 
 function helloMessage() {
   let hours = new Date().getHours();
-  console.log(hours)
+
   if      (hours > 0  && hours <= 10) return "בוקר טוב";
   else if (hours > 10 && hours <= 17) return "צהריים טובים";
   else if (hours > 17 && hours <  22) return "ערב טוב";

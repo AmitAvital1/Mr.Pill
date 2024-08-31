@@ -6,9 +6,8 @@ import DataHandler from "./DataHandler";
 const BASE_URL = "http://123.123.123.123:"
 const SERVER_AND_CLIENT_ON_SAME_MACHINE = true;
 
-
 // do not change
-const BASE_URL_LOCAL = "http://10.0.2.2:"
+const BASE_URL_LOCAL = "http://10.0.2.2:" // android emulator and server running on same machine
 const URL = SERVER_AND_CLIENT_ON_SAME_MACHINE ? BASE_URL_LOCAL : BASE_URL;
 
 let request = {
@@ -153,9 +152,8 @@ function createRequest(requestType: string) {
                 headers: {
                     "Authorization": "Bearer " + user.Token,
                 },
-                data: {
-                    reminderDto: DataHandler.getReminder(),
-                }
+                data: DataHandler.getReminder(),
+            
             }; return;
 
         default:
@@ -192,6 +190,7 @@ export default {
             
         } catch (error) {
             console.error("Error fetching data:", error);
+            response = {} as AxiosResponse<any,any>
             return false;
         }
     },

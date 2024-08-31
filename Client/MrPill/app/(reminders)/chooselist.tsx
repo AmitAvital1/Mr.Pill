@@ -98,15 +98,26 @@ const ReminderParameters = () => {
 
     async function sendAddReminderRequest() {
         
-        DataHandler.setReminder({
+        /*DataHandler.setReminder({
             "ReminderTime": getDateISO(datesArr.indexOf(selectedDateOffset)) + selectedHours + ":" + selectedMinutes + ":00",
             "Message": userReminderMessage || "עליך לקחת את התרופה " + selectedPill.hebrewName,
             "IsRecurring": selectedFrequency != "",
             "RecurrenceInterval": intervalsArr[frequenciesArr.indexOf(selectedFrequency)],
             "UserMedicationId": selectedPill.id,
-        })
+        })*/
+
+        DataHandler.setReminder(
+            {
+                "ReminderTime": "2024-08-22T21:15:00",
+                "Message": "Time to take your medication.",
+                "IsRecurring": true,
+                "RecurrenceInterval": "00:01:00",
+                "UserMedicationId": 1
+            }
+        )
 
         RequestHandler.sendRequest("addReminder");
+        console.log(RequestHandler.getRequest());
         console.log(RequestHandler.getResponse().request._response);
 
     }
@@ -266,7 +277,7 @@ const ReminderParameters = () => {
 
             <AppHomeButton
                 ButtonContent={strFC(selectedFrequency ? "הוסף התראה!" : "נא מלא פרטים")} 
-                ButtonAction={selectedFrequency ? handleButtonPress : ()=>{}}
+                ButtonAction={selectedFrequency ? handleButtonPress : handleButtonPress }//()=>{}}
                 BackgroundColor={selectedFrequency? "rgb(173, 255, 217)": bgc}
             />
 
