@@ -10,6 +10,7 @@ public class Constants
     public static readonly string MOH_JSON_DRAG_HEB_DESC_KEY = "secondarySymptom";
     public static readonly string MOH_JSON_DRAG_IMG_PATH_KEY = "images";
     public static readonly string MOH_JSON_PACKAGES_KEY = "packages";
+    public static readonly string MOH_JSON_SHELFLIFE_KEY = "shelfLife";
     public static readonly string MOH_JSON_REGNUM_KEY = "dragRegNum";
     public static readonly string MOH_JSON_CAPLETSIZE_KEY = "quantity";
     public static readonly string MOH_JSON_BROCHURE_KEY = "brochure";

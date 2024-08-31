@@ -349,10 +349,16 @@ public class UserService : IUserService
 
     private void AddMedicationToCabinet(User user, MedicationRepo medication, bool privacy, MedicineCabinet medicineCabinet)
     {
+        DateTime? expDate = null;
+        if(medication.ShelfLife != -1)
+        {
+            expDate = DateTime.Now.AddMonths(medication.ShelfLife);
+        }
+
         var userMedication = new UserMedications
         {
             Barcode = medication.Barcode,
-            Validity = DateTime.Now.AddMonths(6),
+            Validity = expDate,
             Creator = user,
             MedicineCabinet = medicineCabinet,
             IsPrivate = privacy,
@@ -451,7 +457,8 @@ public class UserService : IUserService
             HebrewDescription = medicationDTO.HebrewDescription,
             ImagePath = medicationDTO.ImagePath,
             largestPackage = medicationDTO.NumberOfPills,
-            BrochurePath = medicationDTO.BrochurePath
+            BrochurePath = medicationDTO.BrochurePath,
+            ShelfLife = medicationDTO.ShelfLife
         };
 
         _dbContext.MedicationRepos.Add(medicationRepo);
@@ -581,7 +588,11 @@ public class UserService : IUserService
             .WithMedicationRepoId(m.MedicationRepoId)
             .WithMedicineCabinetName(m.MedicineCabinet?.MedicineCabinetName ?? string.Empty) 
             .WithImagePath(m.MedicationRepo?.ImagePath ?? string.Empty) 
-            .WithIsPrivate(m.IsPrivate);
+            .WithIsPrivate(m.IsPrivate)
+            .WithBrochurePath(m.MedicationRepo?.BrochurePath ?? string.Empty)
+            .WithNumberOfPills(m.NumberOfPills)
+            .WithShelfLife(m.MedicationRepo?.ShelfLife ?? -1)
+            ;
 
         return medicationDTOBuilder.Build();
     });
@@ -652,6 +663,9 @@ public class UserService : IUserService
                         .WithHebrewName(medication.DrugHebrewName)
                         .WithEnglishDescription(medication.EnglishDescription)
                         .WithHebrewDescription(medication.HebrewDescription)
+                        .WithNumberOfPills(medication.largestPackage)
+                        .WithShelfLife(medication.ShelfLife)
+                        .WithBrochurePath(medication.BrochurePath)
                         .Build();
 
         return medicationDTOBuilder;

@@ -11,4 +11,5 @@ public class MedicationRepo
     public ICollection<UserMedications>? Medications { get; set; } 
     public int largestPackage { get; set; }
     public string? BrochurePath { get; set; }
+    public int ShelfLife { get; set; }
 }

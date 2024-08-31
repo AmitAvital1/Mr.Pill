@@ -21,6 +21,7 @@ public class MedicationDTO
     public string? ImagePath { get; set; }
     public bool IsPrivate { get; set; }
     public int NumberOfPills { get; set; }
+    public int ShelfLife { get; set; }
     public string? MedicineCabinetName { get; set; }
     public string? BrochurePath { get; set; }
 
@@ -104,9 +105,14 @@ public class MedicationDTO
             _medicationDTO.MedicationRepoId = medicationRepoId;
             return this;
         }
-        public MedicationDTOBuilder SetBrochurePath(string brochurePath)
+        public MedicationDTOBuilder WithBrochurePath(string brochurePath)
         {
             _medicationDTO.BrochurePath = brochurePath;
+            return this;
+        }
+        public MedicationDTOBuilder WithShelfLife(int shelfLife)
+        {
+            _medicationDTO.ShelfLife = shelfLife;
             return this;
         }
 

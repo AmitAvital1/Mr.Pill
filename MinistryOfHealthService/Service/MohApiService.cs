@@ -65,30 +65,13 @@ namespace MOHService.service
             {
                  var dto = new MohPillDetailsDTO.Builder()
                  .SetPackageSize(0)
+                 .SetShelfLife(-1)// -1 means no data on the shelf life
                  .SetBrochure(null);
 
                 _logger.LogInformation("Starting to create MohPillDetailsDTO from JSON.");
                 if(extraPillJsonDetails != null)
                 {
-                    JToken package = null;
-                    foreach (JToken p in extraPillJsonDetails[MOH_JSON_PACKAGES_KEY])
-                    {
-                        if (p["barcode"] != null && p["barcode"].ToString() == barcode)
-                        {
-                            package = p;
-                            break;
-                        }
-                    }
-                    if (package == null)
-                    {
-                         _logger.LogWarning("No package found in the JSON extra data.");
-                    }
-                    else
-                    {
-                        int size = int.Parse(package[MOH_JSON_CAPLETSIZE_KEY].ToString().Split(' ')[0]);
-                        dto.SetPackageSize(size);
-                        _logger.LogInformation($"Found {size} packages.");
-                    }
+                    SetPackageSizeAndShelfLife(extraPillJsonDetails, barcode, dto);
 
                     JToken brochure = null;
                     foreach (JToken b in extraPillJsonDetails[MOH_JSON_BROCHURE_KEY])
@@ -101,7 +84,7 @@ namespace MOHService.service
                     }
                     if (brochure == null)
                     {
-                         _logger.LogWarning("No brochure found in the JSON extra data.");
+                        _logger.LogWarning("No brochure found in the JSON extra data.");
                     }
                     else
                     {
@@ -129,6 +112,47 @@ namespace MOHService.service
             {
                 _logger.LogError(ex, "An error occurred while creating MohPillDetailsDTO from JSON.");
                 throw;
+            }
+        }
+
+        private void SetPackageSizeAndShelfLife(JToken extraPillJsonDetails, string barcode, MohPillDetailsDTO.Builder dto)
+        {
+            JToken package = null;
+            foreach (JToken p in extraPillJsonDetails[MOH_JSON_PACKAGES_KEY])
+            {
+                if (p["barcode"] != null && p["barcode"].ToString() == barcode)
+                {
+                    package = p;
+                    break;
+                }
+            }
+            if (package == null)
+            {
+                _logger.LogWarning("No package found in the JSON extra data.");
+            }
+            else
+            {
+                try
+                {
+                    int size = int.Parse(package[MOH_JSON_CAPLETSIZE_KEY].ToString().Split(' ')[0]);
+                    dto.SetPackageSize(size);
+                    _logger.LogInformation($"Found {size} packages.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Cannot convert caplet size to int - determine to 0");
+                }
+
+                try
+                {
+                    int shelflife = int.Parse(package[MOH_JSON_SHELFLIFE_KEY].ToString());
+                    dto.SetShelfLife(shelflife);
+                    _logger.LogInformation($"Found {shelflife} shelflife time.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning("Cannot convert shelflife duration to int - determine to -1 = unknown");
+                }
             }
         }
 

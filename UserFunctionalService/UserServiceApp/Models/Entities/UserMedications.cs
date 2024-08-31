@@ -4,7 +4,7 @@ public class UserMedications
     public int Id { get; set; }
     public required string Barcode { get; set; }
     public int? PillSize { get; set; } 
-    public DateTime Validity { get; set; }
+    public DateTime? Validity { get; set; }
     public int CreatorId { get; set; }
     public required User Creator { get; set; }
     public required MedicineCabinet MedicineCabinet { get; set; }

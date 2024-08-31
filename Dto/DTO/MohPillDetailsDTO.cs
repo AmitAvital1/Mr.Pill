@@ -10,6 +10,7 @@ public class MohPillDetailsDTO
     public string? ImagePath { get; }
     public int NumberOfPills { get; }
     public string? BrochurePath { get; }
+    public int? ShelfLife { get; }
 
     private MohPillDetailsDTO(Builder builder)
     {
@@ -21,6 +22,8 @@ public class MohPillDetailsDTO
         ImagePath = builder.ImagePath;
         NumberOfPills = builder.PackageSize;
         BrochurePath = builder.BrochurePath;
+        ShelfLife = builder.ShelfLife;
+        
     }
     public class Builder
     {
@@ -32,10 +35,16 @@ public class MohPillDetailsDTO
         public string? ImagePath { get; set; }
          public int PackageSize { get; set;}
          public string? BrochurePath { get; set;}
+         public int? ShelfLife { get; set;}
 
         public Builder SetBarcode(string barcode)
         {
             Barcode = barcode;
+            return this;
+        }
+        public Builder SetShelfLife(int shelflife)
+        {
+            ShelfLife = shelflife;
             return this;
         }
 
