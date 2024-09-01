@@ -128,7 +128,7 @@ function createRequest(requestType: string) {
         case "getMyReminders":
             request = {
                 method: 'get',
-                url: URL + "5194/Reminders",
+                url: URL + "5195/Reminders",
                 headers: {
                     "Authorization": "Bearer " + user.Token,
                 },
@@ -138,7 +138,7 @@ function createRequest(requestType: string) {
         case "addReminder":
             request = {
                 method: 'post',
-                url: URL + "5194/SetReminder",
+                url: URL + "5195/SetReminder",
                 headers: {
                     "Authorization": "Bearer " + user.Token,
                 },

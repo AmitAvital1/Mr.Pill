@@ -225,8 +225,9 @@ const styles = StyleSheet.create({
   },
   dropdownItem: {
       padding: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: '#cccccc',
+      borderWidth: 1,
+      borderColor: '#000',
+      borderRadius: 15,
       zIndex: 3,
   },
 });

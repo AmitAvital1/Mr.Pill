@@ -8,7 +8,7 @@ import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from "@/DataHandler";
-import { Pressable } from 'react-native';
+import { Pressable, Image } from 'react-native';
 
 import RequestHandler from '@/RequestHandler';
 
@@ -18,11 +18,12 @@ function getFamilyEmoji(type?: number) {
 }
 
 type Reminder = {
-  reminderTime: any;
-  message: string | null ;
-  isRecurring: boolean;
+  reminderId: number;
+  reminderTime: string;
   recurrenceInterval: string;
-  userMedicationId: number;
+  drugHebrewName: string | null;
+  imagePath: string;
+  medicineCabinetName: string | null;
 }
 
 const backgroundColorLight = "#71bfe9"
@@ -42,27 +43,22 @@ const MyReminders: React.FC = () => {
       setIsRequestSent(true);
 
       function renderReminder(reminder: Reminder, id: number) {
-        
+
         return (
           <Pressable key={id} onPress={()=>{console.log('y')}}>
-  
+            
             <View style={styles.reminderBox}>
               <View style={{alignItems: 'center', flexDirection: 'row'}}>
           
-                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                  <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
-                </View>
-    
-                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                  <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
+                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
+                  <Image source={{uri: reminder.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
                 </View>
                   
                 <View style={{flexGrow: 1}}>
-                  {
-                    <ThemedText style={[styles.plusMinusText, {alignSelf: 'flex-end', paddingTop: 5}]}>👑</ThemedText>
+                  <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
+                  {//<ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>}
                   }
-                  <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>
-                  
+                  <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + " בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
                 </View>
         
               </View>
@@ -81,16 +77,18 @@ const MyReminders: React.FC = () => {
         }
 
         setRenderedReminders(result);
+        
       };
 
-      const sendGetCabinetsRequest = async () => {
+      const sendGetRemindersRequest = async () => {
           
           if (await RequestHandler.sendRequest('getMyReminders')) {
             myReminders = JSON.parse(RequestHandler.getResponse().request._response);
             renderReminderList(myReminders);
           }
       }
-      sendGetCabinetsRequest();
+      sendGetRemindersRequest();
+      //console.log(RequestHandler.getResponse().request._response);
   })
 
 
@@ -108,7 +106,7 @@ const MyReminders: React.FC = () => {
                 </ParallaxScrollView>
             </View>
         </View>
-
+        
         <View style={styles.pagebottom}>
             <View style={styles.row}>
                 <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תזכורת חדשה")} ButtonAction={()=>{router.navigate('/(reminders)/chooselist')}}/>
@@ -131,6 +129,7 @@ const styles = StyleSheet.create({
     minHeight: 100,
     marginHorizontal: 15,
     padding: 5,
+    elevation: 8,
   },
   pagebottom: {
     flex: 1,
@@ -174,6 +173,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    elevation: 5,
   },
   plusMinusText: {
     fontSize: 30,

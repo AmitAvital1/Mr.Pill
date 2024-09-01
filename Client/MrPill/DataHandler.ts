@@ -10,7 +10,13 @@ let user = {
 let stateMap = new Map<string, string>();
 stateMap.set('session', 'true');
 
-let reminder: any = undefined;
+let reminder = {
+  "ReminderTime": "",
+  "Message": "",
+  "IsRecurring": false,
+  "RecurrenceInterval": "",
+  "UserMedicationId": 0
+}
 
 export default {
 
@@ -25,7 +31,13 @@ export default {
     stateMap = new Map<string, string>();
     stateMap.set('session', 'true');
 
-    reminder = undefined;
+    reminder = {
+      "ReminderTime": "",
+      "Message": "",
+      "IsRecurring": false,
+      "RecurrenceInterval": "",
+      "UserMedicationId": 0
+    }
   },
 
   setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
@@ -58,9 +70,11 @@ export default {
     router.dismissAll();
     router.push('/(login)/welcome');
   },
+
   getReminder() {
     return reminder;
   },
+
   setReminder(inputReminder: any) {
     reminder = inputReminder;
   }

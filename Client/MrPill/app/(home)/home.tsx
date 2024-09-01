@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from "@/DataHandler";
 import { Pressable } from 'react-native';
+import RequestHandler from '@/RequestHandler';
 
 const backgroundColorLight = "#c9c9ff"
 const backgroundColorMain = "#dff5ff"
@@ -24,40 +25,57 @@ function helloMessage() {
 }
 
 type Reminder = {
-  userId: number;
+  reminderId: number;
   reminderTime: string;
-  message?: string;
-  isRecurring: boolean;
-  recurrenceInterval?: string;
+  recurrenceInterval: string;
+  drugHebrewName: string | null;
+  imagePath: string;
+  medicineCabinetName: string | null;
 };
 
 const HomePage: React.FC = () => {
   let reminderId = -1;
-  function renderReminder(name: string, comment: string) {//(reminder?: Reminder) {
-    reminderId++;
+
+  const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
+  const [renderedReminders, setRenderedReminders] = React.useState<any>([]);
+  const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
+
+  useEffect(()=>{
+
+    const sendGetRemindersRequest = async () => {
+            
+      if (await RequestHandler.sendRequest('getMyReminders')) {
+        setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
+      }
+    }
+
+    sendGetRemindersRequest();
+  })
+
+  function renderReminder(reminder?: Reminder, id?: number) {
+    if (!reminder || !id) return;
+    if (reminder.reminderTime.slice())
     return (
-      <View key={reminderId} style={styles.reminderBox}>
-        <View style={{flexDirection: 'row'}}>
-  
-        <Pressable key={reminderId+"pressable"+1} onPress={()=>{}}>
-          <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-            <ThemedText style={[styles.plusMinusText, {paddingTop: 21.5}]}>✔</ThemedText>
+      <Pressable key={id} onPress={()=>{console.log('y')}}>
+        
+        <View style={styles.reminderBox}>
+          <View style={{alignItems: 'center', flexDirection: 'row'}}>
+      
+            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
+              <Image source={{uri: reminder.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
+            </View>
+              
+            <View style={{flexGrow: 1}}>
+              <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
+              {//<ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>}
+              }
+              <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + " בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
+            </View>
+    
           </View>
-        </Pressable>
-  
-        <Pressable key={reminderId+"pressable"+2} onPress={()=>{}}>
-          <View style={[styles.plusMinusButton, {backgroundColor: "#cc4e4e"}]}>
-            <ThemedText style={[styles.plusMinusText, {paddingTop: 18}]}>✖</ThemedText>
-          </View>
-        </Pressable>
-  
-        <View style={{flexGrow: 1}}>
-          <ThemedText style={{fontWeight:'bold', textAlign: 'center'}}>{name}</ThemedText>
-          <ThemedText style={{textAlign: 'center'}}>{comment}</ThemedText>
         </View>
-  
-        </View>
-      </View>
+
+      </Pressable>
     )
   }
 
@@ -73,10 +91,7 @@ const HomePage: React.FC = () => {
 
           <ThemedText style={{fontSize: 18, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName + ".\n"}</ThemedText>תזכורות להיום:</ThemedText>
           <ParallaxScrollView backgroundColor={backgroundColorLight}>
-            {/*renderReminder("Calcium Carbonate 5mg", "14:00 אחרי האוכל")}
-            {renderReminder("Donepezil 20mg", "21:00 לפני האוכל")}
-            {renderReminder("Donepezil 20mg", "21:00")}
-            {renderReminder("Donepezil 20mg", "21:00")*/}
+            {myReminders.map((reminder, index) => renderReminder(reminder, index))}
           </ParallaxScrollView>
         
         </View>

@@ -22,8 +22,8 @@ function getFamilyEmoji(type?: number) {
     return familyEmojis[type? type % 26 : Math.floor(Math.random() * 26)];
 }
 
-const backgroundColorLight = "#71bfe9"
-const backgroundColorMain = "#e6c8c8"
+const backgroundColorLight = "#e9a771"
+const backgroundColorMain = "#c8e6d5"
 const borderColor = "#005a27"
 
 const MyCabinets: React.FC = () => {
@@ -95,7 +95,6 @@ const MyCabinets: React.FC = () => {
         </View>
 
         
-
         <View style={styles.pagebottom}>
             <View style={styles.row}>
                 <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף ארון חדש")} ButtonAction={()=>{router.navigate('/(cabinet)/addcabinet')}}/>
@@ -118,6 +117,7 @@ const styles = StyleSheet.create({
     minHeight: 100,
     marginHorizontal: 15,
     padding: 5,
+    elevation: 8,
   },
   pagebottom: {
     flex: 1,
@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   reminderBox: {
-    backgroundColor: 'pink',
+    backgroundColor: backgroundColorMain,
     borderWidth: 2,
     borderColor: borderColor,
     borderRadius: 12,

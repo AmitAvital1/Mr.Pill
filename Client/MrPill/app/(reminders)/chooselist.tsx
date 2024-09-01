@@ -98,35 +98,29 @@ const ReminderParameters = () => {
 
     async function sendAddReminderRequest() {
         
-        /*DataHandler.setReminder({
+        DataHandler.setReminder({
             "ReminderTime": getDateISO(datesArr.indexOf(selectedDateOffset)) + selectedHours + ":" + selectedMinutes + ":00",
             "Message": userReminderMessage || "עליך לקחת את התרופה " + selectedPill.hebrewName,
             "IsRecurring": selectedFrequency != "",
             "RecurrenceInterval": intervalsArr[frequenciesArr.indexOf(selectedFrequency)],
             "UserMedicationId": selectedPill.id,
-        })*/
+        })
 
-        DataHandler.setReminder(
-            {
-                "ReminderTime": "2024-08-22T21:15:00",
-                "Message": "Time to take your medication.",
-                "IsRecurring": true,
-                "RecurrenceInterval": "00:01:00",
-                "UserMedicationId": 1
-            }
-        )
+        if (await RequestHandler.sendRequest("addReminder")) {
+            
+            console.log(RequestHandler.getResponse().request._response);
+            return true;
 
-        RequestHandler.sendRequest("addReminder");
-        console.log(RequestHandler.getRequest());
-        console.log(RequestHandler.getResponse().request._response);
+        } else {
+            return false;
+        }
 
     }
 
     async function handleButtonPress() {
-        await sendAddReminderRequest();
 
-        if (RequestHandler.getResponse().request.status == 200) {
-            router.replace("/(reminders)/reminders")
+        if (await sendAddReminderRequest()) {
+            router.dismiss();
         } else {
             setIsAddReminderError(true);
         }
@@ -277,7 +271,7 @@ const ReminderParameters = () => {
 
             <AppHomeButton
                 ButtonContent={strFC(selectedFrequency ? "הוסף התראה!" : "נא מלא פרטים")} 
-                ButtonAction={selectedFrequency ? handleButtonPress : handleButtonPress }//()=>{}}
+                ButtonAction={selectedFrequency ? handleButtonPress : ()=>{}}
                 BackgroundColor={selectedFrequency? "rgb(173, 255, 217)": bgc}
             />
 
