@@ -103,7 +103,7 @@ function createRequest(requestType: string) {
                 },
                 data: {
                     MedicationBarcode: DataHandler.getState('medicationBarcode'),
-                    Privacy: false
+                    Privacy: DataHandler.getFlag("privatePill"),
                 }
             }; return;
 

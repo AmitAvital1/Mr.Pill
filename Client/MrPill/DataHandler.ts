@@ -10,6 +10,8 @@ let user = {
 let stateMap = new Map<string, string>();
 stateMap.set('session', 'true');
 
+let flagMap = new Map<string, boolean>();
+
 let reminder = {
   "ReminderTime": "",
   "Message": "",
@@ -86,5 +88,11 @@ export default {
   },
   setCabinet(inputCabinet: any){ 
     cabinet = inputCabinet;
+  },
+  getFlag(key: string) {
+    return flagMap.get(key);
+  },
+  setFlag(key: string, value: boolean) {
+    return flagMap.set(key, value);
   },
 };
