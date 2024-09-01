@@ -68,6 +68,7 @@ const AddPillScreen = () => {
     const response = await sendPostMedicineToCabinetRequest();
 
     if (response) {
+      Alert.alert("תרופה נוספה לארון בהצלחה!");
       router.replace('/(home)/home');
     } else {
       setIsRequestSent(true);
@@ -89,6 +90,7 @@ const AddPillScreen = () => {
         setCameraVisible(true);
       } else {
         Alert.alert("אין גישה למצלמה", "כדי לסרוק ברקוד, יש לאשר גישה למצלמה.", [{ text: "הבנתי" }]);
+
       }
     } else {
       setCameraVisible(true);

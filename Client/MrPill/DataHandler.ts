@@ -18,6 +18,8 @@ let reminder = {
   "UserMedicationId": 0
 }
 
+let cabinet: any;
+
 export default {
 
   reset() {
@@ -38,13 +40,14 @@ export default {
       "RecurrenceInterval": "",
       "UserMedicationId": 0
     }
+
+    cabinet = null;
   },
 
   setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
     user.FirstName    = firstName   ? firstName   : user.FirstName    ;
     user.LastName     = lastName    ? lastName    : user.LastName     ;
     user.PhoneNumber  = phoneNumber ? phoneNumber : user.PhoneNumber  ;
-    user.Token        = token       ? token       : user.Token        ;
     user.Token        = token       ? token       : user.Token        ;
   },
   setPhone(phoneNumber: string) {
@@ -59,6 +62,7 @@ export default {
   isEmpty() {
     return (user.FirstName == "" || user.LastName == "" || user.PhoneNumber == "" || user.Token == "");
   },
+
   getState(key: string) {
     return stateMap.get(key);
   },
@@ -74,8 +78,13 @@ export default {
   getReminder() {
     return reminder;
   },
-
   setReminder(inputReminder: any) {
     reminder = inputReminder;
-  }
+  },
+  getCabinet() {
+    return cabinet;
+  },
+  setCabinet(inputCabinet: any){ 
+    cabinet = inputCabinet;
+  },
 };

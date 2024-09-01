@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet } from 'react-native';
@@ -11,6 +11,7 @@ import { Pressable } from 'react-native';
 
 import RequestHandler from '@/RequestHandler';
 import { useFocusEffect } from '@react-navigation/native';
+import DataHandler from '@/DataHandler';
 
 type Cabinet = {
   id: number,
@@ -33,8 +34,7 @@ const MyCabinets: React.FC = () => {
 
     useFocusEffect(
       useCallback(() => {
-      
-        //
+
         const sendGetCabinetsRequest = async () => {
           if (await RequestHandler.sendRequest('getMyCabinets')) {
             setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
@@ -42,7 +42,6 @@ const MyCabinets: React.FC = () => {
         };
     
         sendGetCabinetsRequest();
-        //
   
         return () => {
           //console.log('Screen was unfocused or navigating away');
@@ -57,18 +56,24 @@ const MyCabinets: React.FC = () => {
 
           <View style={styles.reminderBox}>
             <View style={{alignItems: 'center', flexDirection: 'row'}}>
-        
-              <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
-              </View>
-  
-              <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
-              </View>
-                
+
+              <Pressable onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(pills)/mypills");}}>
+                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                  <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
+                </View>
+              </Pressable>
+
+              <Pressable onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/cabinetmembers");}}>
+                <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
+                  <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
+                </View>
+              </Pressable> 
+
               <View style={{flexGrow: 1}}>
                 {isOwnedByMe &&
-                  <ThemedText style={[styles.plusMinusText, {alignSelf: 'flex-end', paddingTop: 5}]}>👑</ThemedText>
+                <Pressable onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}>
+                  <ThemedText style={[styles.plusMinusText, {alignSelf: 'flex-end', paddingTop: 5}]}>➕</ThemedText>
+                </Pressable>
                 }
                 <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
                 
@@ -91,7 +96,7 @@ const MyCabinets: React.FC = () => {
                     ארונות תרופות שלי:{"\n"}
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                    {myCabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
+                    {myCabinets.map((cabinet, index) => renderCabinet(cabinet, index, index == 1))}
                     {myCabinets.length == 0 && <ThemedText style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
                 </ParallaxScrollView>
             </View>
@@ -166,7 +171,7 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   plusMinusText: {
-    fontSize: 30,
+    fontSize: 25,
     fontWeight: 'bold',
     position: 'absolute',
   }

@@ -38,7 +38,8 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
 const style = StyleSheet.create({  
   button: {
     minWidth: 150,
-    flex: 1,
+    maxHeight: 150,
+    flexGrow: 1,
     borderRadius: 1000,
     justifyContent: "center",
     alignItems: "center",

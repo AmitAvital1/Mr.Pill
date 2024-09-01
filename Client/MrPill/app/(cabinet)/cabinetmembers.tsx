@@ -1,5 +1,4 @@
-
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet } from 'react-native';
@@ -7,35 +6,19 @@ import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import DataHandler from "@/DataHandler";
 import { Pressable, Image } from 'react-native';
-
-import RequestHandler from '@/RequestHandler';
-import { useFocusEffect } from '@react-navigation/native';
-
-function getFamilyEmoji(type?: number) {
-    const familyEmojis = ["👪","👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👩‍👩‍👧‍👧","👩‍👩‍👦‍👦","👩‍👩‍👧‍👦","👩‍👩‍👧","👩‍👩‍👦","👨‍👨‍👧‍👧","👨‍👨‍👦‍👦","👨‍👨‍👧‍👦","👨‍👧‍👦","👨‍👧","👨‍👦","👩‍👧‍👧","👩‍👦‍👦","👩‍👧‍👦","👩‍👧","👩‍👦","👨‍👦‍👦","👨‍👧‍👧"];
-    return familyEmojis[type? type % 26 : Math.floor(Math.random() * 26)];
-}
-
-type Reminder = {
-  reminderId: number;
-  reminderTime: string;
-  recurrenceInterval: string;
-  drugHebrewName: string | null;
-  imagePath: string;
-  medicineCabinetName: string | null;
-}
+import DataHandler from '@/DataHandler';
 
 const backgroundColorLight = "#71bfe9"
 const backgroundColorMain = "#e6c8c8"
 const borderColor = "#005a27"
 
-const MyReminders: React.FC = () => {
+const CabinetMembersPage: React.FC = () => {
 
-  const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
-  function renderReminder(reminder?: Reminder, id?: number) {
-    if (!reminder || !id) return;
+    const myMembers = DataHandler.getCabinet()
+
+    function renderMember(member?: Reminder, id?: number) {
+    if (!member || !id) return;
     return (
       <Pressable key={id} onPress={()=>{console.log('y')}}>
         
@@ -60,22 +43,6 @@ const MyReminders: React.FC = () => {
     )
   }
 
-  useFocusEffect(
-    useCallback(() => {
-    
-      const sendGetRemindersRequest = async () => {
-        if (await RequestHandler.sendRequest('getMyReminders')) {
-          setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
-        }
-      };
-      sendGetRemindersRequest();
-
-      return () => {
-        //console.log('Screen was unfocused or navigating away');
-      };
-    }, [])
-  );
-
   // MAIN PAGE LAYOUT
   return (    
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
@@ -86,7 +53,7 @@ const MyReminders: React.FC = () => {
                     התזכורות שלי:{"\n"}
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                  {myReminders.map((reminder, index) => renderReminder(reminder, index))}
+                  {myMembers.map((reminder, index) => renderMember(reminder, index))}
                 </ParallaxScrollView>
             </View>
         </View>
@@ -166,4 +133,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default MyReminders;
+export default CabinetMembersPage;

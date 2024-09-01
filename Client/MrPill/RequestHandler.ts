@@ -148,6 +148,16 @@ function createRequest(requestType: string) {
             
             }; return;
 
+        case "addPersonToCabinet":
+            request = {
+                method: 'post',
+                url: `${URL}5181/Mr-Pill/joined-new-house?targetPhoneNumber=${DataHandler.getState("targetPhoneNumber")}&medicineCabinetName=${DataHandler.getState("medicineCabinetName")}`,
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {},
+            }; return;
+
         default:
             console.error("Invalid request type");
     }
@@ -184,7 +194,7 @@ export default {
             return false;
         }
     },
-    
+
     getRequest() {
         return request;
     },

@@ -1,5 +1,5 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, TextInput, View, Text} from 'react-native';
+import {SafeAreaView, StyleSheet, TextInput, View, Text, Alert} from 'react-native';
 
 import { router } from 'expo-router';
 
@@ -13,8 +13,6 @@ const bgc = "#c9e7ff"
 
 const AddCabinetScreen = () => {
 
-  const user = DataHandler.getUser()
-
   const [cabinetName, setCabinetName] = React.useState<string>('');
   const [isNameTaken, setIsNameTaken] = React.useState<boolean>(false);
 
@@ -24,6 +22,7 @@ const AddCabinetScreen = () => {
     let response = await sendAddCabinetRequest();
     
     if (response) {
+      Alert.alert("נוצר ארון תרופות חדש בהצלחה!");
       router.dismiss()
       router.replace('/(cabinet)/mycabinets');
     } else if (RequestHandler.getResponse().request.status == 400) {

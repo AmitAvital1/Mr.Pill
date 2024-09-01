@@ -77,7 +77,7 @@ function getDateISO(offsetDays?: number) {
 
 }
 
-const ReminderParameters = () => {  
+const AddReminderScreen = () => {  
 
     const parallaxScrollViewRef = useRef<{ scrollToChild: (index: number) => void }>(null);
 
@@ -356,4 +356,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default ReminderParameters;
+export default AddReminderScreen;
