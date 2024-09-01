@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import {SafeAreaView, StyleSheet, TextInput, View, Text} from 'react-native';
-import axios from 'axios';
+
 import { router } from 'expo-router';
 
 import DataHandler from '@/DataHandler';
@@ -91,7 +91,8 @@ const LogInScreen = () => {
       DataHandler.setState('validationCode', validationCode);
 
       if (await RequestHandler.sendRequest("verifyLogin")) {
-        DataHandler.setUser(undefined, undefined, undefined, JSON.parse(RequestHandler.getResponse().request._response).token)
+        const response = RequestHandler.getParsedResponse();
+        DataHandler.setUser(response.firstName, response.lastName, undefined, JSON.parse(RequestHandler.getResponse().request._response).token)
         return true;
       }
       

@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet } from 'react-native';
@@ -11,6 +11,7 @@ import DataHandler from "@/DataHandler";
 import { Pressable, Image } from 'react-native';
 
 import RequestHandler from '@/RequestHandler';
+import { useFocusEffect } from '@react-navigation/native';
 
 function getFamilyEmoji(type?: number) {
     const familyEmojis = ["👪","👨‍👩‍👦","👨‍👩‍👧","👨‍👩‍👧‍👦","👨‍👩‍👦‍👦","👨‍👩‍👧‍👧","👨‍👨‍👦","👨‍👨‍👧","👩‍👩‍👧‍👧","👩‍👩‍👦‍👦","👩‍👩‍👧‍👦","👩‍👩‍👧","👩‍👩‍👦","👨‍👨‍👧‍👧","👨‍👨‍👦‍👦","👨‍👨‍👧‍👦","👨‍👧‍👦","👨‍👧","👨‍👦","👩‍👧‍👧","👩‍👦‍👦","👩‍👧‍👦","👩‍👧","👩‍👦","👨‍👦‍👦","👨‍👧‍👧"];
@@ -32,65 +33,48 @@ const borderColor = "#005a27"
 
 const MyReminders: React.FC = () => {
 
-    let myReminders: [Reminder];
-
-    const [renderedReminders, setRenderedReminders] = React.useState<any>([]);
-    const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
-  
-    useEffect(() => {
+  const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
+  function renderReminder(reminder?: Reminder, id?: number) {
+    if (!reminder || !id) return;
+    return (
+      <Pressable key={id} onPress={()=>{console.log('y')}}>
+        
+        <View style={styles.reminderBox}>
+          <View style={{alignItems: 'center', flexDirection: 'row'}}>
       
-      if(isRequestSent) return;
-      setIsRequestSent(true);
-
-      function renderReminder(reminder: Reminder, id: number) {
-
-        return (
-          <Pressable key={id} onPress={()=>{console.log('y')}}>
-            
-            <View style={styles.reminderBox}>
-              <View style={{alignItems: 'center', flexDirection: 'row'}}>
-          
-                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
-                  <Image source={{uri: reminder.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
-                </View>
-                  
-                <View style={{flexGrow: 1}}>
-                  <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
-                  {//<ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>}
-                  }
-                  <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + " בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
-                </View>
-        
-              </View>
+            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
+              <Image source={{uri: reminder.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
             </View>
-  
-          </Pressable>
-        )
-      }
-      const renderReminderList = (reminderList: [Reminder]) => {
-        
-        if (!reminderList) return [];
-        let result = [];
-  
-        for (let i = 0; i < reminderList.length; i++) { 
-            result.push(renderReminder(reminderList[i], i));
-        }
+              
+            <View style={{flexGrow: 1}}>
+              <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
+              {//<ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>}
+              }
+              <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + " בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
+            </View>
+    
+          </View>
+        </View>
 
-        setRenderedReminders(result);
-        
-      };
+      </Pressable>
+    )
+  }
 
+  useFocusEffect(
+    useCallback(() => {
+    
       const sendGetRemindersRequest = async () => {
-          
-          if (await RequestHandler.sendRequest('getMyReminders')) {
-            myReminders = JSON.parse(RequestHandler.getResponse().request._response);
-            renderReminderList(myReminders);
-          }
-      }
+        if (await RequestHandler.sendRequest('getMyReminders')) {
+          setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
+        }
+      };
       sendGetRemindersRequest();
-      //console.log(RequestHandler.getResponse().request._response);
-  })
 
+      return () => {
+        //console.log('Screen was unfocused or navigating away');
+      };
+    }, [])
+  );
 
   // MAIN PAGE LAYOUT
   return (    
@@ -102,7 +86,7 @@ const MyReminders: React.FC = () => {
                     התזכורות שלי:{"\n"}
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                    {renderedReminders.length > 0 && renderedReminders}
+                  {myReminders.map((reminder, index) => renderReminder(reminder, index))}
                 </ParallaxScrollView>
             </View>
         </View>

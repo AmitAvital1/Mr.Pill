@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import React, { useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet, Image } from 'react-native';
@@ -34,23 +35,27 @@ type Reminder = {
 };
 
 const HomePage: React.FC = () => {
-  let reminderId = -1;
 
   const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
-  const [renderedReminders, setRenderedReminders] = React.useState<any>([]);
-  const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
 
-  useEffect(()=>{
-
-    const sendGetRemindersRequest = async () => {
-            
-      if (await RequestHandler.sendRequest('getMyReminders')) {
-        setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
+  useFocusEffect(
+    useCallback(() => {
+    
+      //
+      const sendGetRemindersRequest = async () => {
+              
+        if (await RequestHandler.sendRequest('getMyReminders')) {
+          setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
+        }
       }
-    }
+      sendGetRemindersRequest();
+      //
 
-    sendGetRemindersRequest();
-  })
+      return () => {
+        //console.log('Screen was unfocused or navigating away');
+      };
+    }, [])
+  );
 
   function renderReminder(reminder?: Reminder, id?: number) {
     if (!reminder || !id) return;
@@ -61,15 +66,15 @@ const HomePage: React.FC = () => {
         <View style={styles.reminderBox}>
           <View style={{alignItems: 'center', flexDirection: 'row'}}>
       
-            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
-              <Image source={{uri: reminder.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
+            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: backgroundColorLight}]}>
+              <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100}} resizeMode='center'></Image>
             </View>
               
             <View style={{flexGrow: 1}}>
-              <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
+              <ThemedText style={{fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
               {//<ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>}
               }
-              <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + " בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
+              <ThemedText style={{fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\n בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
             </View>
     
           </View>
@@ -83,6 +88,7 @@ const HomePage: React.FC = () => {
 
   return (
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
+
       <View style={{flex: 1, minHeight: 40}}>
         {MrPillLogo(1)}
       </View>
@@ -122,11 +128,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: backgroundColorLight,
     borderRadius: 20,
-    borderWidth: 2,
+    //borderWidth: 2,
     borderColor: borderColor,
     minHeight: 100,
     marginHorizontal: 15,
     padding: 5,
+    elevation: 5,
   },
   pagebottom: {
     flex: 1,
@@ -152,7 +159,7 @@ const styles = StyleSheet.create({
   },
   reminderBox: {
     backgroundColor: 'pink',
-    borderWidth: 2,
+    //borderWidth: 2,
     borderColor: borderColor,
     borderRadius: 12,
     flex: 1,
@@ -166,7 +173,7 @@ const styles = StyleSheet.create({
     minWidth: 50,
     minHeight: 50,
     borderRadius: 25,
-    borderWidth: 2,
+    //borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,

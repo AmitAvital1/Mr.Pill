@@ -1,5 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import DataHandler from "./DataHandler";
+import { parse } from "expo-linking";
 
 
 // change if need
@@ -18,6 +19,7 @@ let request = {
 };
 
 let response: AxiosResponse<any, any>;
+let parsedResponse: any;
 
 function createRequest(requestType: string) {
 
@@ -164,6 +166,7 @@ export default {
             response = await axios(request);
             
             if (response.request.status == 200) {
+                parsedResponse = JSON.parse(response.request._response);
                 return true;
             } else if (response.request.status == 401) {
                 if (requestType != "verifySignup" && requestType != "verifyLogin") {
@@ -181,12 +184,14 @@ export default {
             return false;
         }
     },
-
+    
     getRequest() {
         return request;
     },
-
     getResponse() {
         return response;
+    },
+    getParsedResponse() {
+        return parsedResponse;
     }
 };

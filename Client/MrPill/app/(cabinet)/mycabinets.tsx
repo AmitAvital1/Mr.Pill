@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet } from 'react-native';
@@ -10,6 +10,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import { Pressable } from 'react-native';
 
 import RequestHandler from '@/RequestHandler';
+import { useFocusEffect } from '@react-navigation/native';
 
 type Cabinet = {
   id: number,
@@ -28,24 +29,26 @@ const borderColor = "#005a27"
 
 const MyCabinets: React.FC = () => {
 
-    const [renderedCabinets, setRenderedCabinets] = React.useState<any>([]);
-    const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
     const [myCabinets, setMyCabinets] = React.useState<[Cabinet?]>([]);
-  
-    useEffect(() => {
 
-      if (isRequestSent) return;
+    useFocusEffect(
+      useCallback(() => {
+      
+        //
+        const sendGetCabinetsRequest = async () => {
+          if (await RequestHandler.sendRequest('getMyCabinets')) {
+            setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
+          }
+        };
+    
+        sendGetCabinetsRequest();
+        //
   
-      setIsRequestSent(true);
-  
-      const sendGetCabinetsRequest = async () => {
-        if (await RequestHandler.sendRequest('getMyCabinets')) {
-          setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
-        }
-      };
-  
-      sendGetCabinetsRequest();
-    }, [isRequestSent]);
+        return () => {
+          //console.log('Screen was unfocused or navigating away');
+        };
+      }, [])
+    );
 
     function renderCabinet(cabinet: Cabinet | undefined, id: number, isOwnedByMe?: boolean) {
       if (!cabinet) return;
