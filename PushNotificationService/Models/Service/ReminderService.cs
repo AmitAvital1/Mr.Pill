@@ -171,6 +171,23 @@ public class ReminderService : IReminderService
 
     }
 
+    public IEnumerable<UIReminderDTO> GetUserTodayReminders(int phoneNumber)
+    {
+        var reminders = GetUserReminders(phoneNumber);
+        var res = new List<UIReminderDTO>();
+        var now = DateTime.UtcNow.AddHours(3);
+
+        foreach(var r in reminders)
+        {
+            if(r.ReminderTime.Date.Equals(now.Date))
+            {
+                res.Add(r);
+            }
+        }
+
+       return res;
+    }
+
        public int GetPhoneNumberFromToken(string? token)
     {
         if (token == null)

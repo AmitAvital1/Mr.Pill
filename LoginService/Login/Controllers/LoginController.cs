@@ -288,6 +288,14 @@ public class LoginController : Controller
         try
         {
             string token = GetTokenFromHeaders();
+            
+            string phoneNumber = _loginService.getPhoneNumberFromToken(token);
+
+            if(targetPhoneNumber.Equals(phoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} is same as the sender phone number", targetPhoneNumber);
+                return BadRequest("Cannot send yourself request");
+            }
 
             if (!_loginService.PhoneNumberExistInDb(targetPhoneNumber))
             {

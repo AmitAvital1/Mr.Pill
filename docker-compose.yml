@@ -53,6 +53,16 @@ services:
     restart: always
     networks:
       - mynetwork
+      
+  pushnotification:
+    build:
+      context: .
+      dockerfile: PushNotificationService/Dockerfile
+    ports:
+      - "5195:8080"
+    restart: always
+    networks:
+      - mynetwork
 
   userfunctional:
     container_name: userfunc

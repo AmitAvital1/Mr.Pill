@@ -5,6 +5,7 @@ public class MedicineCabinetDTO
     public int Id { get; set; }
     public string? MedicineCabinetName { get; set; }
     public int? CreatorId { get; set; }
+    public bool? IsCreator { get; set; }
 
     public class MedicineCabinetDTOBuilder
     {
@@ -30,6 +31,12 @@ public class MedicineCabinetDTO
         public MedicineCabinetDTOBuilder WithCreatorId(int? CreatorId)
         {
             _medicineCabinetDTO.CreatorId = CreatorId;
+            return this;
+        }
+
+        public MedicineCabinetDTOBuilder WithIsCreator(bool? isCreator)
+        {
+            _medicineCabinetDTO.IsCreator = isCreator;
             return this;
         }
 

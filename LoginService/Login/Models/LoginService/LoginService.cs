@@ -104,7 +104,7 @@ public class LoginService : ILoginService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
     
-    private string getPhoneNumberFromToken(string token)
+    public string getPhoneNumberFromToken(string token)
     {
         _logger.LogInformation("Attempting to extract phone number from token.");
 

@@ -17,4 +17,5 @@ public interface IUserService
     public bool NameAlreadyExistInMyInventory(string Name, int phoneNumber);
     public void CreateNewMedicineCabinet(string name, int phoneNumber);
     public IEnumerable<MedicineCabinetDTO> GetAllMedicineCabinets(int userPhoneNumer);
+    public IEnumerable<UserDTO> GetAllMedicineCabinetUsers(int userPhoneNumer, int cabinetId);
 }

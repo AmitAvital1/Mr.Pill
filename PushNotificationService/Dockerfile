@@ -27,12 +27,3 @@ CMD dotnet PushNotificationService.dll
 
 
 
-# pushnotification:
-#     build:
-#       context: .
-#       dockerfile: PushNotificationService/Dockerfile
-#     ports:
-#       - "5201:8080"
-#     restart: always
-#     networks:
-#       - mynetwork

@@ -642,8 +642,32 @@ public class UserService : IUserService
                 .WithId(mc.Id)
                 .WithMedicineCabinetName(mc.MedicineCabinetName)
                 .WithCreatorId(mc.CreatorId)
+                .WithIsCreator(mc.CreatorId == user.UserId ? true : false)
                 .Build();
         }).ToList();
+    }
+
+    public IEnumerable<UserDTO> GetAllMedicineCabinetUsers(int userPhoneNumer, int cabinetId)
+    {
+        var users = _dbContext.MedicineCabinetUsers
+            .Where(mcu => mcu.MedicineCabinetId == cabinetId)
+            .Select(mcu => mcu.User)
+            .ToList();
+        
+        List<UserDTO> usersDTO = new List<UserDTO>();
+
+        foreach(User u in users)
+        {
+            UserDTO dto = UserDTO.Builder()
+                .WithFirstName(u.FirstName)
+                .WithLastName(u.LastName)
+                .WithPhoneNumber(u.PhoneNumber.ToString())
+                .Build();
+
+            usersDTO.Add(dto);
+        }
+
+        return usersDTO;
     }
 
     public async Task<MedicationDTO> GetMedicationByBarcode(string medicationBarcode)

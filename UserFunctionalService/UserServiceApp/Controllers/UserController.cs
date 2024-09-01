@@ -217,6 +217,29 @@ public class UserController : Controller
         }
     }
 
+    [HttpGet("users/cabinet")]
+    public ActionResult GetAllCabinetUsers([FromQuery] int cabinetId)
+    {
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int userPhoneNumer = _userService.GetUserPhoneNumber(token);
+            IEnumerable<UserDTO> medicineCabinetDTOs = _userService.GetAllMedicineCabinetUsers(userPhoneNumer, cabinetId);
+
+            if (!medicineCabinetDTOs.Any())
+            {
+                return NotFound(new { Message = "No medicine cabinets found for the user.", UserPhoneNumber = userPhoneNumer });
+            }
+
+            return Ok(medicineCabinetDTOs);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while retrieving medicine cabinets for user.");
+            return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
+        }
+    }
+
     [HttpGet("medication/barcode")]
     public async Task<ActionResult<MedicationDTO>> GetMedicationByBarcode([FromQuery] string medicationBarcode)
     {

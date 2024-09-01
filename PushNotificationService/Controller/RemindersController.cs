@@ -35,6 +35,24 @@ public class ReminderController : Controller
         return Ok(reminders);
     }
 
+    [HttpGet]
+    [Route("Reminders/today")]
+    public ActionResult<IEnumerable<ReminderDTO>> GetTodayReminders()
+    {
+        string? token = GetAuthorizationTokenOrThrow();
+        int phoneNumber = _reminderService.GetPhoneNumberFromToken(token);
+
+        if (!_reminderService.IsUserExistInDb(phoneNumber))
+        {
+            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (checked by userService)", phoneNumber);
+            return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+        }
+
+        IEnumerable<UIReminderDTO> reminders = _reminderService.GetUserTodayReminders(phoneNumber);
+
+        return Ok(reminders);
+    }
+
     [HttpPost]
     [Route("SetReminder")]
     public IActionResult SetReminder([FromBody] ReminderDTO reminderDto)
