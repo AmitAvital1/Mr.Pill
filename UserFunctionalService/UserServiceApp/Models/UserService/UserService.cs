@@ -317,6 +317,21 @@ public class UserService : IUserService
         return user;
     }
 
+    private User? GetUserByPhoneNumberAndAllCabinet(int phoneNumber)
+    {
+        var user = _dbContext?.Users?
+            .Include(u => u.MedicineCabinetUsersList)
+                .ThenInclude(mcu => mcu.MedicineCabinet)
+            .SingleOrDefault(u => u.PhoneNumber == phoneNumber);
+        
+        if (user == null)
+        {
+            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService).", phoneNumber);
+        }
+
+        return user;
+    }
+
     private MedicationRepo? GetMedicationByBarcodeWithoutReturnADto(string medicationBarcode)
     {
         var medication = _dbContext?.MedicationRepos.SingleOrDefault(m => m.Barcode == medicationBarcode);
@@ -569,35 +584,34 @@ public class UserService : IUserService
     }
 
     private IEnumerable<MedicationDTO> ConvertMedicationsToDTOs(IEnumerable<UserMedications> medications)
-{
-    return medications.Select(m =>
     {
-        if (m == null)
+        return medications.Select(m =>
         {
-            throw new ArgumentNullException(nameof(m), "UserMedications instance is null.");
-        }
+            if (m == null)
+            {
+                throw new ArgumentNullException(nameof(m), "UserMedications instance is null.");
+            }
 
-        var medicationDTOBuilder = MedicationDTO.Builder()
-            .WithId(m.Id)
-            .WithEnglishName(m.MedicationRepo?.DrugEnglishName ?? string.Empty) 
-            .WithHebrewName(m.MedicationRepo?.DrugHebrewName ?? string.Empty)  
-            .WithEnglishDescription(m.MedicationRepo?.EnglishDescription ?? string.Empty) 
-            .WithHebrewDescription(m.MedicationRepo?.HebrewDescription ?? string.Empty) 
-            .WithValidity(m.Validity)
-            .WithUserId(m.CreatorId)
-            .WithMedicationRepoId(m.MedicationRepoId)
-            .WithMedicineCabinetName(m.MedicineCabinet?.MedicineCabinetName ?? string.Empty) 
-            .WithImagePath(m.MedicationRepo?.ImagePath ?? string.Empty) 
-            .WithIsPrivate(m.IsPrivate)
-            .WithBrochurePath(m.MedicationRepo?.BrochurePath ?? string.Empty)
-            .WithNumberOfPills(m.NumberOfPills)
-            .WithShelfLife(m.MedicationRepo?.ShelfLife ?? -1)
-            ;
+            var medicationDTOBuilder = MedicationDTO.Builder()
+                .WithId(m.Id)
+                .WithEnglishName(m.MedicationRepo?.DrugEnglishName ?? string.Empty) 
+                .WithHebrewName(m.MedicationRepo?.DrugHebrewName ?? string.Empty)  
+                .WithEnglishDescription(m.MedicationRepo?.EnglishDescription ?? string.Empty) 
+                .WithHebrewDescription(m.MedicationRepo?.HebrewDescription ?? string.Empty) 
+                .WithValidity(m.Validity)
+                .WithUserId(m.CreatorId)
+                .WithMedicationRepoId(m.MedicationRepoId)
+                .WithMedicineCabinetName(m.MedicineCabinet?.MedicineCabinetName ?? string.Empty) 
+                .WithImagePath(m.MedicationRepo?.ImagePath ?? string.Empty) 
+                .WithIsPrivate(m.IsPrivate)
+                .WithBrochurePath(m.MedicationRepo?.BrochurePath ?? string.Empty)
+                .WithNumberOfPills(m.NumberOfPills)
+                .WithShelfLife(m.MedicationRepo?.ShelfLife ?? -1)
+                ;
 
-        return medicationDTOBuilder.Build();
-    });
-}
-
+            return medicationDTOBuilder.Build();
+        });
+    }
 
     private List<UserMedications> FilterMedications(User user, MedicineCabinet medicineCabinet)
     {
@@ -618,7 +632,7 @@ public class UserService : IUserService
 
     public IEnumerable<MedicineCabinetDTO> GetAllMedicineCabinets(int userPhoneNumer)
     {
-        var user = GetUserByPhoneNumber(userPhoneNumer);
+        var user = GetUserByPhoneNumberAndAllCabinet(userPhoneNumer);
           
         if (user == null)
         {
