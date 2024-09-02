@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { Alert } from "react-native";
 
 let user = {
     FirstName: "",
@@ -7,10 +8,13 @@ let user = {
     Token: "",
 };
 
+let map = new Map<string, any>();
+
 let stateMap = new Map<string, string>();
-stateMap.set('session', 'true');
 
 let flagMap = new Map<string, boolean>();
+flagMap.set('session', true);
+
 
 let reminder = {
   "ReminderTime": "",
@@ -18,9 +22,7 @@ let reminder = {
   "IsRecurring": false,
   "RecurrenceInterval": "",
   "UserMedicationId": 0
-}
-
-let cabinet: any;
+};
 
 export default {
 
@@ -32,8 +34,10 @@ export default {
       Token: "",
     };
 
-    stateMap = new Map<string, string>();
-    stateMap.set('session', 'true');
+    map = new Map<string, any>;
+    stateMap = new Map<string, string>;
+    flagMap = new Map<string, boolean>();
+    flagMap.set('session', true);
 
     reminder = {
       "ReminderTime": "",
@@ -41,9 +45,15 @@ export default {
       "IsRecurring": false,
       "RecurrenceInterval": "",
       "UserMedicationId": 0
-    }
+    };
 
-    cabinet = null;
+  },
+  set(key: string, value: any) {
+    map.set(key,value);
+  },
+  
+  get(key: string) {
+    return map.get(key);
   },
 
   setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
@@ -72,7 +82,8 @@ export default {
     return stateMap.set(key, value);
   },
   expireSession() {
-    this.setState('session', 'false');
+    this.setFlag('session', false);
+    Alert.alert("עבר זמן מאז שהתחברת בפעם האחרונה, אנא התחבר מחדש.");
     router.dismissAll();
     router.push('/(login)/welcome');
   },
@@ -82,12 +93,6 @@ export default {
   },
   setReminder(inputReminder: any) {
     reminder = inputReminder;
-  },
-  getCabinet() {
-    return cabinet;
-  },
-  setCabinet(inputCabinet: any){ 
-    cabinet = inputCabinet;
   },
   getFlag(key: string) {
     return flagMap.get(key);

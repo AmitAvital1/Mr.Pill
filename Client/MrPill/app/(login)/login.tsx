@@ -56,7 +56,7 @@ const LogInScreen = () => {
     let response = await sendVerifyLoginRequest();
     console.log(response);
     if (response) {
-      DataHandler.setState('session', 'true');
+      DataHandler.setFlag('session', true);
       router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
     }
   }
@@ -66,7 +66,6 @@ const LogInScreen = () => {
     if (response) {
       setIsPhoneValid(true);
     }
-    
   }
 
   function updateButton() {
@@ -81,8 +80,6 @@ const LogInScreen = () => {
   useEffect(() => {
     setIsConfirmButtonDisabled(!isValidCodeModelCorrect(validationCode));
   }, [validationCode]);
-
-  validationCode
 
   const sendVerifyLoginRequest = async () => {
 

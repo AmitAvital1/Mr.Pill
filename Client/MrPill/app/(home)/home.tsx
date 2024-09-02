@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, ScrollView } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -12,8 +12,10 @@ import { Pressable } from 'react-native';
 import RequestHandler from '@/RequestHandler';
 
 const backgroundColorLight = "#c9c9ff"
+const backgroundColorAlt = "#ffe3e3"
 const backgroundColorMain = "#dff5ff"
 const borderColor = "#8a8aa7"
+
 
 function helloMessage() {
   let hours = new Date().getHours();
@@ -34,23 +36,69 @@ type Reminder = {
   medicineCabinetName: string | null;
 };
 
+type Notification = {
+  id: number,
+  targetPhoneNumber: string,
+  senderPhoneNumber: string,
+  cabinetName: string,
+  senderName: string,
+  isHandle: boolean,
+  isApprove: boolean,
+  isSenderSeen: boolean,
+  dateStart: string,
+  dateEnd: string
+}
+
+type Cabinet = {
+  Id: number,
+  SenderPhoneNumber: string,
+  CabinetName: string,
+  SenderName: string,
+}
+
+function getEmoji(type?: number) {
+  const emojis = ["😎","😍","🥰","😁","😊","😄","😃","😀","😏"]
+  return emojis[type? type % emojis.length : Math.floor(Math.random() * emojis.length)];
+}
+
 const HomePage: React.FC = () => {
 
   const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
+  const [myNotifications, setNotifications] = React.useState<[Notification?]>([]);
+  const [isNotificationsOpen, setIsNotificationsOpen] = React.useState<boolean>(false);
+
+  const respondToJoinCabinetRequest = async (notification: Notification, userResponse: boolean) => {
+    
+    DataHandler.setFlag("userResponse", userResponse);
+    DataHandler.set("notification", notification);
+
+    if (await RequestHandler.sendRequest("respondToJoinCabinetRequest")) {
+      
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
     
       //
+      setIsNotificationsOpen(false);
       const sendGetRemindersRequest = async () => {
               
-        if (await RequestHandler.sendRequest('getMyReminders')) {
+        if (await RequestHandler.sendRequest('getMyRemindersToday')) {
           setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
         }
       }
       sendGetRemindersRequest();
-      //
 
+      const sendGetNotificationsRequest = async () => {
+              
+        if (await RequestHandler.sendRequest('getNotifications')) {
+          setNotifications(JSON.parse(RequestHandler.getResponse().request._response).data);
+          console.log(RequestHandler.getResponse().request._response)
+        }
+      }
+      sendGetNotificationsRequest();
+      //
       return () => {
         //console.log('Screen was unfocused or navigating away');
       };
@@ -58,24 +106,51 @@ const HomePage: React.FC = () => {
   );
 
   function renderReminder(reminder?: Reminder, id?: number) {
-    if (!reminder || !id) return;
-    if (reminder.reminderTime.slice())
+    if (!reminder) return;
     return (
       <Pressable key={id} onPress={()=>{console.log('y')}}>
         
         <View style={styles.reminderBox}>
           <View style={{alignItems: 'center', flexDirection: 'row'}}>
-      
-            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: backgroundColorLight}]}>
-              <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100}} resizeMode='center'></Image>
-            </View>
-              
+
+            <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100, marginRight: 30}} resizeMode='center'></Image>
+
             <View style={{flexGrow: 1}}>
               <ThemedText style={{fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
-              {//<ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>}
-              }
               <ThemedText style={{fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\n בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
             </View>
+    
+          </View>
+        </View>
+
+      </Pressable>
+    )
+  }
+
+  function renderNotification(notification?: Notification, id?: number) {
+    if (!notification) return;
+    return (
+      <Pressable key={id} onPress={()=>{console.log('y')}}>
+        
+        <View style={styles.reminderBox}>
+          <View style={{alignItems: 'center', flexDirection: 'row'}}>
+
+          <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, true)}}>
+            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
+              <ThemedText style={[styles.plusMinusText, {paddingTop: 19.5, color: 'green'}]}>✔</ThemedText>
+            </View>
+          </Pressable>
+
+          <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, false)}}>
+            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
+              <ThemedText style={[styles.plusMinusText, {paddingTop: 17.5}]}>❌</ThemedText>
+            </View>
+          </Pressable>
+
+          <View style={{width: "50%", flexGrow: 1}}>
+            <ThemedText style={{fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{notification.senderName} - 0{notification.senderPhoneNumber}</ThemedText>
+            <ThemedText style={{fontSize: 16, marginRight: 35, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</ThemedText>
+          </View>
     
           </View>
         </View>
@@ -89,19 +164,42 @@ const HomePage: React.FC = () => {
   return (
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
 
-      <View style={{flex: 1, minHeight: 40}}>
-        {MrPillLogo(1)}
+      {myNotifications.length > 0 &&
+      <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}}>
+      <View style={{position: 'absolute', marginLeft: 25, marginTop: 150, borderRadius: 100}}>
+        <ThemedText style={{lineHeight: 55, fontSize: 35}}>🔔</ThemedText>
       </View>
-      <View style={{flex: 1, minHeight: 50,}}>
+      <View style={{position: 'absolute', marginLeft: 25, marginTop: 150, borderRadius: 100}}>
+        <ThemedText>🔴</ThemedText>
+      </View>
+      </Pressable>}
+      {MrPillLogo(0.75)}
+      <ThemedText style={{marginBottom: 5, fontSize: 18, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
+      {isNotificationsOpen &&
+      <View style={{flex: 1,}}>
+        <View style={[styles.pagetop, {borderBottomWidth: 10, borderColor: backgroundColorLight, backgroundColor: backgroundColorAlt}]}>
+        <ThemedText style={{fontSize: 18, textAlign: 'center'}}>בקשות הצטרפות:</ThemedText>
+          <ParallaxScrollView backgroundColor={backgroundColorAlt}>
+              {myNotifications.map((notification, index) => renderNotification(notification, index))
+              }
+          </ParallaxScrollView>
+        </View>
+      </View>}
+      
+      {!isNotificationsOpen && 
+      <View style={{flex: myReminders.length > 0 ? 1 : 0}}>
         <View style={styles.pagetop}> 
 
-          <ThemedText style={{fontSize: 18, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName + ".\n"}</ThemedText>תזכורות להיום:</ThemedText>
+          <ThemedText style={styles.text}>{myReminders.length > 0 ? "תזכורות להיום:" : "אין תזכורות להיום" + getEmoji()}</ThemedText>
+ 
+          {myReminders.length > 0 && 
           <ParallaxScrollView backgroundColor={backgroundColorLight}>
             {myReminders.map((reminder, index) => renderReminder(reminder, index))}
-          </ParallaxScrollView>
+          </ParallaxScrollView>}
         
         </View>
-      </View>
+      </View>}
+              
       <View style={styles.pagebottom}>
 
         <View style={styles.row}>
@@ -124,13 +222,13 @@ const HomePage: React.FC = () => {
 const styles = StyleSheet.create({
   pagetop: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: backgroundColorLight,
     borderRadius: 20,
     //borderWidth: 2,
     borderColor: borderColor,
-    minHeight: 100,
+    minHeight: 75,
     marginHorizontal: 15,
     padding: 5,
     elevation: 5,
@@ -150,15 +248,16 @@ const styles = StyleSheet.create({
     minHeight: 170,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: backgroundColorMain,
     flexDirection: 'row',
   },
   text: {
-    fontSize: 20,
+    lineHeight: 35,
+    fontSize: 25,
+    fontWeight: 'bold',
     color: '#000',
   },
   reminderBox: {
-    backgroundColor: 'pink',
+    backgroundColor: "#dadada",
     //borderWidth: 2,
     borderColor: borderColor,
     borderRadius: 12,
@@ -168,15 +267,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     paddingVertical: 5,
     minWidth: 300,
+    elevation: 3,
   },
   plusMinusButton: {
-    minWidth: 50,
-    minHeight: 50,
+    minWidth: 75,
+    minHeight: 75,
     borderRadius: 25,
-    //borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    elevation: 3,
   },
   plusMinusText: {
     fontSize: 35,

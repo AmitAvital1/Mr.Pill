@@ -57,7 +57,7 @@ const ChooseList = ({ items, selectedItem, onSelect, listStyle, type, scrollRef 
 const hoursArr = ["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
 const minutesArr = ["00", "15", "30", "45"];
 const frequenciesArr = ["פעם אחת בלבד", "פעם בשבוע", "פעם ביומיים", "פעם ביום", "כל 12 שעות", "כל 6 שעות", "כל 4 שעות", "כל 3 שעות"];
-const intervalsArr = ["", "07:00:00", "02:00:00", "01:00:00", "00:12:00", "00:06:00", "00:04:00", "00:03:00"];
+const intervalsArr = [undefined, "07:00:00", "02:00:00", "01:00:00", "00:12:00", "00:06:00", "00:04:00", "00:03:00"];
 const datesArr = ["היום", "מחר", "בעוד יומיים", "בעוד שלושה ימים", "בעוד ארבעה ימים", "בעוד חמישה ימים", "בעוד שישה ימים", "בעוד שבוע"];
 
 function getDateISO(offsetDays?: number) {
@@ -101,7 +101,7 @@ const AddReminderScreen = () => {
         DataHandler.setReminder({
             "ReminderTime": getDateISO(datesArr.indexOf(selectedDateOffset)) + selectedHours + ":" + selectedMinutes + ":00",
             "Message": userReminderMessage || "עליך לקחת את התרופה " + selectedPill.hebrewName,
-            "IsRecurring": selectedFrequency != "",
+            "IsRecurring": !(selectedFrequency === "פעם אחת בלבד"),
             "RecurrenceInterval": intervalsArr[frequenciesArr.indexOf(selectedFrequency)],
             "UserMedicationId": selectedPill.id,
         })
@@ -112,6 +112,8 @@ const AddReminderScreen = () => {
             return true;
 
         } else {
+            console.log(RequestHandler.getRequest());
+            console.log(RequestHandler.getResponse().request._response);
             return false;
         }
 

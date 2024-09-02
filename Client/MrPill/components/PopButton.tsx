@@ -48,7 +48,7 @@ export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonActio
 
 
   return (
-    <View style={style.container}>
+    <View style={[style.container, {maxHeight: 180 * ButtonScale}]}>
       <Pressable onPress={handleOnPress}>
         <Animated.View
           style={[

@@ -1,10 +1,9 @@
 import axios, { AxiosResponse } from "axios";
 import DataHandler from "./DataHandler";
-import { parse } from "expo-linking";
 
 
 // change if need
-const BASE_URL = "http://123.123.123.123:"
+const BASE_URL = "http://10.100.102.17:"
 const SERVER_AND_CLIENT_ON_SAME_MACHINE = true;
 
 // do not change
@@ -137,6 +136,16 @@ function createRequest(requestType: string) {
                 data: {}
             }; return;
 
+        case "getMyRemindersToday":
+            request = {
+                method: 'get',
+                url: URL + "5195/Reminders/today",
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {}
+            }; return;
+
         case "addReminder":
             request = {
                 method: 'post',
@@ -157,6 +166,37 @@ function createRequest(requestType: string) {
                 },
                 data: {},
             }; return;
+
+        case "getCabinetMembers":
+            request = {
+                method: 'get',
+                url: URL + "5194/users/cabinet?cabinetId=" + DataHandler.get('cabinet').id,
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {},
+            }; return;
+
+        case "getNotifications":
+            request = {
+                method: 'get',
+                url: URL + "5181/get-notifications",
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {},
+            }; return;
+
+        case "respondToJoinCabinetRequest":
+            request = {
+                method: 'put',
+                url: URL + "5181/handle-notification?requestId=" + DataHandler.get('notification').id + "&approve=" + DataHandler.getFlag('userResponse'),
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {},
+            }; return;
+    
 
         default:
             console.error("Invalid request type");

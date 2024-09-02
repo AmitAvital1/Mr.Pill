@@ -13,9 +13,5 @@ export function MrPillLogo(scale?: number) {
     );
   };
 
-  return(
-    <View style={{flex: 1, maxHeight: 240 * (scale || 1), marginBottom: 20}}>
-      <PopButton ButtonContent={logo} BackgroundColor="white" ButtonScale={scale? scale: 1}/>
-    </View>
-  )
+  return <PopButton ButtonContent={logo} BackgroundColor="white" ButtonScale={scale? scale: 1}/>
 }

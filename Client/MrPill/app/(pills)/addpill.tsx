@@ -125,7 +125,9 @@ const AddPillScreen = () => {
 
   return (
     <SafeAreaView style={{ backgroundColor: backgroundColorMain, flex: 1 }}>
+      <View style={{justifyContent: 'center', minHeight: 90, marginBottom: 10}}> 
       {MrPillLogo(0.5)}
+      </View>
       {cameraVisible && (
         <View style={styles.cameraContainer}>
           <BarCodeScanner
@@ -156,8 +158,8 @@ const AddPillScreen = () => {
 
       <View style={{ flexGrow: 1, minHeight: 160 }}>
         <View style={styles.pagetop}>
-          <ThemedText style={{ textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>
-            אנא בחר ארון להוספת התרופה:{"\n"}
+          <ThemedText style={{ lineHeight: 30, textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>
+            אנא בחר ארון להוספת התרופה:
           </ThemedText>
           {cabinets.length < 1 &&
           <ThemedText style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000" }}>
@@ -205,7 +207,7 @@ const styles = StyleSheet.create({
     borderColor: borderColor,
     minHeight: 100,
     marginHorizontal: 15,
-    padding: 5,
+    paddingBottom: 5,
     elevation: 5,
   },
   privacyButton: {

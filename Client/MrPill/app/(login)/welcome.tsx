@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link, router } from "expo-router";
 
 import {
@@ -10,7 +10,6 @@ import {
 } from "react-native";
 
 import { MrPillLogo } from "@/components/MrPillLogo";
-import axios from "axios";
 import DataHandler from "@/DataHandler";
 import RequestHandler from "@/RequestHandler";
 
@@ -24,22 +23,19 @@ async function handleLoginPress() {
     DataHandler.setState('login', 'false');
   }
 
-  router.dismissAll();
-  router.push('/(login)/login');
-  //router.push('/(reminders)/ask');
+  router.navigate('/(login)/login');
 
 }
 
 async function sendAutomaticLoginRequest() {
 
-  if (DataHandler.getState('session') == 'true') {
+  if (DataHandler.getFlag('session')) {
     router.navigate('/(home)/home');
   }
 
   if (DataHandler.isEmpty()) return false;
   
   return (await RequestHandler.sendRequest('login'));
-
 }
 
 const WelcomeScreen = () => {

@@ -35,7 +35,7 @@ const MyReminders: React.FC = () => {
 
   const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
   function renderReminder(reminder?: Reminder, id?: number) {
-    if (!reminder || !id) return;
+    if (!reminder) return;
     return (
       <Pressable key={id} onPress={()=>{console.log('y')}}>
         
@@ -82,8 +82,8 @@ const MyReminders: React.FC = () => {
         <View style={{flex: 1}}>
         {MrPillLogo(0.5)}
             <View style={styles.pagetop}> 
-                <ThemedText style={{textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
-                    התזכורות שלי:{"\n"}
+                <ThemedText style={{lineHeight: 30, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
+                    התזכורות שלי:
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                   {myReminders.map((reminder, index) => renderReminder(reminder, index))}
@@ -104,6 +104,7 @@ const MyReminders: React.FC = () => {
 const styles = StyleSheet.create({
   pagetop: {
     flex: 1,
+    marginTop: 20,
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: backgroundColorLight,
@@ -112,7 +113,8 @@ const styles = StyleSheet.create({
     borderColor: borderColor,
     minHeight: 100,
     marginHorizontal: 15,
-    padding: 5,
+    paddingBottom: 5,
+    paddingHorizontal: 5,
     elevation: 8,
   },
   pagebottom: {
