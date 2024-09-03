@@ -18,9 +18,9 @@ async function handleLoginPress() {
   const success = await sendAutomaticLoginRequest();
 
   if (success) {
-    DataHandler.setState('login', 'true');
+    DataHandler.setFlag('login', true);
   } else {
-    DataHandler.setState('login', 'false');
+    DataHandler.setFlag('login', false);
   }
 
   router.navigate('/(login)/login');
@@ -29,12 +29,13 @@ async function handleLoginPress() {
 
 async function sendAutomaticLoginRequest() {
 
-  if (DataHandler.getFlag('session')) {
+  if (DataHandler.isEmpty()) return false;
+
+  if (DataHandler.getFlag('sessionAlive')) {
     router.navigate('/(home)/home');
+    return true;
   }
 
-  if (DataHandler.isEmpty()) return false;
-  
   return (await RequestHandler.sendRequest('login'));
 }
 

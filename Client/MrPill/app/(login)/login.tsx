@@ -31,12 +31,12 @@ const isValidCodeModelCorrect = (validCode: string) => {
 const LogInScreen = () => {
 
   const user = DataHandler.getUser()
-  const loginType = DataHandler.getState('login');
+  const loginType = DataHandler.getFlag('login');
 
-  const [phoneNumber, onChangePhoneNumber] = React.useState<string>(loginType == 'true' ? user.PhoneNumber : "");
+  const [phoneNumber, onChangePhoneNumber] = React.useState<string>(loginType ? user.PhoneNumber : "");
   const [validationCode, setValidationCode] = React.useState<string>("");
  
-  const [isPhoneValid, setIsPhoneValid] = React.useState<boolean>(loginType == 'true');
+  const [isPhoneValid, setIsPhoneValid] = React.useState<boolean>(loginType || false);
   const [isNumberInSystem, setIsNumberInSystem] = React.useState<boolean>(true);
 
   const [isInitialButtonDisabled, setIsInitialButtonDisabled] = React.useState(true);
@@ -56,7 +56,7 @@ const LogInScreen = () => {
     let response = await sendVerifyLoginRequest();
     console.log(response);
     if (response) {
-      DataHandler.setFlag('session', true);
+      DataHandler.setFlag('sessionAlive', true);
       router.replace({pathname: '/(home)/home', params: {'userIsLoggedIn': 1}});
     }
   }
@@ -89,7 +89,7 @@ const LogInScreen = () => {
 
       if (await RequestHandler.sendRequest("verifyLogin")) {
         const response = RequestHandler.getParsedResponse();
-        DataHandler.setUser(response.firstName, response.lastName, undefined, JSON.parse(RequestHandler.getResponse().request._response).token)
+        DataHandler.setUser(response.firstName, response.lastName, phoneNumber, JSON.parse(RequestHandler.getResponse().request._response).token)
         return true;
       }
       
@@ -128,7 +128,7 @@ const LogInScreen = () => {
         style={styles.input}
         onChangeText={(input: any) => {onChangePhoneNumber(input); setIsNumberInSystem(true); updateButton();}}
         value={phoneNumber}
-        placeholder={loginType != 'true' ? "מספר טלפון" : user.PhoneNumber}
+        placeholder={"מספר טלפון"}
         keyboardType="numeric"
         textAlign="right"
         onEndEditing={()=>{}}
@@ -149,6 +149,7 @@ const LogInScreen = () => {
 
       {isPhoneValid && 
         <View>
+          
           <TextInput
             style={styles.input}
             onChangeText={(input: any) => {setValidationCode(input); updateButton()}}

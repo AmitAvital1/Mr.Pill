@@ -29,7 +29,7 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
     <Pressable key={Type} onPress={handleOnPress}>
       <View style={[style.button, {backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
           {Type && <Text style={{fontSize: 72, position: 'absolute', paddingTop: padding[Type]}}>{emojis[Type]}</Text>}
-          <ButtonContent />
+          <ButtonContent key={Type} />
       </View>
     </Pressable>
   );
