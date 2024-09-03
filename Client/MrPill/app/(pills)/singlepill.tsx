@@ -1,7 +1,7 @@
 import React from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -21,7 +21,7 @@ type Pill = {
     validity: string | null;
     userId: number;
     medicationRepoId: number;
-    imagePath: string | null;
+    imagePath: string;
     isPrivate: boolean;
     numberOfPills: number;
     shelfLife: number;
@@ -38,10 +38,9 @@ const SinglePillPage: React.FC = () => {
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
         <View style={{flex: 1}}>
         {MrPillLogo(0.5)}
-            <View style={styles.pagetop}> 
-                <ThemedText style={{lineHeight: 30, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
-                    asdasd
-                </ThemedText>
+            <View style={styles.pagetop}>
+                <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+                <ThemedText style={{lineHeight: 30, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}></ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                   
                 </ParallaxScrollView>
@@ -50,9 +49,13 @@ const SinglePillPage: React.FC = () => {
         
         <View style={styles.pagebottom}>
             <View style={styles.row}>
-                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תזכורת חדשה")} ButtonAction={()=>{router.navigate('/(reminders)/addreminder')}}/>
+                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➕")} ButtonAction={()=>{router.navigate('/(reminders)/addreminder')}}/>
+            </View>
+            <View style={styles.row}>
+                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➖")} ButtonAction={()=>{router.navigate('/(reminders)/addreminder')}}/>
             </View>
         </View>
+        
 
     </View>
   );
@@ -76,6 +79,7 @@ const styles = StyleSheet.create({
   },
   pagebottom: {
     flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
@@ -122,7 +126,12 @@ const styles = StyleSheet.create({
     fontSize: 30,
     fontWeight: 'bold',
     position: 'absolute',
-  }
+  },
+  image: {
+    alignSelf: "center",
+    height: "100%",
+    width: "100%",
+  }, 
 });
 
 export default SinglePillPage;

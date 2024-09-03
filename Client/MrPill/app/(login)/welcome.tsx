@@ -24,7 +24,6 @@ async function handleLoginPress() {
   }
 
   router.replace('/(login)/login');
-
 }
 
 async function sendAutomaticLoginRequest() {

@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     elevation: 5,
   },
+  
   privacyButton: {
     minHeight: 80,
     minWidth: 100,
@@ -226,8 +227,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 20,
     marginHorizontal: 15,
-    marginVertical: 35,
     padding: 5,
+    minHeight: 150,
   },
   
   row: {

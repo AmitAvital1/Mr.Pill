@@ -9,6 +9,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 
 import DataHandler from "@/DataHandler";
 import RequestHandler from "@/RequestHandler";
+import { router } from "expo-router";
 
 type Pill = {
   id: number;
@@ -19,7 +20,7 @@ type Pill = {
   validity: string | null;
   userId: number;
   medicationRepoId: number;
-  imagePath: string | null;
+  imagePath: string;
   isPrivate: boolean;
   numberOfPills: number;
   shelfLife: number;
@@ -57,8 +58,9 @@ const MyPills: React.FC = () => {
     
   }, []);
   
-  const handleImagePress = (pillId: number) => {
-    console.log(pillId);
+  const handleImagePress = (pill: Pill) => {
+    DataHandler.set('pill', pill);
+    router.navigate("/(pills)/singlepill");
   };
 
   const renderPill = (pill: Pill, index: number) => {
@@ -67,9 +69,9 @@ const MyPills: React.FC = () => {
       <SafeAreaView key={pill.id} style={[styles.pillContainer, {backgroundColor: index % 2 == 0? "#bfbfbf" : "#d4d4d4",}]}>
         
         <View>
-          <Pressable onPress={() => handleImagePress(pill.id)}>
+          <Pressable onPress={() => handleImagePress(pill)}>
             <View style={styles.imageContainer}>
-            <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+              <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
             </View>
           </Pressable>
         </View>

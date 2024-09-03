@@ -16,7 +16,6 @@ const backgroundColorAlt = "#ffe3e3"
 const backgroundColorMain = "#dff5ff"
 const borderColor = "#8a8aa7"
 
-
 function helloMessage() {
   let hours = new Date().getHours();
 
@@ -59,7 +58,7 @@ const HomePage: React.FC = () => {
   const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
   const [myNotifications, setNotifications] = React.useState<[Notification?]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = React.useState<boolean>(false);
-  const [screenUpdated, setScreenUpdated] = React.useState<boolean>(false);
+  const [screenUpdated, setScreenUpdated] = React.useState<boolean>();
 
   const respondToJoinCabinetRequest = async (notification: Notification, userResponse: boolean) => {
     DataHandler.setFlag("userResponse", userResponse);
@@ -90,10 +89,13 @@ const HomePage: React.FC = () => {
   }
 
   useEffect(() => {
+    if (screenUpdated === undefined) return;
+
     const updateNotifications = async ()=> {
       await sendGetNotificationsRequest();
       setIsNotificationsOpen(myNotifications.length > 0);
     }
+
     updateNotifications();
   }, [screenUpdated])
 
@@ -172,7 +174,7 @@ const HomePage: React.FC = () => {
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
      
       <Pressable onPress={logOut}>
-      <View style={{backgroundColor: "#ddd", position: 'absolute', marginLeft: "3.5%", marginTop: "7%", borderRadius: 999}}>
+      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "3.5%", marginTop: "7%", borderRadius: 999}}>
         <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
       </View>
       </Pressable>
@@ -270,7 +272,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   reminderBox: {
-    backgroundColor: "#dadada",
+    backgroundColor: "#dadadadf",
     //borderWidth: 2,
     borderColor: borderColor,
     borderRadius: 12,
