@@ -98,7 +98,7 @@ const AddReminderScreen = () => {
 
     async function sendAddReminderRequest() {
         
-        DataHandler.setReminder({
+        DataHandler.set('reminder', {
             "ReminderTime": getDateISO(datesArr.indexOf(selectedDateOffset)) + selectedHours + ":" + selectedMinutes + ":00",
             "Message": userReminderMessage || "עליך לקחת את התרופה " + selectedPill.hebrewName,
             "IsRecurring": !(selectedFrequency === "פעם אחת בלבד"),

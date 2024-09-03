@@ -10,7 +10,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import DataHandler from "@/DataHandler";
 import RequestHandler from "@/RequestHandler";
 
-
 type Pill = {
   id: number;
   englishName: string | null;
@@ -20,10 +19,12 @@ type Pill = {
   validity: string | null;
   userId: number;
   medicationRepoId: number;
-  imagePath: string;
+  imagePath: string | null;
   isPrivate: boolean;
   numberOfPills: number;
+  shelfLife: number;
   medicineCabinetName: string | null;
+  brochurePath: string | null;
 }
 
 const MyPills: React.FC = () => {

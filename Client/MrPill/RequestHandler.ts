@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import DataHandler from "./DataHandler";
 
-
 // change if need
 const BASE_URL = "http://10.100.102.17:"
 const SERVER_AND_CLIENT_ON_SAME_MACHINE = true;
@@ -153,7 +152,7 @@ function createRequest(requestType: string) {
                 headers: {
                     "Authorization": "Bearer " + user.Token,
                 },
-                data: DataHandler.getReminder(),
+                data: DataHandler.get('reminder'),
             
             }; return;
 
