@@ -92,7 +92,7 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const updateNotifications = async ()=> {
       await sendGetNotificationsRequest();
-      setIsNotificationsOpen(myNotifications.length < 1);
+      setIsNotificationsOpen(myNotifications.length > 0);
     }
     updateNotifications();
   }, [screenUpdated])

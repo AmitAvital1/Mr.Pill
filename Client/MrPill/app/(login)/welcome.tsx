@@ -23,7 +23,7 @@ async function handleLoginPress() {
     DataHandler.setFlag('login', false);
   }
 
-  router.navigate('/(login)/login');
+  router.replace('/(login)/login');
 
 }
 
@@ -32,7 +32,7 @@ async function sendAutomaticLoginRequest() {
   if (DataHandler.isEmpty()) return false;
 
   if (DataHandler.getFlag('sessionAlive')) {
-    router.navigate('/(home)/home');
+    router.replace('/(home)/home');
     return true;
   }
 

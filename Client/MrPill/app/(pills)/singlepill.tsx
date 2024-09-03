@@ -1,5 +1,4 @@
-
-/*import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet } from 'react-native';
@@ -9,14 +8,30 @@ import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from '@/DataHandler';
 
-
 const backgroundColorLight = "#71bfe9"
 const backgroundColorMain = "#e6c8c8"
 const borderColor = "#005a27"
 
+type Pill = {
+    id: number;
+    englishName: string | null;
+    hebrewName: string | null;
+    englishDescription: string | null;
+    hebrewDescription: string | null;
+    validity: string | null;
+    userId: number;
+    medicationRepoId: number;
+    imagePath: string | null;
+    isPrivate: boolean;
+    numberOfPills: number;
+    shelfLife: number;
+    medicineCabinetName: string | null;
+    brochurePath: string | null;
+}
+
 const SinglePillPage: React.FC = () => {
 
-    const pill = DataHandler.get('pill');
+  const pill: Pill = DataHandler.get('pill');
 
   // MAIN PAGE LAYOUT
   return (    
@@ -111,4 +126,3 @@ const styles = StyleSheet.create({
 });
 
 export default SinglePillPage;
-*/

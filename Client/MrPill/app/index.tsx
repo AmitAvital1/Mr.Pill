@@ -15,7 +15,7 @@ export default function IndexScreen() {
             await DataHandler.loadUserFromStorage();
         }
 
-        loadUser()
+        loadUser();
     })
 
     return <Redirect href={"/(login)/welcome"}/>;
