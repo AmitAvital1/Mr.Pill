@@ -1,8 +1,8 @@
-import React, {FunctionComponent} from 'react';
+import React from 'react';
 import {View, StyleSheet, Pressable, Text} from 'react-native';
 
 type AppHomeButtonProps = {
-  ButtonContent: FunctionComponent;
+  ButtonContent: React.JSX.Element | React.JSX.Element[];
   ButtonAction?: Function;
   BackgroundColor?: string;
   BorderColor?: string;
@@ -11,7 +11,6 @@ type AppHomeButtonProps = {
 };
 
 const emojis = ["", "🗄", "💊", "⏰", "➕",];
-const padding = [0,20,20,20,10];
 
 export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, ButtonAction, BackgroundColor, BorderColor, BorderWidth, Type }) => {
 
@@ -28,8 +27,8 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
   return (
     <Pressable key={Type} onPress={handleOnPress}>
       <View style={[style.button, {backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
-          {Type && <Text style={{fontSize: 72, position: 'absolute', paddingTop: padding[Type]}}>{emojis[Type]}</Text>}
-          <ButtonContent />
+          {Type && <Text style={{fontSize: 72, position: 'absolute', color: "#FFFFFF88"}}>{emojis[Type]}</Text>}
+          {ButtonContent}
       </View>
     </Pressable>
   );

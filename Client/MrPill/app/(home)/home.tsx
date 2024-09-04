@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
@@ -15,7 +15,6 @@ const backgroundColorLight = "#c9c9ff"
 const backgroundColorAlt = "#ffe3e3"
 const backgroundColorMain = "#dff5ff"
 const borderColor = "#8a8aa7"
-
 
 function helloMessage() {
   let hours = new Date().getHours();
@@ -49,15 +48,8 @@ type Notification = {
   dateEnd: string
 }
 
-type Cabinet = {
-  Id: number,
-  SenderPhoneNumber: string,
-  CabinetName: string,
-  SenderName: string,
-}
-
 function getEmoji(type?: number) {
-  const emojis = ["😎","😍","🥰","😁","😊","😄","😃","😀","😏"]
+  const emojis = ["😎","😍","🥰","😁","😊","😄","😃","😀","😏"];
   return emojis[type? type % emojis.length : Math.floor(Math.random() * emojis.length)];
 }
 
@@ -66,42 +58,59 @@ const HomePage: React.FC = () => {
   const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
   const [myNotifications, setNotifications] = React.useState<[Notification?]>([]);
   const [isNotificationsOpen, setIsNotificationsOpen] = React.useState<boolean>(false);
+  const [screenUpdated, setScreenUpdated] = React.useState<boolean>();
 
   const respondToJoinCabinetRequest = async (notification: Notification, userResponse: boolean) => {
-    
     DataHandler.setFlag("userResponse", userResponse);
     DataHandler.set("notification", notification);
 
-    if (await RequestHandler.sendRequest("respondToJoinCabinetRequest")) {
-      
+    await RequestHandler.sendRequest("respondToJoinCabinetRequest");
+    setScreenUpdated(!screenUpdated);
+  }
+
+  const sendGetRemindersRequest = async () => {
+              
+    if (await RequestHandler.sendRequest('getMyRemindersToday')) {
+      setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-    
-      //
-      setIsNotificationsOpen(false);
-      const sendGetRemindersRequest = async () => {
+  const sendGetNotificationsRequest = async () => {
               
-        if (await RequestHandler.sendRequest('getMyRemindersToday')) {
-          setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
-        }
-      }
-      sendGetRemindersRequest();
+    if (await RequestHandler.sendRequest('getNotifications')) {
+      setNotifications(JSON.parse(RequestHandler.getResponse().request._response).data);
+      console.log(RequestHandler.getResponse().request._response)
+    }
+  }
 
-      const sendGetNotificationsRequest = async () => {
-              
-        if (await RequestHandler.sendRequest('getNotifications')) {
-          setNotifications(JSON.parse(RequestHandler.getResponse().request._response).data);
-          console.log(RequestHandler.getResponse().request._response)
-        }
-      }
+  const logOut = () => {
+    DataHandler.reset();
+    DataHandler.expireSession();
+  }
+
+  useEffect(() => {
+    if (screenUpdated === undefined) return;
+
+    const updateNotifications = async ()=> {
+      await sendGetNotificationsRequest();
+      setIsNotificationsOpen(myNotifications.length > 0);
+    }
+
+    updateNotifications();
+  }, [screenUpdated])
+
+  useFocusEffect(
+
+    useCallback(() => {
+
+      setIsNotificationsOpen(false);
+      sendGetRemindersRequest();
       sendGetNotificationsRequest();
-      //
+      
       return () => {
         //console.log('Screen was unfocused or navigating away');
       };
+
     }, [])
   );
 
@@ -117,7 +126,7 @@ const HomePage: React.FC = () => {
 
             <View style={{flexGrow: 1}}>
               <ThemedText style={{fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
-              <ThemedText style={{fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\n בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
+              <ThemedText style={{fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</ThemedText>
             </View>
     
           </View>
@@ -163,13 +172,19 @@ const HomePage: React.FC = () => {
 
   return (
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
+     
+      <Pressable onPress={logOut}>
+      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "3.5%", marginTop: "7%", borderRadius: 999}}>
+        <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
+      </View>
+      </Pressable>
 
       {myNotifications.length > 0 &&
       <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}}>
-      <View style={{position: 'absolute', marginLeft: 25, marginTop: 150, borderRadius: 100}}>
+      <View style={{backgroundColor: "#ddd", position: 'absolute', marginLeft: "5%", marginTop: "30%", borderRadius: 999}}>
         <ThemedText style={{lineHeight: 55, fontSize: 35}}>🔔</ThemedText>
       </View>
-      <View style={{position: 'absolute', marginLeft: 25, marginTop: 150, borderRadius: 100}}>
+      <View style={{position: 'absolute', marginLeft: "5%", marginTop: "30%", borderRadius: 1000}}>
         <ThemedText>🔴</ThemedText>
       </View>
       </Pressable>}
@@ -257,7 +272,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   reminderBox: {
-    backgroundColor: "#dadada",
+    backgroundColor: "#dadadadf",
     //borderWidth: 2,
     borderColor: borderColor,
     borderRadius: 12,
