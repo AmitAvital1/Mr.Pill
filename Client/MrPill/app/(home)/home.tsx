@@ -190,7 +190,7 @@ const HomePage: React.FC = () => {
       </Pressable>}
 
       {MrPillLogo(0.75)}
-      <ThemedText style={{marginBottom: 5, fontSize: 18, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
+      <ThemedText style={{lineHeight: 30, marginBottom: 5, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
       {isNotificationsOpen &&
       <View style={{flex: 1,}}>
         <View style={[styles.pagetop, {borderBottomWidth: 10, borderColor: backgroundColorLight, backgroundColor: backgroundColorAlt}]}>
@@ -205,7 +205,7 @@ const HomePage: React.FC = () => {
       <View style={{flex: myReminders.length > 0 ? 1 : 0}}>
         <View style={styles.pagetop}> 
 
-          <ThemedText style={styles.text}>{myReminders.length > 0 ? "תזכורות להיום:" : "אין תזכורות להיום" + getEmoji()}</ThemedText>
+          <ThemedText style={styles.text}>{myReminders.length > 0 ? "תזכורות להיום:" : "אין תזכורות להיום  " + getEmoji()}</ThemedText>
  
           {myReminders.length > 0 && 
           <ParallaxScrollView backgroundColor={backgroundColorLight}>

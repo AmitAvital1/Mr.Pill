@@ -11,9 +11,9 @@ import { PopButton } from '@/components/PopButton';
 import RequestHandler from '@/RequestHandler';
 import { WebView } from 'react-native-webview';
 
-const backgroundColorLight = "#b6ece6"
+const backgroundColorLight = "#cbc4ff"
 const backgroundColorMain = "#c8e3e6"
-const borderColor = "#005a27"
+const borderColor = "#02005a55"
 
 type Pill = {
     id: number;
@@ -74,7 +74,7 @@ const SinglePillPage: React.FC = () => {
 
                 <ThemedText style={styles.text}>מתוך ארון התרופות: {pill.medicineCabinetName}</ThemedText>
                 <View style={{flex: 1}}/>
-                <ThemedText style={styles.text}>מספר התרופות שנותרו: {pill.numberOfPills}</ThemedText>
+                <ThemedText style={styles.text}>מספר התרופות שנותרו:  <ThemedText style={[styles.text, {lineHeight: 40, fontSize: 40, color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "yellow" : "green")}]}>{pill.numberOfPills}</ThemedText></ThemedText>
             </View>
         </View>
         
