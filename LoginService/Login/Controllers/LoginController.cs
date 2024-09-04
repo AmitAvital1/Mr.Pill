@@ -287,7 +287,8 @@ public class LoginController : Controller
     {
         try
         {
-            string token = GetTokenFromHeaders(); 
+            string token = GetTokenFromHeaders();
+            
             string phoneNumber = _loginService.getPhoneNumberFromToken(token);
 
             if(targetPhoneNumber.Equals(phoneNumber))
