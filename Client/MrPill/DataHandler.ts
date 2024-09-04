@@ -20,10 +20,9 @@ let user = {
 
 // using 3 tables for easy access to different types of data
 let map = new Map<string, any>();
-
 let stateMap = new Map<string, string>();
-
 let flagMap = new Map<string, boolean>();
+let disposable: any = null;
 
 export default {
 
@@ -50,8 +49,14 @@ export default {
     map.set(key,value);
   },
   
-  get(key: string) {
-    return map.get(key);
+  get(key: string, dispose?: boolean) {
+    const result = map.get(key);
+
+    if (dispose) {
+      map.delete(key);
+    }
+
+    return result;
   },
 
   setUser(firstName?: string, lastName?: string, phoneNumber?: string, token?: string) {
@@ -78,8 +83,14 @@ export default {
     return (user.FirstName == "" || user.LastName == "" || user.PhoneNumber == "" || user.Token == "");
   },
 
-  getState(key: string) {
-    return stateMap.get(key);
+  getState(key: string, dispose?: boolean) {
+    const result = stateMap.get(key);
+    
+    if (dispose) {
+      stateMap.delete(key);
+    }
+
+    return result;
   },
 
   setState(key: string, value: string) {
@@ -155,6 +166,6 @@ export default {
       console.error(e);
 
     }
-  }
+  },
 
 };

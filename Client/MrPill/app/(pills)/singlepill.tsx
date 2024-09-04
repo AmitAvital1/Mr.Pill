@@ -55,7 +55,7 @@ const SinglePillPage: React.FC = () => {
 
   const handlePillImagePress = () => {
     DataHandler.setState("pdfURL", pill.brochurePath);
-    router.push("/(pills)pillbrochure");
+    router.push("/(pills)/pillbrochure");
   }
 
   // MAIN PAGE LAYOUT
@@ -66,13 +66,14 @@ const SinglePillPage: React.FC = () => {
         
             <View style={styles.pagetop}>
                 
-                <View style={styles.imageContainer}>
+                <Pressable style={styles.imageContainer} onPress={handlePillImagePress}>
                   <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
                     <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
                   <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
-                </View>
+                </Pressable>
 
-                <ThemedText style={styles.text}>מתוך ארון התרופות: {pill.medicineCabinetName}</ThemedText>
+                <ThemedText style={styles.text}>מתוך ארון התרופות:{"\n"}{pill.medicineCabinetName}</ThemedText>
+                {pill.validity && <ThemedText style={styles.text}>תוקף: {pill.validity.slice(0, 10)}</ThemedText>}
                 <View style={{flex: 1}}/>
                 <ThemedText style={styles.text}>מספר התרופות שנותרו:  <ThemedText style={[styles.text, {lineHeight: 40, fontSize: 40, color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "yellow" : "green")}]}>{pill.numberOfPills}</ThemedText></ThemedText>
             </View>

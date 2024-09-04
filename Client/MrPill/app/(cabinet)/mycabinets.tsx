@@ -52,22 +52,24 @@ const MyCabinets: React.FC = () => {
       if (!cabinet) return;
       return (
         <Pressable key={id} onPress={()=>{console.log('y')}}>
-
           <View style={styles.reminderBox}>
             <View style={{alignItems: 'center', flexDirection: 'row'}}>
-
-              <Pressable onPress={()=>{DataHandler.set('cabinet', cabinet); router.navigate("/(pills)/mypills");}}>
+              
+              {/*  */}
+              <Pressable onPress={()=>{DataHandler.setState("showFromCabinet", cabinet.medicineCabinetName); router.navigate("/(pills)/mypills");}}>
                 <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
                   <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
                 </View>
               </Pressable>
 
+              {/*  */}
               <Pressable onPress={()=>{DataHandler.set('cabinet', cabinet); router.navigate("/(cabinet)/cabinetmembers");}}>
                 <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
                   <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
                 </View>
               </Pressable> 
-
+              
+              {/*  */}
               <View style={{flexGrow: 1}}>
                 {cabinet.isCreator &&
                 <Pressable onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}>
@@ -75,7 +77,6 @@ const MyCabinets: React.FC = () => {
                 </Pressable>
                 }
                 <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
-                
               </View>
       
             </View>
@@ -89,23 +90,29 @@ const MyCabinets: React.FC = () => {
   return (    
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
         <View style={{flex: 1}}>
-        {MrPillLogo(0.5)}
-            <View style={styles.pagetop}> 
-                <ThemedText style={{lineHeight: 35, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
-                    ארונות תרופות שלי:
-                </ThemedText>
-                <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                    {myCabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
-                    {myCabinets.length == 0 && <ThemedText style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
-                </ParallaxScrollView>
-            </View>
+          {/* page header */}
+          {MrPillLogo(0.5)}
+          <View style={styles.pagetop}>
+
+            {/* page title */}
+            <ThemedText style={{lineHeight: 35, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
+              ארונות תרופות שלי:
+            </ThemedText>
+
+            {/* cabinet list */}
+            <ParallaxScrollView backgroundColor={backgroundColorLight}>
+              {myCabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
+              {myCabinets.length == 0 && <ThemedText style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
+            </ParallaxScrollView>
+
+          </View>
         </View>
 
-        
+        {/* page bottom */}
         <View style={styles.pagebottom}>
-            <View style={styles.row}>
-                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף ארון חדש")} ButtonAction={()=>{router.navigate('/(cabinet)/addcabinet')}}/>
-            </View>
+          <View style={styles.row}>
+            <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף ארון חדש")} ButtonAction={()=>{router.navigate('/(cabinet)/addcabinet')}}/>
+          </View>
         </View>
 
     </View>

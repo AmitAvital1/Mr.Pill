@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { View, Text, StyleSheet, Image, Pressable, Modal, SafeAreaView } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable, Modal, SafeAreaView, ScrollView } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import * as FileSystem from 'expo-file-system';
 
-import axios from "axios";
 import { MrPillLogo } from "@/components/MrPillLogo";
 import Ionicons from '@expo/vector-icons/Ionicons';
 
@@ -32,21 +31,16 @@ type Pill = {
 const MyPills: React.FC = () => {
 
   const user = DataHandler.getUser();
-  const [myPills, setMyPills] = useState<Pill[]>([]);
-  const [ownerId, setOwnerId] = useState<number>(0);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
 
-  // Example dropdown items
-  const dropdownItems = [
-      '5',
-      '6',
-      '7',
-  ];
+  const [myPills, setMyPills] = useState<Pill[]>([]);
+  const [dropDownItems, setDropDownItems] = useState<String[]>([]);
+  const [cabinetName, setCabinetName] = useState<string>(DataHandler.getState("showFromCabinet") || "");
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  
 
   const toggleDropdown = () => {
-      setDropdownVisible(!dropdownVisible);
+    setDropdownVisible(!dropdownVisible);
   };
-
 
   useFocusEffect(
     useCallback(() => {
@@ -64,7 +58,6 @@ const MyPills: React.FC = () => {
       };
     }, [])
   );
-
   
   const handleImagePress = (pill: Pill) => {
     DataHandler.set('pill', pill);
@@ -91,26 +84,28 @@ const MyPills: React.FC = () => {
         <View style={{maxWidth: 170, minWidth: 170,}}>
           {/*<Text style={styles.itemText}>{pill.quantity}</Text>*/}
           <Text style={styles.itemText}>{pill.hebrewName}</Text>
-          {pill.isPrivate && <Text style={styles.itemText}>אישי</Text>}
+          {pill.isPrivate && !(cabinetName==="me") && <Text style={styles.itemText}>אישי</Text>}
         </View>
 
       </SafeAreaView>
     );
   };
 
-  const renderPillItems = (ownerId: number) => {
+  const renderPillItems = () => {
   
     let pillItems = [];
     for (let i = 0; i < myPills.length; i++) {
-      if (ownerId == 1 || myPills[i].medicationRepoId == ownerId)
+      if (cabinetName === "" || cabinetName === myPills[i].medicineCabinetName || (cabinetName === "me" && myPills[i].isPrivate))
         pillItems.push(renderPill(myPills[i], i));
     }
     return pillItems;
   };
 
   const handleMorePillSources = () => {
+    if (!dropdownVisible) {
+      setDropDownItems([...new Set(myPills.map((pill, index)=> pill.medicineCabinetName))] as String[]);
+    }
     toggleDropdown();
-    console.log(FileSystem.documentDirectory)
   }
 
   return (
@@ -118,24 +113,26 @@ const MyPills: React.FC = () => {
       
       <View style={styles.lineContainer}>
 
-      <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>בחר ארון</Text>
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.text}>הצג לפי ארון</Text>
           <Pressable onPress={handleMorePillSources}>
-            <Ionicons name={'list-circle-outline'} size={ownerId >= 2 ? 90 : 80} color={ownerId >= 2 ? '#000000' : '#777777'}/>
+            <Ionicons name={'list-circle-outline'} size={cabinetName.length > 2 ? 90 : 80} color={cabinetName.length > 2 ? '#000000' : '#777777'}/>
           </Pressable>
         </View>
+
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.text}>אישי בלבד</Text>
+          <Pressable onPress={()=>{setCabinetName("me"); setDropdownVisible(false)}}>
+            <Ionicons name={'person-circle-outline'} size={cabinetName === "me" ? 90 : 80} color={cabinetName === "me" ? '#000000' : '#777777'}/>
+          </Pressable>
+        </View>
+
+        <View></View>
 
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>הצג הכל</Text>
-          <Pressable onPress={()=>{setOwnerId(1); setDropdownVisible(false)}}>
-            <Ionicons name={'people-circle-outline'} size={ownerId == 1 ? 90 : 80} color={ownerId == 1 ? '#000000' : '#777777'}/>
-          </Pressable>
-        </View>
-
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>אישי</Text>
-          <Pressable onPress={()=>{setOwnerId(0); setDropdownVisible(false)}}>
-            <Ionicons name={'person-circle-outline'} size={ownerId == 0 ? 90 : 80} color={ownerId == 0 ? '#000000' : '#777777'}/>
+          <Pressable onPress={()=>{setCabinetName(""); setDropdownVisible(false)}}>
+            <Ionicons name={'people-circle-outline'} size={cabinetName === "" ? 90 : 80} color={cabinetName === "" ? '#000000' : '#777777'}/>
           </Pressable>
         </View>
 
@@ -149,17 +146,16 @@ const MyPills: React.FC = () => {
       
       {dropdownVisible && (
           <View style={styles.dropdown}>
-              {dropdownItems.map((item, index) => (
-                  <Pressable key={index} style={styles.dropdownItem} onPress={()=>{setOwnerId(Number(item)); setDropdownVisible(false)}}>
-                      <Text>{item}</Text>
+              {dropDownItems.map((item: any, index: any) => (
+                  <Pressable key={index} style={styles.dropdownItem} onPress={()=>{setCabinetName(item); setDropdownVisible(false)}}>
+                      <Text style={{fontSize: 26, fontWeight: 'bold', textAlign: 'center',}}>{item}</Text>
                   </Pressable>
               ))}
           </View>
       )}
       
-
       <View style={{gap: 5}}>
-        {renderPillItems(ownerId)}
+        {renderPillItems()}
       </View>
   </ParallaxScrollView>
   );
@@ -224,22 +220,21 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   dropdown: {
-      position: 'absolute',
-      top: 50, 
-      width: 100,
-      backgroundColor: '#ffffff',
-      borderWidth: 1,
-      borderColor: '#cccccc',
+      flex: 1,
       borderRadius: 5,
-      elevation: 3, 
-      zIndex: 2, 
+      zIndex: 2,
+      marginBottom: 50,
   },
   dropdownItem: {
+      backgroundColor: "#ffc2c2",
+      flex: 1,
       padding: 10,
-      borderWidth: 1,
-      borderColor: '#000',
+      elevation: 3,
       borderRadius: 15,
-      zIndex: 3,
+      zIndex: 5,
+      minHeight: 50,
+      margin: 3,
+      
   },
 });
 
