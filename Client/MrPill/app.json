@@ -35,7 +35,6 @@
     },
     "plugins": [
       "expo-router",
-      "./plugins/withNetworkSecurityConfig",
       [
         "expo-build-properties",
         {
@@ -47,6 +46,14 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "970bb119-21a0-4b97-9fa6-90781cbd09b6"
+      }
     }
   }
 }

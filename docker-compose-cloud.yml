@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: db
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1433:1433"
+    networks:
+      - mynetwork 
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest"
+    ports:
+      - "5672:5672"   # RabbitMQ default port
+      - "15672:15672" # RabbitMQ Management UI port
+    networks:
+      - mynetwork
+
+  login:
+    container_name: login
+    image: amitav2/login_service:latest
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      ConnectionStrings__DefaultConnection: "Server=db;Database=YourDatabase;User=sa;Password=YourStrong!Passw0rd;"
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__Username: "guest"
+      RabbitMQ__Password: "guest"
+      ASPNETCORE_ENVIRONMENT: Production
+    ports:
+      - "5181:8080"
+    networks:
+      - mynetwork
+
+  mohservice:
+    container_name: mohservice
+    image: amitav2/mohservice:latest
+    ports:
+      - "5200:8080"
+    restart: always
+    networks:
+      - mynetwork
+      
+  pushnotification:
+    image: amitav2/pushnotification_service:latest
+    ports:
+      - "5195:8080"
+    restart: always
+    networks:
+      - mynetwork
+
+  userfunctional:
+    container_name: userfunc
+    image: amitav2/userfunctional_service:latest
+    depends_on:
+      - db
+      - rabbitmq
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=db;Database=YourDatabase;User=sa;Password=YourStrong!Passw0rd;"
+      RabbitMQ__Host: "rabbitmq"
+      RabbitMQ__Username: "guest"
+      RabbitMQ__Password: "guest"
+    ports:
+      - "5194:8080"
+    restart: always
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
