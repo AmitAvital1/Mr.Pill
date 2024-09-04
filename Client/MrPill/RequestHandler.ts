@@ -204,7 +204,7 @@ function createRequest(requestType: string) {
                     "Authorization": "Bearer " + user.Token,
                 },
                 data: {
-                    MedicationRepoId: DataHandler.getState("repoId"),
+                    Amount: DataHandler.getState("pillAmount"),
                     MedicationId: DataHandler.getState("pillId"),
                 },
             }; return;

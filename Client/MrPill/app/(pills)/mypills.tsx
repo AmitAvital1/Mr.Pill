@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { View, Text, StyleSheet, Image, Pressable, Modal, SafeAreaView } from "react-native";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import * as FileSystem from 'expo-file-system';
@@ -10,6 +10,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import DataHandler from "@/DataHandler";
 import RequestHandler from "@/RequestHandler";
 import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 
 type Pill = {
   id: number;
@@ -46,17 +47,24 @@ const MyPills: React.FC = () => {
       setDropdownVisible(!dropdownVisible);
   };
 
-  useEffect(() => {
 
-    const fetchPills = async () => {
-      if (await RequestHandler.sendRequest('getAllPills')) {
-        setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
-      }
-    };
+  useFocusEffect(
+    useCallback(() => {
 
-    fetchPills();
-    
-  }, []);
+      const fetchPills = async () => {
+        if (await RequestHandler.sendRequest('getAllPills')) {
+          setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
+        }
+      };
+  
+      fetchPills();
+
+      return () => {
+
+      };
+    }, [])
+  );
+
   
   const handleImagePress = (pill: Pill) => {
     DataHandler.set('pill', pill);

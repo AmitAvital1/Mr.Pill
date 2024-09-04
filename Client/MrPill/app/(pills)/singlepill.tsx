@@ -1,14 +1,13 @@
 import React from 'react';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet, Image, Pressable } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
-import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from '@/DataHandler';
 import { PopButton } from '@/components/PopButton';
-import PdfViewer from '@/components/PdfViewer';
+
 import RequestHandler from '@/RequestHandler';
 import { WebView } from 'react-native-webview';
 
@@ -41,15 +40,22 @@ const SinglePillPage: React.FC = () => {
   const handlePlusButtonPress = async () => {
     DataHandler.setState("pillId", pill.id.toString());
     DataHandler.setState("pillAmount", "1");
-    await RequestHandler.sendRequest("updatePill");
+    if (await RequestHandler.sendRequest("updatePill"))
+      pill.numberOfPills++;
     setScreenUpdated(!screenUpdated);
   }
 
   const handleMinusButtonPress = async () => {
     DataHandler.setState("pillId", pill.id.toString());
     DataHandler.setState("pillAmount", "-1");
-    await RequestHandler.sendRequest("updatePill");
+    if (await RequestHandler.sendRequest("updatePill"))
+      pill.numberOfPills--;
     setScreenUpdated(!screenUpdated);
+  }
+
+  const handlePillImagePress = () => {
+    DataHandler.setState("pdfURL", pill.brochurePath);
+    router.push("/(pills)pillbrochure");
   }
 
   // MAIN PAGE LAYOUT
@@ -57,17 +63,17 @@ const SinglePillPage: React.FC = () => {
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
         <View style={{flex: 1}}>
         {MrPillLogo(0.5)}
+        
             <View style={styles.pagetop}>
                 
                 <View style={styles.imageContainer}>
                   <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
-                    <Pressable onPress={()=>{}}>
-                      <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
-                    </Pressable>
+                    <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
                   <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
                 </View>
+
                 <ThemedText style={styles.text}>מתוך ארון התרופות: {pill.medicineCabinetName}</ThemedText>
-                
+                <View style={{flex: 1}}/>
                 <ThemedText style={styles.text}>מספר התרופות שנותרו: {pill.numberOfPills}</ThemedText>
             </View>
         </View>

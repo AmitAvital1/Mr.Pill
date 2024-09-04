@@ -6,9 +6,7 @@ import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-
 import { Pressable } from 'react-native';
-
 import RequestHandler from '@/RequestHandler';
 import { useFocusEffect } from '@react-navigation/native';
 import DataHandler from '@/DataHandler';
