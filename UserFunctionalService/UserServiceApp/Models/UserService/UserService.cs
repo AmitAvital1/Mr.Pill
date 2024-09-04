@@ -307,8 +307,7 @@ public class UserService : IUserService
 
     private User? GetUserByPhoneNumber(int phoneNumber)
     {
-        var user = _dbContext?.Users?
-                .SingleOrDefault(u => u.PhoneNumber == phoneNumber);
+        var user = _dbContext?.Users?.SingleOrDefault(u => u.PhoneNumber == phoneNumber);
         
         if (user == null)
         {
@@ -321,7 +320,7 @@ public class UserService : IUserService
     private User? GetUserByPhoneNumberAndAllCabinet(int phoneNumber)
     {
         var user = _dbContext?.Users?
-            .Include(u => u.MedicineCabinetUsersList ?? new List<MedicineCabinetUsers>())
+            .Include(u => u.MedicineCabinetUsersList)
                 .ThenInclude(mcu => mcu.MedicineCabinet)
             .SingleOrDefault(u => u.PhoneNumber == phoneNumber);
         
@@ -335,8 +334,7 @@ public class UserService : IUserService
 
     private MedicationRepo? GetMedicationByBarcodeWithoutReturnADto(string medicationBarcode)
     {
-        var medication = _dbContext?.MedicationRepos
-                .SingleOrDefault(m => m.Barcode == medicationBarcode);
+        var medication = _dbContext?.MedicationRepos.SingleOrDefault(m => m.Barcode == medicationBarcode);
         
         if (medication == null)
         {
@@ -551,7 +549,7 @@ public class UserService : IUserService
             var user = _dbContext?.Users
                     ?.Include(u => u.MedicineCabinetUsersList!)
                         ?.ThenInclude(mcu => mcu.MedicineCabinet)
-                            ?.ThenInclude(mc => mc.Medications ?? new List<UserMedications>())
+                            ?.ThenInclude(mc => mc.Medications)
                                 ?.ThenInclude(m => m.MedicationRepo)
                     .FirstOrDefault(u => u.PhoneNumber == userPhoneNumber);
 
@@ -705,7 +703,7 @@ public class UserService : IUserService
                         .WithHebrewDescription(medication.HebrewDescription)
                         .WithNumberOfPills(medication.largestPackage)
                         .WithShelfLife(medication.ShelfLife)
-                        .WithBrochurePath(medication.BrochurePath!)
+                        .WithBrochurePath(medication.BrochurePath)
                         .Build();
 
         return medicationDTOBuilder;
@@ -734,7 +732,7 @@ public class UserService : IUserService
 
         if (medication == null)
         {
-            _logger.LogError (
+            _logger.LogError(
                 "Medication with ID {MedicationId} not found in medicine cabinet '{MedicineCabinetName}' for user with phone number {PhoneNumber}.", 
                 medicationId, 
                 medicineCabinetName, 
@@ -750,41 +748,27 @@ public class UserService : IUserService
         _dbContext?.SaveChanges();
     }
 
-    public void UpdateMedication( UpdateMedicationDTO updateMedication)
+    public void UpdateMedication(UpdateMedicationDTO updateMedication)
     {
-        var medicineCabinet = _dbContext.MedicineCabinets
-            .Include(mc => mc.Medications)
-            .FirstOrDefault(mc => mc.Id == updateMedication.MedicationRepoId);
-
-        if (medicineCabinet == null)
-        {
-            _logger.LogWarning(
-                "Medicine cabinet with ID {MedicineCabinetId} not found.",
-                updateMedication.MedicationRepoId
-            );
-
-            throw new Exception("Medicine cabinet not found.");
-        }
-
-        var medication = medicineCabinet?.Medications
-            ?.FirstOrDefault(m => m.Id == updateMedication.MedicationId);
+        var medication = _dbContext.UserMedications
+            .FirstOrDefault(mc => mc.Id == updateMedication.MedicationId);
 
         if (medication == null)
         {
             _logger.LogWarning(
-                "Medication with ID {MedicationId} not found in Medicine Cabinet ID {MedicineCabinetId}.",
-                updateMedication.MedicationId,
+                "Medication with ID {MedicationId} not found.",
                 updateMedication.MedicationId
             );
 
-            throw new Exception("Medication not found in the specified medicine cabinet.");
+            throw new Exception("Medicine not found.");
         }
 
         lock (_lockForUpdateMedication)
         {
-            if (medication.NumberOfPills > 0)
+
+            if (medication.NumberOfPills + updateMedication.Amount >= 0)
             {
-                medication.NumberOfPills -= 1;
+                medication.NumberOfPills += updateMedication.Amount;
             }
             else
             {
@@ -795,9 +779,8 @@ public class UserService : IUserService
         }
 
         _logger.LogInformation(
-            "Database updated successfully for MedicationId {MedicationId} in Medicine Cabinet ID {MedicineCabinetId}.",
-            medication.Id,
-            medicineCabinet?.Id
+            "Database updated successfully for MedicationId {MedicationId} ",
+            medication.Id
         );  
     }
 }

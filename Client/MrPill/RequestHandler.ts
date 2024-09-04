@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from "axios";
 import DataHandler from "./DataHandler";
 
 // change if need
-const BASE_URL = "http://10.100.102.17:"
+const BASE_URL = "http://20.217.66.65:"
 const SERVER_AND_CLIENT_ON_SAME_MACHINE = true;
 
 // do not change
