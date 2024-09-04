@@ -195,6 +195,19 @@ function createRequest(requestType: string) {
                 },
                 data: {},
             }; return;
+        
+        case "updatePill":
+            request = {
+                method: 'put',
+                url: URL + "5194/medications/update",
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {
+                    MedicationRepoId: DataHandler.getState("repoId"),
+                    MedicationId: DataHandler.getState("pillId"),
+                },
+            }; return;
     
 
         default:

@@ -1,15 +1,19 @@
 import React from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, Pressable } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from '@/DataHandler';
+import { PopButton } from '@/components/PopButton';
+import PdfViewer from '@/components/PdfViewer';
+import RequestHandler from '@/RequestHandler';
+import { WebView } from 'react-native-webview';
 
-const backgroundColorLight = "#71bfe9"
-const backgroundColorMain = "#e6c8c8"
+const backgroundColorLight = "#b6ece6"
+const backgroundColorMain = "#c8e3e6"
 const borderColor = "#005a27"
 
 type Pill = {
@@ -26,12 +30,27 @@ type Pill = {
     numberOfPills: number;
     shelfLife: number;
     medicineCabinetName: string | null;
-    brochurePath: string | null;
+    brochurePath: string;
 }
 
 const SinglePillPage: React.FC = () => {
 
   const pill: Pill = DataHandler.get('pill');
+  const [screenUpdated, setScreenUpdated] = React.useState<boolean>();
+
+  const handlePlusButtonPress = async () => {
+    DataHandler.setState("pillId", pill.id.toString());
+    DataHandler.setState("pillAmount", "1");
+    await RequestHandler.sendRequest("updatePill");
+    setScreenUpdated(!screenUpdated);
+  }
+
+  const handleMinusButtonPress = async () => {
+    DataHandler.setState("pillId", pill.id.toString());
+    DataHandler.setState("pillAmount", "-1");
+    await RequestHandler.sendRequest("updatePill");
+    setScreenUpdated(!screenUpdated);
+  }
 
   // MAIN PAGE LAYOUT
   return (    
@@ -39,20 +58,26 @@ const SinglePillPage: React.FC = () => {
         <View style={{flex: 1}}>
         {MrPillLogo(0.5)}
             <View style={styles.pagetop}>
-                <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
-                <ThemedText style={{lineHeight: 30, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}></ThemedText>
-                <ParallaxScrollView backgroundColor={backgroundColorLight}>
-                  
-                </ParallaxScrollView>
+                
+                <View style={styles.imageContainer}>
+                  <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
+                    <Pressable onPress={()=>{}}>
+                      <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+                    </Pressable>
+                  <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
+                </View>
+                <ThemedText style={styles.text}>מתוך ארון התרופות: {pill.medicineCabinetName}</ThemedText>
+                
+                <ThemedText style={styles.text}>מספר התרופות שנותרו: {pill.numberOfPills}</ThemedText>
             </View>
         </View>
         
         <View style={styles.pagebottom}>
             <View style={styles.row}>
-                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➕")} ButtonAction={()=>{router.navigate('/(reminders)/addreminder')}}/>
+                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➕", 50)} ButtonAction={()=>{handlePlusButtonPress()}}/>
             </View>
             <View style={styles.row}>
-                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➖")} ButtonAction={()=>{router.navigate('/(reminders)/addreminder')}}/>
+                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➖", 50)} ButtonAction={()=>{handleMinusButtonPress()}}/>
             </View>
         </View>
         
@@ -69,13 +94,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: backgroundColorLight,
     borderRadius: 20,
-    borderWidth: 2,
     borderColor: borderColor,
     minHeight: 100,
     marginHorizontal: 15,
     paddingBottom: 5,
     paddingHorizontal: 5,
-    elevation: 8,
+    gap: 5,
+    elevation: 3,
   },
   pagebottom: {
     flex: 1,
@@ -96,20 +121,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   text: {
-    fontSize: 20,
+    lineHeight: 36,
+    fontSize: 26,
+    fontWeight: 'bold',
     color: '#000',
-  },
-  reminderBox: {
-    backgroundColor: 'pink',
-    borderWidth: 2,
-    borderColor: borderColor,
-    borderRadius: 12,
-    flex: 1,
-    justifyContent: 'center',
-    alignContent: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    minWidth: 300,
+    textAlign: 'center',
   },
   plusMinusButton: {
     minWidth: 50,
@@ -122,16 +138,29 @@ const styles = StyleSheet.create({
     marginRight: 12,
     elevation: 5,
   },
-  plusMinusText: {
-    fontSize: 30,
-    fontWeight: 'bold',
-    position: 'absolute',
-  },
   image: {
+    flex: 1,
     alignSelf: "center",
     height: "100%",
     width: "100%",
   }, 
+  imageContainer: {
+    margin: 8,
+    minHeight: "20%",
+    maxHeight: "50%",
+    flex: 1,
+    width: "100%",
+    borderRadius: 20,
+
+    borderColor: "#747474",
+    backgroundColor: "#bdddf3",
+    justifyContent: 'center',
+    alignContent: 'center',
+    overflow: 'hidden',
+    
+    elevation: 4  ,
+    gap: 3,
+  },
 });
 
 export default SinglePillPage;

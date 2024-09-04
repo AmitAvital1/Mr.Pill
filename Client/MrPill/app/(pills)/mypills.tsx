@@ -77,7 +77,7 @@ const MyPills: React.FC = () => {
         </View>
 
         <View style={{maxWidth: 50, minWidth: 50, marginLeft: 25}}>
-          <Text style={{textAlign: 'center', fontSize: 36, fontWeight: 'bold'}}>{pill.numberOfPills}</Text>
+          <Text style={{textAlign: 'center', fontSize: 36, fontWeight: 'bold', color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "orange" : "green")}}>{pill.numberOfPills}</Text>
         </View>
 
         <View style={{maxWidth: 170, minWidth: 170,}}>

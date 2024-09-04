@@ -43,6 +43,7 @@ const style = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     margin: 10,
-    elevation: 5
+    elevation: 5,
+    shadowRadius: 15
   },
 });

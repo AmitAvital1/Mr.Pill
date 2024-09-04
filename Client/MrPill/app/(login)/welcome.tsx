@@ -18,24 +18,31 @@ async function handleLoginPress() {
   const success = await sendAutomaticLoginRequest();
 
   if (success) {
-    DataHandler.setFlag('login', true);
-  } else {
-    DataHandler.setFlag('login', false);
-  }
 
-  router.replace('/(login)/login');
+  } else {
+
+  }
+  
 }
 
 async function sendAutomaticLoginRequest() {
 
-  if (DataHandler.isEmpty()) return false;
+  if (DataHandler.isEmpty()) {
+    
+    router.push('/(login)/login');
+    return false;
 
-  if (DataHandler.getFlag('sessionAlive')) {
-    router.replace('/(home)/home');
+  } else if (DataHandler.getFlag('sessionAlive')) {
+
+    router.push('/(home)/home');
     return true;
-  }
 
-  return (await RequestHandler.sendRequest('login'));
+  } else {
+
+    DataHandler.setFlag('login', await RequestHandler.sendRequest('login'));
+    router.push('/(login)/login');
+
+  }
 }
 
 const WelcomeScreen = () => {

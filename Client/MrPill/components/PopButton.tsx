@@ -1,19 +1,25 @@
-import React, {FunctionComponent, useEffect, useRef} from 'react';
+import React, { useEffect, useRef } from 'react';
 import {View, StyleSheet, Pressable, Animated} from 'react-native';
 
+
 type PopButtonProps = {
-  ButtonContent: FunctionComponent;
+  ButtonContent: React.JSX.Element | React.JSX.Element[];
   ButtonAction?: Function;
   BackgroundColor?: string;
   ButtonScale?: number;
+  Position?: "absolute" | "relative" | "static";
 };
 
-export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonAction, ButtonScale }) => {
+export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonAction, ButtonScale, Position }) => {
   const animatedScale = useRef(new Animated.Value(0)).current;
   const animatedRotation = useRef(new Animated.Value(0)).current;
 
   if (!ButtonScale) {
     ButtonScale = 1
+  }
+
+  if (!Position) {
+    Position = "relative";
   }
 
   useEffect(() => {
@@ -48,14 +54,14 @@ export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonActio
 
 
   return (
-    <View style={[style.container, {maxHeight: 180 * ButtonScale}]}>
+    <View style={[style.container, {maxHeight: 180 * ButtonScale, position: Position}]}>
       <Pressable onPress={handleOnPress}>
         <Animated.View
           style={[
             style.button,
             { transform: [{ scale: animatedScale }, { rotate: rotation }] },
           ]}>
-          <ButtonContent />
+          {ButtonContent}
         </Animated.View>
       </Pressable>
     </View>

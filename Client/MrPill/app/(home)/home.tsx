@@ -66,6 +66,7 @@ const HomePage: React.FC = () => {
 
     await RequestHandler.sendRequest("respondToJoinCabinetRequest");
     setScreenUpdated(!screenUpdated);
+    setIsNotificationsOpen(myNotifications.length > 0);
   }
 
   const sendGetRemindersRequest = async () => {
@@ -93,7 +94,6 @@ const HomePage: React.FC = () => {
 
     const updateNotifications = async ()=> {
       await sendGetNotificationsRequest();
-      setIsNotificationsOpen(myNotifications.length > 0);
     }
 
     updateNotifications();
@@ -174,20 +174,21 @@ const HomePage: React.FC = () => {
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
      
       <Pressable onPress={logOut}>
-      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "3.5%", marginTop: "7%", borderRadius: 999}}>
+      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "3.5%", marginTop: "7%", borderRadius: 999, elevation: 3}}>
         <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
       </View>
       </Pressable>
 
       {myNotifications.length > 0 &&
       <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}}>
-      <View style={{backgroundColor: "#ddd", position: 'absolute', marginLeft: "5%", marginTop: "30%", borderRadius: 999}}>
+      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "5%", marginTop: "30%", borderRadius: 999, elevation: 3}}>
         <ThemedText style={{lineHeight: 55, fontSize: 35}}>🔔</ThemedText>
       </View>
       <View style={{position: 'absolute', marginLeft: "5%", marginTop: "30%", borderRadius: 1000}}>
         <ThemedText>🔴</ThemedText>
       </View>
       </Pressable>}
+
       {MrPillLogo(0.75)}
       <ThemedText style={{marginBottom: 5, fontSize: 18, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
       {isNotificationsOpen &&
@@ -200,7 +201,6 @@ const HomePage: React.FC = () => {
           </ParallaxScrollView>
         </View>
       </View>}
-      
       {!isNotificationsOpen && 
       <View style={{flex: myReminders.length > 0 ? 1 : 0}}>
         <View style={styles.pagetop}> 
@@ -214,6 +214,7 @@ const HomePage: React.FC = () => {
         
         </View>
       </View>}
+      {myNotifications.length < 1 && myReminders.length < 1 && <View style={{flex: 1}}/>}
               
       <View style={styles.pagebottom}>
 
