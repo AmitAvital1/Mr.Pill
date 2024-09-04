@@ -261,7 +261,7 @@ public class UserController : Controller
             {
                 Message = "Medication updated successfully.",
                 MedicationId = updateMedication.MedicationId,
-                MedicationRepoId = updateMedication.MedicationRepoId,
+                Amount = updateMedication.Amount,
                 Timestamp = DateTime.UtcNow
             };
 
