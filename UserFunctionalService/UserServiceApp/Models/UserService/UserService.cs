@@ -143,7 +143,7 @@ public class UserService : IUserService
     {
         var currentTime = DateTime.Now;
 
-        _logger.LogInformation(
+        _logger.LogInformation (
             "Adding new request to the database at {CurrentTime}. " +
             "SenderPhoneNumber: {SenderPhoneNumber}, TargetPhoneNumber: {TargetPhoneNumber}, " +
             "CabinetName: {CabinetName}, IsHandle: {IsHandle}",
@@ -164,6 +164,51 @@ public class UserService : IUserService
 
         _dbContext.CabinetRequests.Add(request);
         _dbContext.SaveChanges();
+    }
+
+    public void RemoveMemberFromHouse(int userPhoneNumber, int targetPhoneNumber, int cabinetId)
+    {
+        string logPrefix = $"[RemoveMemberFromHouse] CabinetId: {cabinetId}, UserPhoneNumber: {userPhoneNumber}, TargetPhoneNumber: {targetPhoneNumber}";
+        _logger.LogInformation($"{logPrefix} - Starting process to remove member.");
+
+        var cabinet = _dbContext?.MedicineCabinets
+                ?.Include(c => c.MedicineCabinetUsers!)
+                    .ThenInclude(mcu => mcu.User)
+                .Include(c => c.Medications)
+                    .FirstOrDefault(c => c.Id == cabinetId && c.Creator != null && c.Creator.PhoneNumber == userPhoneNumber);
+
+        if (cabinet == null)
+        {
+            _logger.LogWarning($"{logPrefix} - No cabinet found with ID {cabinetId} or user is not the creator.");
+            throw new ArgumentException($"No cabinet found with ID {cabinetId} or you are not the creator.");
+        }
+
+        _logger.LogInformation($"{logPrefix} - Cabinet found and verified as created by the user.");
+        
+        var memberToRemove = cabinet?.MedicineCabinetUsers!
+            .FirstOrDefault(mcu => mcu.User.PhoneNumber == targetPhoneNumber);
+
+        if (memberToRemove == null)
+        {
+            _logger.LogWarning($"{logPrefix} - No member with phone number {targetPhoneNumber} found in the cabinet.");
+            throw new ArgumentException($"No member with phone number {targetPhoneNumber} found in the cabinet.");
+        }
+
+        cabinet?.MedicineCabinetUsers?.Remove(memberToRemove);
+
+       // Transfer all medications created by the target user to the creator of the house
+       var medicationsToTransfer = cabinet?.Medications
+            ?.Where(m => m.Creator.PhoneNumber == targetPhoneNumber)
+            .ToList();
+
+        medicationsToTransfer?.ForEach(medication =>
+        {
+            medication.CreatorId = cabinet?.CreatorId ?? throw new InvalidOperationException("Cabinet creator ID is null");
+            medication.Creator = cabinet?.Creator;
+        });
+
+        _dbContext?.SaveChanges();
+        _logger.LogInformation($"{logPrefix} - Successfully removed member and updated medications.");
     }
 
     public bool IsUserExistInDb(int PhoneNumber)
@@ -257,7 +302,7 @@ public class UserService : IUserService
             if (medication == null)
             {
                 
-                _logger.LogError(
+                _logger.LogError (
                     "Error getting medication by barcode {medicationBarcode}"
                     ,medicationBarcode
                 );
@@ -268,7 +313,7 @@ public class UserService : IUserService
             var medicineCabinet = GetMedicineCabinetByName(user, medicineCabinetName);
             if (medicineCabinet == null)
             {
-                _logger.LogError(
+                _logger.LogError (
                     "Error getting medicine cabinet by name - {medicineCabinetName}"
                     ,medicineCabinetName
                 );
@@ -288,7 +333,7 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-           _logger.LogError(
+           _logger.LogError (
                 ex, 
                 "An error occurred while adding medication with barcode '{Barcode}' to the medicine cabinet '{MedicineCabinetName}' " +
                 "for user with phone number {PhoneNumber}.", 
@@ -297,7 +342,7 @@ public class UserService : IUserService
                 phoneNumber
             );
 
-            throw new InvalidOperationException(
+            throw new InvalidOperationException (
                 $"Failed to add medication with barcode '{medicationBarcode}' to the medicine cabinet '{medicineCabinetName}' " +
                 $"for user with phone number '{phoneNumber}'. See inner exception for details.", 
                 ex
@@ -307,7 +352,8 @@ public class UserService : IUserService
 
     private User? GetUserByPhoneNumber(int phoneNumber)
     {
-        var user = _dbContext?.Users?.SingleOrDefault(u => u.PhoneNumber == phoneNumber);
+        var user = _dbContext?.Users?
+            .SingleOrDefault(u => u.PhoneNumber == phoneNumber);
         
         if (user == null)
         {
@@ -334,7 +380,8 @@ public class UserService : IUserService
 
     private MedicationRepo? GetMedicationByBarcodeWithoutReturnADto(string medicationBarcode)
     {
-        var medication = _dbContext?.MedicationRepos.SingleOrDefault(m => m.Barcode == medicationBarcode);
+        var medication = _dbContext?.MedicationRepos
+                .SingleOrDefault(m => m.Barcode == medicationBarcode);
         
         if (medication == null)
         {
@@ -352,7 +399,7 @@ public class UserService : IUserService
 
         if (medicineCabinet == null)
         {
-           _logger.LogInformation(
+           _logger.LogInformation (
                 "The medicine cabinet with the name '{MedicineCabinetName}' does not exist for user with phone number {PhoneNumber}.", 
                 medicineCabinetName, 
                 user.PhoneNumber

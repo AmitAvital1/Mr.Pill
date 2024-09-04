@@ -20,13 +20,7 @@ public class UserController : Controller
         _userService = userService;
         _managerService = managerService;
         
-        // the _managerService charge on the job how run in the background
-        // _managerService.StartAsync();
-
-        // Task task = Task.Run(() =>
-        // {
-            // SendRequestToGateway();
-        // });
+        initFunction();
     }
     
     [AllowAnonymous]
@@ -35,38 +29,6 @@ public class UserController : Controller
     public IActionResult Health()
     {
         return Ok("arrive to user controller!");
-    }
-
-    private void SendRequestToGateway()
-    {
-        try
-        {
-            int port = GetCurrentPort();
-           
-            HttpRequestMessage requestMessage = new HttpRequestMessage
-            {
-                Method = HttpMethod.Get,
-                RequestUri = new Uri($"https://api-gateway-url.com/endpoint?port={port}")
-            };
-
-            using (HttpClient client = new())
-            {
-                HttpResponseMessage response = client.SendAsync(requestMessage).Result;
-
-                if (response.IsSuccessStatusCode)
-                {
-                    _logger.LogInformation("Request sent to API gateway successfully");
-                }
-                else
-                {
-                    _logger.LogError($"Failed to send request to API gateway. Status code: {response.StatusCode}");
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError($"An error occurred while sending request to API gateway: {ex.Message}");
-        }
     }
 
     [HttpPost("medicine-cabinet")]
@@ -228,14 +190,14 @@ public class UserController : Controller
 
             if (!medicineCabinetDTOs.Any())
             {
-                return NotFound(new { Message = "No medicine cabinets found for the user.", UserPhoneNumber = userPhoneNumer });
+                return NotFound(new { Message = "No users how member is this cabinet id found for the user.", UserPhoneNumber = userPhoneNumer });
             }
 
             return Ok(medicineCabinetDTOs);
         }
         catch(Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while retrieving medicine cabinets for user.");
+            _logger.LogError(ex, "An error occurred while retrieving members cabinet for this user.");
             return StatusCode(500, new { Message = "An unexpected error occurred. Please try again later." });
         }
     }
@@ -292,6 +254,26 @@ public class UserController : Controller
         }
     }
 
+    [HttpPut("cabinet/user/remove-member")]
+    public ActionResult RemoveMemberFromHouse([FromQuery] int targetToRemovePhoneNumber, [FromQuery] int cabinetId)
+    {
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int userPhoneNumber = _userService.GetUserPhoneNumber(token);
+
+            _userService.RemoveMemberFromHouse(userPhoneNumber,targetToRemovePhoneNumber, cabinetId);
+
+            _logger.LogInformation($"- Successfully removed PhoneNumber {targetToRemovePhoneNumber} from CabinetId {cabinetId}.");
+            return Ok(new { message = $"Member with PhoneNumber {targetToRemovePhoneNumber} successfully removed from Cabinet {cabinetId}." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"An error occurred at {GetCurrentFormattedTime()} while deleting member");
+            return StatusCode(500, new { message = "An error occurred while deleting members." });
+        }
+    }
+
     private ActionResult<IEnumerable<MedicationDTO>> HandleMedicationResponse(IEnumerable<MedicationDTO> medications, int userPhoneNumber)
     {
         if (medications == null || !medications.Any())
@@ -343,5 +325,48 @@ public class UserController : Controller
     {
         int serverPort = HttpContext.Connection.LocalPort;
         return serverPort;
+    }
+
+    private void initFunction()
+    {
+        // the _managerService charge on the job how run in the background
+        // _managerService.StartAsync();
+
+        // Task task = Task.Run(() =>
+        // {
+            // SendRequestToGateway();
+        // });
+    }
+
+    private void SendRequestToGateway()
+    {
+        try
+        {
+            int port = GetCurrentPort();
+           
+            HttpRequestMessage requestMessage = new HttpRequestMessage
+            {
+                Method = HttpMethod.Get,
+                RequestUri = new Uri($"https://api-gateway-url.com/endpoint?port={port}")
+            };
+
+            using (HttpClient client = new())
+            {
+                HttpResponseMessage response = client.SendAsync(requestMessage).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    _logger.LogInformation("Request sent to API gateway successfully");
+                }
+                else
+                {
+                    _logger.LogError($"Failed to send request to API gateway. Status code: {response.StatusCode}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError($"An error occurred while sending request to API gateway: {ex.Message}");
+        }
     }
 }
