@@ -73,6 +73,7 @@ const style = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 5,
   },
   button: {
     maxWidth: "50%",

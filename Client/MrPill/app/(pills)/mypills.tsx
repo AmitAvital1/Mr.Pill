@@ -60,7 +60,7 @@ const MyPills: React.FC = () => {
   
   const handleImagePress = (pill: Pill) => {
     DataHandler.set('pill', pill);
-    router.navigate("/(pills)/singlepill");
+    router.push("/(pills)/singlepill");
   };
 
   const renderPill = (pill: Pill, index: number) => {
