@@ -26,6 +26,7 @@ services:
 
   login:
     container_name: login
+    image: amitav2/login_service:latest
     build:
       context: .
       dockerfile: LoginService/Login/Dockerfile
@@ -45,6 +46,7 @@ services:
 
   mohservice:
     container_name: mohservice
+    image: amitav2/mohservice:latest
     build:
       context: .
       dockerfile: MinistryOfHealthService/Dockerfile
@@ -55,6 +57,7 @@ services:
       - mynetwork
       
   pushnotification:
+    image: amitav2/pushnotification_service:latest
     build:
       context: .
       dockerfile: PushNotificationService/Dockerfile
@@ -66,6 +69,7 @@ services:
 
   userfunctional:
     container_name: userfunc
+    image: amitav2/userfunctional_service:latest
     build:
       context: .
       dockerfile: UserFunctionalService/UserServiceApp/Dockerfile

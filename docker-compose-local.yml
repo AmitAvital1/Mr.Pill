@@ -26,7 +26,9 @@ services:
 
   login:
     container_name: login
-    image: amitav2/login_service:latest
+    build:
+      context: .
+      dockerfile: LoginService/Login/Dockerfile
     depends_on:
       - db
       - rabbitmq
@@ -43,7 +45,9 @@ services:
 
   mohservice:
     container_name: mohservice
-    image: amitav2/mohservice:latest
+    build:
+      context: .
+      dockerfile: MinistryOfHealthService/Dockerfile
     ports:
       - "5200:8080"
     restart: always
@@ -51,7 +55,9 @@ services:
       - mynetwork
       
   pushnotification:
-    image: amitav2/pushnotification_service:latest
+    build:
+      context: .
+      dockerfile: PushNotificationService/Dockerfile
     ports:
       - "5195:8080"
     restart: always
@@ -60,7 +66,9 @@ services:
 
   userfunctional:
     container_name: userfunc
-    image: amitav2/userfunctional_service:latest
+    build:
+      context: .
+      dockerfile: UserFunctionalService/UserServiceApp/Dockerfile
     depends_on:
       - db
       - rabbitmq
