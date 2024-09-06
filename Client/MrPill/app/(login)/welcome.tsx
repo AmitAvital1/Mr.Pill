@@ -15,18 +15,6 @@ import RequestHandler from "@/RequestHandler";
 
 async function handleLoginPress() {
 
-  const success = await sendAutomaticLoginRequest();
-
-  if (success) {
-
-  } else {
-
-  }
-  
-}
-
-async function sendAutomaticLoginRequest() {
-
   if (DataHandler.isEmpty()) {
     
     router.push('/(login)/login');

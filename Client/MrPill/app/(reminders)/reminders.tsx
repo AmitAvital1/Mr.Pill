@@ -42,6 +42,7 @@ const MyReminders: React.FC = () => {
     DataHandler.setState("reminderId", reminder.reminderId.toString());
     if (await RequestHandler.sendRequest("deleteReminder")) {
       Alert.alert("תזכורת נמחקה בהצלחה!");
+      setIsDeleteEnabled(false);
       setScreenUpdated(!screenUpdated);
     } else {
       Alert.alert("שגיאה במחיקת התזכורת");

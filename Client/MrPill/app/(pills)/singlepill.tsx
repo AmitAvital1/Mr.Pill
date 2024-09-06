@@ -94,6 +94,7 @@ const SinglePillPage: React.FC = () => {
     DataHandler.setState("pillId", pill.id.toString())
     
     if (await RequestHandler.sendRequest("deletePill")) {
+      Alert.alert("תרופה נמחקה בהצלחה!");
       router.dismiss()
     } else if (RequestHandler.getResponse().request.status === 409) {
       Alert.alert("אין אפשרות למחוק תרופה בעלת תזכורות פעילות.")

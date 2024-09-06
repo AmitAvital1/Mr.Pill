@@ -49,6 +49,7 @@ const CabinetMembersPage: React.FC = () => {
     DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName);
     if (await RequestHandler.sendRequest("deleteMember")) {
       Alert.alert("משתתף הוסר בהצלחה!");
+      setIsDeleteEnabled(false);
     } else {
       Alert.alert("שגיאה בהסרת משתתף מהארון.");
     }
