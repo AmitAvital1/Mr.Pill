@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using MrPill.DTOs.DTOs;
 using Newtonsoft.Json;
 using System.IdentityModel.Tokens.Jwt;
+using UserServiceApp.Models.Exceptions;
 
 namespace UserServiceApp.Models.UserService;
 
@@ -203,6 +204,14 @@ public class UserService : IUserService
 
         medicationsToTransfer?.ForEach(medication =>
         {
+            _logger.LogInformation (
+                "{LogPrefix} - Transferring medication ID {MedicationId} from user {TargetPhoneNumber} to creator {CreatorPhoneNumber}.", 
+                logPrefix, 
+                medication.Id, 
+                targetPhoneNumber, 
+                cabinet?.Creator?.PhoneNumber
+            );
+
             medication.CreatorId = cabinet?.CreatorId ?? throw new InvalidOperationException("Cabinet creator ID is null");
             medication.Creator = cabinet?.Creator;
         });
@@ -290,7 +299,7 @@ public class UserService : IUserService
             var user = GetUserByPhoneNumber(phoneNumber);
             if (user == null)
             {
-                _logger.LogError(
+                _logger.LogError (
                     "User not found to by phone number {PhoneNumber}"
                     ,phoneNumber
                 );
@@ -300,8 +309,7 @@ public class UserService : IUserService
 
             var medication = GetMedicationByBarcodeWithoutReturnADto(medicationBarcode);
             if (medication == null)
-            {
-                
+            { 
                 _logger.LogError (
                     "Error getting medication by barcode {medicationBarcode}"
                     ,medicationBarcode
@@ -323,7 +331,7 @@ public class UserService : IUserService
 
             AddMedicationToCabinet(user, medication, privacy, medicineCabinet);
 
-            _logger.LogInformation(
+            _logger.LogInformation (
                 "Successfully added medication with barcode '{Barcode}' to the medicine cabinet '{MedicineCabinetName}' " +
                 "for user with phone number {PhoneNumber}.", 
                 medicationBarcode, 
@@ -362,6 +370,22 @@ public class UserService : IUserService
 
         return user;
     }
+
+    private User? GetUserWithAllDataByPhoneNumber(int phoneNumber)
+    {
+        var user = _dbContext?.Users?
+            .Include(u => u.MedicineCabinetUsersList!)           
+                .ThenInclude(mcu => mcu.MedicineCabinet)         
+                    .ThenInclude(mc => mc.Medications)           
+            .SingleOrDefault(u => u.PhoneNumber == phoneNumber); 
+
+        if (user == null)
+        {
+            _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database (this check was made by userService).", phoneNumber);
+        }
+
+        return user;
+    }    
 
     private User? GetUserByPhoneNumberAndAllCabinet(int phoneNumber)
     {
@@ -412,6 +436,7 @@ public class UserService : IUserService
     private void AddMedicationToCabinet(User user, MedicationRepo medication, bool privacy, MedicineCabinet medicineCabinet)
     {
         DateTime? expDate = null;
+        
         if(medication.ShelfLife != -1)
         {
             expDate = DateTime.Now.AddMonths(medication.ShelfLife);
@@ -475,6 +500,7 @@ public class UserService : IUserService
                     _logger.LogDebug("No medication found in Moh");
                     return null;
                 }
+
                 string responseContent = await response.Content.ReadAsStringAsync();
                 medicationDTO = JsonConvert.DeserializeObject<MedicationDTO>(responseContent);
 
@@ -758,7 +784,7 @@ public class UserService : IUserService
 
     public void DeleteMedication(int userPhoneNumber, int medicationId, string medicineCabinetName)
     {
-        var user = GetUserByPhoneNumber(userPhoneNumber);
+        var user = GetUserWithAllDataByPhoneNumber(userPhoneNumber);
           
         if (user == null)
         {
@@ -791,18 +817,53 @@ public class UserService : IUserService
             );
         }
 
+        if (medication.Creator.PhoneNumber != userPhoneNumber)
+        {
+            _logger.LogError (
+                "User with phone number {PhoneNumber} is not the creator of the medication with ID {MedicationId}.",
+                userPhoneNumber,
+                medicationId
+            );
+            throw new UnauthorizedAccessException(
+                $"User with phone number {userPhoneNumber} is not authorized to delete the medication with ID {medicationId}."
+            );
+        }
+
+        if (checkIfTheirIsAnyAlertOnThisMedication(medication))
+        {
+            throw new MedicationDeletionException (
+            $"Cannot delete medication with ID {medication.Id} because there are active reminders or alerts associated with it."
+            );
+        }
+
         medicineCabinet?.Medications?.Remove(medication);
         _dbContext?.SaveChanges();
     }
 
-    public void UpdateMedication(UpdateMedicationDTO updateMedication)
+    private bool checkIfTheirIsAnyAlertOnThisMedication(UserMedications medication)
+    {
+        var reminders = _dbContext.Reminders
+            .Where(r => r.UserMedicationId == medication.Id && r.IsActive)
+            .ToList();
+        
+        if (reminders.Any())
+        {
+            _logger.LogInformation("There are {ReminderCount} active reminders for medication with ID {MedicationId}.", reminders.Count, medication.Id);
+            return true;
+        }
+
+        _logger.LogInformation("No active reminders found for medication with ID {MedicationId}.", medication.Id);
+         return false;
+    }
+
+    public void UpdateMedicationPills(UpdateMedicationDTO updateMedication)
     {
         var medication = _dbContext.UserMedications
             .FirstOrDefault(mc => mc.Id == updateMedication.MedicationId);
 
         if (medication == null)
         {
-            _logger.LogWarning(
+            _logger.LogWarning (
                 "Medication with ID {MedicationId} not found.",
                 updateMedication.MedicationId
             );
@@ -812,7 +873,6 @@ public class UserService : IUserService
 
         lock (_lockForUpdateMedication)
         {
-
             if (medication.NumberOfPills + updateMedication.Amount >= 0)
             {
                 medication.NumberOfPills += updateMedication.Amount;
@@ -830,4 +890,42 @@ public class UserService : IUserService
             medication.Id
         );  
     }
+
+    public void UpdateDateMedication( UpdateDateMedicationDTO updateDateMedication)
+     {
+        var medication = _dbContext.UserMedications
+            .FirstOrDefault(mc => mc.Id == updateDateMedication.MedicationId);
+
+        if (medication == null)
+        {
+            _logger.LogWarning (
+                "Medication with ID {MedicationId} not found.",
+                updateDateMedication.MedicationId
+            );
+
+            throw new Exception("Medicine not found.");
+        }
+
+        DateTime newMedicationDate;
+
+        if (!DateTime.TryParse(updateDateMedication.MedicationNewDate, out newMedicationDate))
+        {
+            _logger.LogError(
+                "Invalid date format for MedicationNewDate: {MedicationNewDate}. Unable to update MedicationId {MedicationId}.",
+                updateDateMedication.MedicationNewDate, updateDateMedication.MedicationId
+            );
+            throw new ArgumentException("Invalid date format for medication.");
+        }
+
+        lock (_lockForUpdateMedication)
+        {
+            medication.Validity = newMedicationDate;
+            _dbContext.SaveChanges();
+        }
+
+        _logger.LogInformation(
+            "Database updated successfully for MedicationId {MedicationId} ",
+            medication.Id
+        );  
+     }
 }
