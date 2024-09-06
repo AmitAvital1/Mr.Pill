@@ -291,7 +291,20 @@ public class UserController : Controller
             int userPhoneNumber = _userService.GetUserPhoneNumber(token);
             _userService.DeleteMedication(userPhoneNumber, medicationId, medicineCabinetName);
 
-            return Ok();
+            _logger.LogInformation(
+                "Medication with ID {MedicationId} successfully deleted for user {UserPhoneNumber} from cabinet '{MedicineCabinetName}'", 
+                medicationId, 
+                userPhoneNumber, 
+                medicineCabinetName
+            );
+
+            return Ok(new 
+            { 
+                message = $"Medication with ID {medicationId} successfully deleted from cabinet '{medicineCabinetName}' for user {userPhoneNumber}.",
+                medicationId,
+                userPhoneNumber,
+                medicineCabinetName
+            });
         }
         catch (MedicationDeletionException ex)
         {
