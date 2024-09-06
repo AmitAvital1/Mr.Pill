@@ -65,13 +65,15 @@ const HomePage: React.FC = () => {
     DataHandler.set("notification", notification);
 
     await RequestHandler.sendRequest("respondToJoinCabinetRequest");
-    setScreenUpdated(!screenUpdated);
     setIsNotificationsOpen(myNotifications.length > 0);
+    setScreenUpdated(!screenUpdated);
+
   }
 
   const sendGetRemindersRequest = async () => {
               
     if (await RequestHandler.sendRequest('getMyRemindersToday')) {
+      console.log(RequestHandler.getResponse().request._response)
       setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
     }
   }
@@ -89,14 +91,17 @@ const HomePage: React.FC = () => {
     DataHandler.expireSession();
   }
 
+  const updateNotifications = async ()=> {
+    await sendGetNotificationsRequest();
+  }
+
   useEffect(() => {
     if (screenUpdated === undefined) return;
 
-    const updateNotifications = async ()=> {
-      await sendGetNotificationsRequest();
-    }
+    setIsNotificationsOpen(false);
+    sendGetRemindersRequest();
+    sendGetNotificationsRequest();
 
-    updateNotifications();
   }, [screenUpdated])
 
   useFocusEffect(
@@ -170,26 +175,27 @@ const HomePage: React.FC = () => {
 
   const user = DataHandler.getUser()
 
+  // MAIN LAYOUT
   return (
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
      
       <Pressable onPress={logOut}>
-      <View style={{backgroundColor: "#ddd9", position: 'absolute', left: "3.5%", marginTop: "7%", borderRadius: 999, elevation: 3}}>
+      <View style={{backgroundColor: "#ddd9", position: 'absolute', left: "5%", marginTop: "7%", borderRadius: 999, elevation: 3}}>
         <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
       </View>
       </Pressable>
 
       {myNotifications.length > 0 &&
-      <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}}>
+      <Pressable style={{zIndex: 5}}onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}}>
       <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "5%", marginTop: "27%", borderRadius: 999, elevation: 3}}>
-        <ThemedText style={{lineHeight: 55, fontSize: 35}}>🔔</ThemedText>
+        <ThemedText style={{lineHeight: 55, fontSize: 45}}>🔔</ThemedText>
       </View>
       <View style={{position: 'absolute', marginLeft: "5%", marginTop: "27%", borderRadius: 999}}>
         <ThemedText>🔴</ThemedText>
       </View>
       </Pressable>}
 
-      {MrPillLogo(0.75, true)}
+      {MrPillLogo(0.5, true)}
 
       <ThemedText style={{lineHeight: 30, marginTop: 15, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
       {isNotificationsOpen &&
@@ -197,8 +203,7 @@ const HomePage: React.FC = () => {
         <View style={[styles.pagetop, {borderBottomWidth: 10, borderColor: backgroundColorLight, backgroundColor: backgroundColorAlt}]}>
         <ThemedText style={{fontSize: 18, textAlign: 'center'}}>בקשות הצטרפות:</ThemedText>
           <ParallaxScrollView backgroundColor={backgroundColorAlt}>
-              {myNotifications.map((notification, index) => renderNotification(notification, index))
-              }
+              {myNotifications.map((notification, index) => renderNotification(notification, index))}
           </ParallaxScrollView>
         </View>
       </View>}

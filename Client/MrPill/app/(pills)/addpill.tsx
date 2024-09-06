@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, TextInput, View, Text, Pressable, Alert, TouchableOpacity } from 'react-native';
+import { SafeAreaView, StyleSheet, TextInput, View, Text, Pressable, Alert, TouchableOpacity, ScrollView } from 'react-native';
 
 import DataHandler from '@/DataHandler';
 import { router } from 'expo-router';
@@ -125,7 +125,7 @@ const AddPillScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ backgroundColor: backgroundColorMain, flex: 1 }}>
+    <ScrollView style={{ backgroundColor: backgroundColorMain, flex: 1 }}>
       <View style={{justifyContent: 'center', minHeight: 90, marginBottom: 10}}> 
       {MrPillLogo(0.5)}
       </View>
@@ -141,11 +141,9 @@ const AddPillScreen = () => {
         </View>
       )}
 
-      {!cameraVisible && (
-        <TouchableOpacity style={styles.scanButton} onPress={toggleCamera}>
-          <Text style={styles.scanButtonText}>סרוק ברקוד התרופה 📷</Text>
-        </TouchableOpacity>
-      )}
+      <ThemedText style={{ lineHeight: 30, textAlign: 'center', fontSize: 18, fontWeight: 'bold', marginHorizontal: 30, marginTop: 5, }}>
+        הכנס ידנית מספר ברקוד של תרופה או לחץ בכדי לסרוק באמצעות המצלמה.
+      </ThemedText>
 
       <TextInput
         style={[styles.input, { backgroundColor: scanned ? 'lightgreen' : backgroundColorLight }]}
@@ -157,10 +155,16 @@ const AddPillScreen = () => {
         editable={!scanned} // Allow manual input if barcode is not scanned
       />
 
+      {!cameraVisible && (
+        <TouchableOpacity style={styles.scanButton} onPress={toggleCamera}>
+          <Text style={styles.scanButtonText}>סרוק באמצעות המצלמה 📷</Text>
+        </TouchableOpacity>
+      )}
+
       <View style={{ flexGrow: 1, minHeight: 160 }}>
         <View style={styles.pagetop}>
           <ThemedText style={{ lineHeight: 30, textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>
-            אנא בחר ארון להוספת התרופה:
+           בחר ארון להוספת התרופה:
           </ThemedText>
           {cabinets.length < 1 &&
           <ThemedText style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000" }}>
@@ -172,7 +176,7 @@ const AddPillScreen = () => {
           </ParallaxScrollView>
         </View>
       </View>
-      <Text style={styles.text}>אנא בחר את מצב פרטיות התרופה:</Text>
+      <Text style={styles.text}>בחר את מצב פרטיות התרופה:</Text>
       <View style={{flex: 0, flexDirection:'row', minHeight: 50, justifyContent: 'center', gap: 50, marginTop: 10}}>
         
         <Pressable onPress={()=>{setIsPrivate(false);}}>
@@ -193,7 +197,7 @@ const AddPillScreen = () => {
         </View>
       </View>
 
-    </SafeAreaView>
+    </ScrollView>
   );
 };
 
@@ -229,9 +233,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 15,
     padding: 5,
-    minHeight: 150,
+    minHeight: 180,
   },
-  
   row: {
     flex: 1,
     minHeight: 5,
@@ -253,8 +256,10 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   input: {
+    alignSelf: 'center',
     height: 60,
-    margin: 8,
+    marginTop: 5,
+    width: "90%",
     borderWidth: 2,
     borderColor: borderColor,
     padding: 10,
@@ -263,11 +268,11 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   scanButton: {
-    backgroundColor: '#ff7f7f',
+    backgroundColor: '#41c052',
     padding: 15,
     borderRadius: 30,
     borderWidth: 2,
-    borderColor: '#ff5c5c',
+    borderColor: '#2b8037',
     margin: 10,
     alignItems: 'center',
     elevation: 5,

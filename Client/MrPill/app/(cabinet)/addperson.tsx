@@ -33,9 +33,11 @@ const AddPersonToCabinetScreen = () => {
     if (response) {
       router.dismiss()
       router.replace('/(cabinet)/mycabinets');
-      Alert.alert("חבר נוסף לארון בהצלחה!");
+      Alert.alert("בקשת הצטרפות לארון נשלחה בהצלחה!");
     } else if (RequestHandler.getResponse().request.status == 400) {
       setIsAlreadyMember(true);
+    } else {
+      Alert.alert("שגיאה בהוספת משתתף");
     }
     
   }
