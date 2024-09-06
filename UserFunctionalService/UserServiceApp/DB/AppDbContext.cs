@@ -47,7 +47,7 @@ public class AppDbContext : DbContext
             .HasOne(medication => medication.MedicineCabinet)
             .WithMany(MedicineCabinet => MedicineCabinet.Medications)
             .HasForeignKey(medication => medication.MedicineCabinetId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);// change from NoAction to Cascade
 
         modelBuilder.Entity<User>()
             .HasIndex(user => user.PhoneNumber)

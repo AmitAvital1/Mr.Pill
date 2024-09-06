@@ -31,6 +31,10 @@ public class UserController : Controller
         return Ok("arrive to user controller!");
     }
 
+
+/////////////////// -> POST ///////////////////
+
+
     [HttpPost("medicine-cabinet")]
     public ActionResult CreateNewMedicineCabinet([FromQuery] string Name)
     {
@@ -113,6 +117,9 @@ public class UserController : Controller
             return StatusCode(500, "An unexpected error occurred. Please try again later.");
         }
     }
+
+/////////////////// -> GET ///////////////////
+
 
     [HttpGet("user/medications")]
     public ActionResult<IEnumerable<MedicationDTO>> GetAllMedicationByUserId([FromQuery] string medicineCabinetName)
@@ -210,14 +217,20 @@ public class UserController : Controller
         return Ok(medication);
     }
 
+
+
+/////////////////// -> PUT ///////////////////
+
+
     [HttpPut("medications/update")]
     public ActionResult UpdateMedication([FromBody] UpdateMedicationDTO updateMedication)
     {
+        // This endpoint update the number of pills in the medications
         try
         {
             string? token = GetAuthorizationTokenOrThrow();
-            _userService.UpdateMedication(updateMedication);
-            _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", updateMedication.MedicationId);
+            _userService.UpdateMedicationPills(updateMedication);
+            _logger.LogInformation("Successfully updated medication (Pills) with ID {MedicationId}.", updateMedication.MedicationId);
 
             var response = new 
             {
@@ -236,6 +249,39 @@ public class UserController : Controller
         } 
     }
 
+
+    [HttpPut("update/medication/date")]
+    public ActionResult UpdateExistingMedication([FromBody] UpdateDateMedicationDTO updateDateMedication)
+    {
+        // This endpoint update the expire date of medications
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            _userService.UpdateDateMedication(updateDateMedication);
+            _logger.LogInformation("Successfully updated medication with ID {MedicationId}.", updateDateMedication.MedicationId);
+
+            var response = new 
+            {
+                Message = "Medication updated successfully.",
+                MedicationId = updateDateMedication.MedicationId,
+                Timestamp = DateTime.UtcNow
+            };
+
+            return Ok(response);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while updating medication with ID {MedicationId}.", updateDateMedication.MedicationId);
+            return StatusCode(500, "An unexpected error occurred. Please try again later.");
+        } 
+    }
+
+
+
+/////////////////// -> DELETE ///////////////////
+
+    
+    
     [HttpDelete("medications/{medicationId}")]
     public ActionResult DeleteMedication(int medicationId, [FromQuery] string medicineCabinetName)
     {
@@ -247,6 +293,18 @@ public class UserController : Controller
 
             return Ok();
         }
+        catch (MedicationDeletionException ex)
+        {
+            _logger.LogWarning(ex, $"Conflict while deleting medication with ID {medicationId}");
+            // Return 409 Conflict for active reminders or alerts preventing deletion
+            return Conflict(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, $"Invalid operation while deleting medication with ID {medicationId}");
+            // Return 404 if medication is not found
+            return NotFound(new { message = ex.Message });
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"An error occurred at {GetCurrentFormattedTime()} while deleting medication");
@@ -254,7 +312,7 @@ public class UserController : Controller
         }
     }
 
-    [HttpPut("cabinet/user/remove-member")]
+    [HttpDelete("cabinet/user/remove-member")]
     public ActionResult RemoveMemberFromHouse([FromQuery] int targetToRemovePhoneNumber, [FromQuery] int cabinetId)
     {
         try
@@ -273,6 +331,11 @@ public class UserController : Controller
             return StatusCode(500, new { message = "An error occurred while deleting members." });
         }
     }
+
+
+/////////////////// -> PRIVATE METHODS ///////////////////
+
+
 
     private ActionResult<IEnumerable<MedicationDTO>> HandleMedicationResponse(IEnumerable<MedicationDTO> medications, int userPhoneNumber)
     {
