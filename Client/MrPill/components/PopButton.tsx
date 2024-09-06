@@ -59,7 +59,7 @@ export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonActio
         <Animated.View
           style={[
             style.button,
-            { transform: [{ scale: animatedScale }, { rotate: rotation }] },
+            { transform: [{ scale: animatedScale }, { rotate: rotation }], },
           ]}>
           {ButtonContent}
         </Animated.View>
@@ -73,9 +73,9 @@ const style = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 8,
   },
   button: {
+    maxWidth: "50%",
     justifyContent: 'center',
     alignItems: 'center',
   },

@@ -208,6 +208,52 @@ function createRequest(requestType: string) {
                     MedicationId: DataHandler.getState("pillId"),
                 },
             }; return;
+        
+        case "deletePill":
+            request = {
+                method: 'delete',
+                url: URL + "5194/medications/" + DataHandler.getState("pillId") + "?medicineCabinetName=" + DataHandler.getState("medicineCabinetName"),
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {
+                },
+            }; return;
+
+        case "updatePillDate":
+            request = {
+                method: 'put',
+                url: URL + "5194/update/medication/date",
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {
+                    MedicationId: DataHandler.getState("pillId"),
+                    MedicationNewDate: DataHandler.getState("pillDate")
+                },
+            }; return;
+
+        case "removeMember":
+            request = {
+                method: 'delete',
+                url: URL + "5194/cabinet/user/remove-member?targetToRemovePhoneNumber=" + DataHandler.getState("targetPhone") + "&cabinetId=" + DataHandler.getState("cabinetId"),
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {
+                },
+            }; return;
+
+        case "deleteReminder":
+            request = {
+                method: 'delete',
+                url: URL + "5195/DeleteReminder?Id=" + DataHandler.getState("reminderId"),
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {
+                },
+            }; return;
     
 
         default:

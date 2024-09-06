@@ -1,19 +1,19 @@
 import React from 'react';
-import { Redirect, router } from 'expo-router';
+import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet, Image, Pressable } from 'react-native';
+import { View, StyleSheet, Image, Pressable, Alert } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import DataHandler from '@/DataHandler';
-import { PopButton } from '@/components/PopButton';
 
 import RequestHandler from '@/RequestHandler';
-import { WebView } from 'react-native-webview';
 
-const backgroundColorLight = "#cbc4ff"
-const backgroundColorMain = "#c8e3e6"
-const borderColor = "#02005a55"
+const backgroundColorLight = "#cbc4ff";
+const backgroundColorMain = "#c8e3e6";
+const borderColor = "#02005a55";
+const redButtonColor = "#f58e97";
+const greenButtonColor = "lightgreen";
 
 type Pill = {
     id: number;
@@ -28,14 +28,36 @@ type Pill = {
     isPrivate: boolean;
     numberOfPills: number;
     shelfLife: number;
-    medicineCabinetName: string | null;
+    medicineCabinetName: string;
     brochurePath: string;
 }
 
 const SinglePillPage: React.FC = () => {
 
   const pill: Pill = DataHandler.get('pill');
+
   const [screenUpdated, setScreenUpdated] = React.useState<boolean>();
+  const [newDate, setNewDate] = React.useState<string>(pill.validity || new Date().toISOString());
+  const [isEditEnabled, setIsEditEnabled] = React.useState<boolean>(false);
+  const [isDateInputEnabled, setIsDateInputEnabled] = React.useState<boolean>(false);
+
+  const changeDay = (increase: boolean) => {
+    const result = new Date(newDate);
+    result.setDate(result.getDate() + (increase? 1 : -1));
+    setNewDate(result.toISOString());
+  }
+
+  const changeMonth = (increase: boolean) => {
+    const result = new Date(newDate);
+    result.setMonth(result.getMonth() + (increase? 1 : -1));
+    setNewDate(result.toISOString());
+  }
+
+  const changeYear = (increase: boolean) => {
+    const result = new Date(newDate);
+    result.setFullYear(result.getUTCFullYear() + (increase? 1 : -1));
+    setNewDate(result.toISOString());
+  }
 
   const handlePlusButtonPress = async () => {
     DataHandler.setState("pillId", pill.id.toString());
@@ -58,27 +80,143 @@ const SinglePillPage: React.FC = () => {
     router.push("/(pills)/pillbrochure");
   }
 
+  const handleDateButtonPress = () => {
+    if (!isDateInputEnabled) {
+      setIsDateInputEnabled(true);
+    } else {
+      sendChangeDateRequest();
+    }
+  }
+
+  const sendDeletePillRequest = async () => {
+    
+    DataHandler.setState("medicineCabinetName", pill.medicineCabinetName);
+    DataHandler.setState("pillId", pill.id.toString())
+    
+    if (await RequestHandler.sendRequest("deletePill")) {
+      router.dismiss()
+    } else if (RequestHandler.getResponse().request.status === 409) {
+      Alert.alert("אין אפשרות למחוק תרופה בעלת תזכורות פעילות.")
+    } else {
+      console.log(RequestHandler.getRequest());
+      Alert.alert("שגיאה במחיקת התרופה");
+    }
+
+  }
+
+  const sendChangeDateRequest = async () => {
+
+    DataHandler.setState("pillId", pill.id.toString());
+    DataHandler.setState("pillDate", newDate);
+
+    if (await RequestHandler.sendRequest("updatePillDate")) {
+      Alert.alert("תוקף עודכן בהצלחה!");
+      pill.validity = newDate;
+    } else {
+      console.log(RequestHandler.getRequest());
+      Alert.alert("שגיאה בעת עדכון תאריך התרופה");
+    }
+    setIsDateInputEnabled(false);
+    setScreenUpdated(!screenUpdated);
+  }
+
   // MAIN PAGE LAYOUT
   return (    
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
-        <View style={{flex: 1}}>
-        {MrPillLogo(0.5)}
-        
-            <View style={styles.pagetop}>
-                
-                <Pressable style={styles.imageContainer} onPress={handlePillImagePress}>
-                  <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
-                    <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
-                  <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
-                </Pressable>
-
+        <View style={{minHeight: "10%", margin: -10}}>
+          {MrPillLogo(0.3)}
+        </View>
+        <View style={styles.pagetop}>
+            
+            <Pressable style={styles.imageContainer} onPress={handlePillImagePress}>
+              <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
+                <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+              <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
+            </Pressable>
+            
+            <View style={{flexDirection: 'row'}}>
+              
+              <Pressable style={{marginHorizontal: 10, alignItems: 'center', justifyContent: 'center', alignContent: 'center', borderColor: "#777", borderWidth: 3, backgroundColor: backgroundColorMain, minHeight: 100, minWidth: 100, borderRadius: 999}} onPress={()=>{setIsEditEnabled(!isEditEnabled); setIsDateInputEnabled(false)}}>
+                <ThemedText style={{color: "#333", fontSize: 50, lineHeight: 60, fontWeight: 'bold' }}>✏</ThemedText>
+              </Pressable>
+              
+              <View>
                 <ThemedText style={styles.text}>מתוך ארון התרופות:{"\n"}{pill.medicineCabinetName}</ThemedText>
                 {pill.validity && <ThemedText style={styles.text}>תוקף: {pill.validity.slice(0, 10)}</ThemedText>}
-                <View style={{flex: 1}}/>
-                <ThemedText style={styles.text}>מספר התרופות שנותרו:  <ThemedText style={[styles.text, {lineHeight: 40, fontSize: 40, color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "yellow" : "green")}]}>{pill.numberOfPills}</ThemedText></ThemedText>
+              </View>
+
+
             </View>
+
+
+            {// edit pill inputs
+            isEditEnabled &&
+            <View style={{minHeight: "10%", flex: 1, flexDirection: 'row'}}>
+
+                {// delete pill
+                !isDateInputEnabled &&
+                <Pressable style={{marginHorizontal: 10, justifyContent: 'center', alignContent: 'center', borderColor: "#777", borderWidth: 3, backgroundColor: redButtonColor, minHeight: 100, minWidth: 100, borderRadius: 999}} onPress={sendDeletePillRequest}>
+                  <ThemedText style={styles.text}>מחק{'\n'}תרופה</ThemedText>
+                </Pressable>}
+                
+                {// edit date inputs
+                isDateInputEnabled &&
+                <View style={{flexDirection: 'row'}}>
+                  
+                  <View style={{gap: 10}}>
+                    <ThemedText style={styles.text}>שנה</ThemedText>
+                    <Pressable style={styles.greenButton} onPress={()=>changeYear(true)}>
+                      <ThemedText style={styles.text}>+</ThemedText>
+                    </Pressable>
+
+                    <Pressable style={styles.redButton} onPress={()=>changeYear(false)}>
+                      <ThemedText style={styles.text}>-</ThemedText>
+                    </Pressable>   
+
+                  </View>
+                  <View style={{gap: 10}}>
+                    <ThemedText style={styles.text}>חודש </ThemedText>
+                    <Pressable style={styles.greenButton} onPress={()=>changeMonth(true)}>
+                      <ThemedText style={styles.text}>+</ThemedText>
+                    </Pressable>
+
+                    <Pressable style={styles.redButton} onPress={()=>changeMonth(false)}>
+                      <ThemedText style={styles.text}>-</ThemedText>
+                    </Pressable>
+
+                  </View>
+                  <View style={{gap: 10}}>
+                    <ThemedText style={styles.text}>יום </ThemedText>
+                    <Pressable style={styles.greenButton} onPress={()=>changeDay(true)}>
+                      <ThemedText style={styles.text}>+</ThemedText>
+                    </Pressable>
+
+                    <Pressable style={styles.redButton} onPress={()=>changeDay(false)}>
+                      <ThemedText style={styles.text}>-</ThemedText>
+                    </Pressable>
+
+                  </View>
+                </View>}
+
+                <Pressable style={[{backgroundColor: isDateInputEnabled ? greenButtonColor : backgroundColorMain}, {marginHorizontal: 10, justifyContent: 'center', alignContent: 'center', borderColor: "#777", borderWidth: 3, backgroundColor: backgroundColorMain, minHeight: 100, minWidth: 100, borderRadius: 999}]} onPress={handleDateButtonPress}>
+                  <ThemedText style={styles.text}>{isDateInputEnabled ? "אישור\nהתוקף\nהחדש" : "עדכן\nתוקף"}</ThemedText>
+                </Pressable>
+
+            </View>}
+
+            {isEditEnabled && isDateInputEnabled &&
+              <ThemedText style={[styles.text, {color: "#581d22"}]}>התוקף החדש: {newDate.slice(0,10)}</ThemedText>
+            }
+
+            {!isEditEnabled && <View style={{flex: 1}}/>}
+
+            {!isDateInputEnabled &&
+            <ThemedText style={styles.text}>מספר התרופות שנותרו:  <ThemedText style={[styles.text, {lineHeight: 50, fontSize: 40, color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "yellow" : "green")}]}>{pill.numberOfPills}</ThemedText></ThemedText>
+            }
         </View>
         
+        
+        {!isDateInputEnabled &&
         <View style={styles.pagebottom}>
             <View style={styles.row}>
                 <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➕", 50)} ButtonAction={()=>{handlePlusButtonPress()}}/>
@@ -86,8 +224,9 @@ const SinglePillPage: React.FC = () => {
             <View style={styles.row}>
                 <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("➖", 50)} ButtonAction={()=>{handleMinusButtonPress()}}/>
             </View>
-        </View>
+        </View>}
         
+        {isDateInputEnabled && <View style={{margin: 10}} />}
 
     </View>
   );
@@ -102,12 +241,34 @@ const styles = StyleSheet.create({
     backgroundColor: backgroundColorLight,
     borderRadius: 20,
     borderColor: borderColor,
-    minHeight: 100,
+    minHeight: "70%",
     marginHorizontal: 15,
     paddingBottom: 5,
     paddingHorizontal: 5,
     gap: 5,
     elevation: 3,
+  },
+  greenButton: {
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    alignContent: 'center',
+    borderColor: "#777",
+    borderWidth: 3,
+    backgroundColor: greenButtonColor,
+    minHeight: 50,
+    minWidth: 50,
+    borderRadius: 999
+  },
+  redButton: {
+    marginHorizontal: 10,
+    justifyContent: 'center',
+    alignContent: 'center',
+    borderColor: "#777",
+    borderWidth: 3,
+    backgroundColor: redButtonColor,
+    minHeight: 50,
+    minWidth: 50,
+    borderRadius: 999
   },
   pagebottom: {
     flex: 1,
@@ -116,9 +277,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 20,
     marginHorizontal: 15,
-    marginVertical: 20,
     padding: 5,
-    maxHeight: 180
+    minHeight: "15%",
+    maxHeight: "25%"
   },
   row: {
     flex: 1,
@@ -128,8 +289,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   text: {
-    lineHeight: 36,
-    fontSize: 26,
+    lineHeight: 34,
+    fontSize: 24,
     fontWeight: 'bold',
     color: '#000',
     textAlign: 'center',
@@ -153,19 +314,17 @@ const styles = StyleSheet.create({
   }, 
   imageContainer: {
     margin: 8,
-    minHeight: "20%",
+    minHeight: "35%",
     maxHeight: "50%",
     flex: 1,
     width: "100%",
     borderRadius: 20,
-
     borderColor: "#747474",
     backgroundColor: "#bdddf3",
     justifyContent: 'center',
     alignContent: 'center',
     overflow: 'hidden',
-    
-    elevation: 4  ,
+    elevation: 4,
     gap: 3,
   },
 });

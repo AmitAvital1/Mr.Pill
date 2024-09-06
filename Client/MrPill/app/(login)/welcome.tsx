@@ -52,7 +52,7 @@ const WelcomeScreen = () => {
 
       <View style={styles.pagetop}>
         <Text style={styles.title}>ברוכים הבאים!</Text>
-        {MrPillLogo(1)}
+        {MrPillLogo(1, true)}
       </View>
 
       <View style={styles.button}>
@@ -81,19 +81,20 @@ const styles = StyleSheet.create({
     margin: 10,
     borderColor: "black",
     elevation: 5,
+    maxHeight: "25%"
   },
   buttontext: {
     fontSize: 42,
     color: "white",
   },
   pagetop: {
-    height: 180,
     flex: 1,
     padding: 10,
     backgroundColor: "lavender",
     justifyContent: "center",
     alignContent: "center",
-    marginVertical: 25
+    marginVertical: 25,
+    maxHeight: "50%",
   },
   title: {
     fontSize: 52,

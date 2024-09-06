@@ -44,7 +44,6 @@ const AddPillScreen = () => {
 
   useEffect(() => {
     if (isRequestSent) return;
-
     setIsRequestSent(true);
 
     const sendGetCabinetsRequest = async () => {
@@ -54,7 +53,7 @@ const AddPillScreen = () => {
     };
 
     sendGetCabinetsRequest();
-  }, [isRequestSent]);
+  });
 
   const sendPostMedicineToCabinetRequest = async () => {
     DataHandler.setState('medicineCabinetName', cabinets[cabSelection].medicineCabinetName);
@@ -68,12 +67,14 @@ const AddPillScreen = () => {
   };
 
   async function handleButtonPress() {
+    if (cabSelection == -1) return;
     const response = await sendPostMedicineToCabinetRequest();
 
     if (response) {
       Alert.alert("תרופה נוספה לארון בהצלחה!");
       router.replace('/(home)/home');
     } else {
+      Alert.alert("שגיאה בהוספת התרופה.");
       setIsRequestSent(true);
     }
   }

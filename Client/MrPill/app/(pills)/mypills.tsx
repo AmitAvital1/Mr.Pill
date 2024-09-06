@@ -42,19 +42,18 @@ const MyPills: React.FC = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
+  const fetchPills = async () => {
+    if (await RequestHandler.sendRequest('getAllPills')) {
+      setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
+    }
+  };
+
   useFocusEffect(
     useCallback(() => {
 
-      const fetchPills = async () => {
-        if (await RequestHandler.sendRequest('getAllPills')) {
-          setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
-        }
-      };
-  
       fetchPills();
 
       return () => {
-
       };
     }, [])
   );
