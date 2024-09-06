@@ -174,23 +174,24 @@ const HomePage: React.FC = () => {
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
      
       <Pressable onPress={logOut}>
-      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "3.5%", marginTop: "7%", borderRadius: 999, elevation: 3}}>
+      <View style={{backgroundColor: "#ddd9", position: 'absolute', left: "3.5%", marginTop: "7%", borderRadius: 999, elevation: 3}}>
         <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
       </View>
       </Pressable>
 
       {myNotifications.length > 0 &&
       <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}}>
-      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "5%", marginTop: "30%", borderRadius: 999, elevation: 3}}>
+      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "5%", marginTop: "27%", borderRadius: 999, elevation: 3}}>
         <ThemedText style={{lineHeight: 55, fontSize: 35}}>🔔</ThemedText>
       </View>
-      <View style={{position: 'absolute', marginLeft: "5%", marginTop: "30%", borderRadius: 1000}}>
+      <View style={{position: 'absolute', marginLeft: "5%", marginTop: "27%", borderRadius: 999}}>
         <ThemedText>🔴</ThemedText>
       </View>
       </Pressable>}
 
-      {MrPillLogo(0.75)}
-      <ThemedText style={{lineHeight: 30, marginBottom: 5, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
+      {MrPillLogo(0.75, true)}
+
+      <ThemedText style={{lineHeight: 30, marginTop: 15, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
       {isNotificationsOpen &&
       <View style={{flex: 1,}}>
         <View style={[styles.pagetop, {borderBottomWidth: 10, borderColor: backgroundColorLight, backgroundColor: backgroundColorAlt}]}>
@@ -214,7 +215,10 @@ const HomePage: React.FC = () => {
         
         </View>
       </View>}
-      {myNotifications.length < 1 && myReminders.length < 1 && <View style={{flex: 1}}/>}
+
+
+      {// empty flex view for page layout
+      myNotifications.length < 1 && myReminders.length < 1 && <View style={{flex: 1}}/>}
               
       <View style={styles.pagebottom}>
 

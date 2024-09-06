@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -25,6 +25,7 @@ const CabinetMembersPage: React.FC = () => {
 
   const cabinet = DataHandler.get('cabinet');
   const [members, setMembers] = React.useState<[Member?]>([]);
+  const [isDeleteEnabled, setIsDeleteEnabled] = React.useState<boolean>(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -42,19 +43,32 @@ const CabinetMembersPage: React.FC = () => {
       };
     }, [])
   );
+  
+  const handleDeleteMemberButtonPress = async (member: Member) => {
+    DataHandler.setState("targetPhone", member.phoneNumber);
+    DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName);
+    if (await RequestHandler.sendRequest("deleteMember")) {
+      Alert.alert("משתתף הוסר בהצלחה!");
+    } else {
+      Alert.alert("שגיאה בהסרת משתתף מהארון.");
+    }
+  }
 
   function renderMember(member?: Member, id?: number) {
     if (!member) return;
-    const memberIsTheUser = "0" + member.phoneNumber == DataHandler.getUser().PhoneNumber;
+    const memberIsTheUser = ("0" + member.phoneNumber) === DataHandler.getUser().PhoneNumber;
     return (
       <Pressable key={id} onPress={()=>{console.log('y')}}>
         
         <View style={styles.reminderBox}>
           <View style={{alignItems: 'center', flexDirection: 'row'}}>
-      
+
+            {isDeleteEnabled && !memberIsTheUser &&
+            <Pressable onPress={()=>handleDeleteMemberButtonPress(member)} style={{borderWidth: 2, borderColor: "grey", marginRight: 20, justifyContent: 'center', alignContent: 'center', minHeight: 50, minWidth: 50, backgroundColor: "#da5454", borderRadius: 999}}>
+              <ThemedText style={{fontSize: 22, fontWeight: 'bold', textAlign: 'center'}}>הסר</ThemedText>
+            </Pressable>}
+
             <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
-              {//<Image source={{uri: member.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
-              }
             </View>
               
             <View style={{flexGrow: 1}}>
@@ -77,13 +91,20 @@ const CabinetMembersPage: React.FC = () => {
         {MrPillLogo(0.5)}
             <View style={styles.pagetop}> 
                 <ThemedText style={{lineHeight: 30, textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 8}}>
-                    חברי ארון התרופות "{cabinet.medicineCabinetName}" 
+                    חברי ארון התרופות:{"\n\"" + cabinet.medicineCabinetName}" 
                 </ThemedText>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                   {members.map((member, index) => renderMember(member, index))}
                 </ParallaxScrollView>
             </View>
         </View>
+        {cabinet.isCreator &&
+        <View style={styles.pagebottom}>
+          <View style={styles.row}>
+            <AppHomeButton BackgroundColor={"#da5454"} BorderColor={"grey"} ButtonContent={strFC("מחיקת משתתף")} ButtonAction={()=>{setIsDeleteEnabled(!isDeleteEnabled)}}/>
+            <AppHomeButton BackgroundColor={"lightgreen"} BorderColor={"grey"} ButtonContent={strFC("הוסף משתתף")} ButtonAction={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}/>
+          </View>
+        </View>}
         
     </View>
   );

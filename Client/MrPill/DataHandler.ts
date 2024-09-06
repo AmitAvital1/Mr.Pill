@@ -22,7 +22,8 @@ let user = {
 let map = new Map<string, any>();
 let stateMap = new Map<string, string>();
 let flagMap = new Map<string, boolean>();
-let disposable: any = null;
+flagMap.set('sessionAlive', true);
+let disposable: any = undefined;
 
 export default {
 
@@ -33,6 +34,7 @@ export default {
     stateMap = new Map<string, string>;
     flagMap = new Map<string, boolean>();
     flagMap.set('sessionAlive', true);
+    disposable = undefined;
 
   },
   resetUser() {
@@ -144,13 +146,16 @@ export default {
         LastName: await AsyncStorage.getItem('userLastName') || "",
         PhoneNumber: await AsyncStorage.getItem('userPhoneNumber') || "",
         Token: await AsyncStorage.getItem('userToken') || "",
-      } 
+      }
 
     } catch (e) {
 
       console.error(e);
+      return false;
 
     }
+
+    return true;
   },
 
   async saveUserToStorage() {

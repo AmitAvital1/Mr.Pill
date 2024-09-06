@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Alert } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -34,40 +34,59 @@ const borderColor = "#005a27"
 const MyReminders: React.FC = () => {
 
   const [myReminders, setMyReminders] = React.useState<[Reminder?]>([]);
+  const [isDeleteEnabled, setIsDeleteEnabled] = React.useState<boolean>(false);
+  const [screenUpdated, setScreenUpdated] = React.useState<boolean>(false);
+
+  const handleDeleteReminderButtonPress = async (reminder: Reminder) => {
+
+    DataHandler.setState("reminderId", reminder.reminderId.toString());
+    if (await RequestHandler.sendRequest("deleteReminder")) {
+      Alert.alert("תזכורת נמחקה בהצלחה!");
+      setScreenUpdated(!screenUpdated);
+    } else {
+      Alert.alert("שגיאה במחיקת התזכורת");
+    }
+
+  }
+
   function renderReminder(reminder?: Reminder, id?: number) {
     if (!reminder) return;
     return (
-      <Pressable key={id} onPress={()=>{console.log('y')}}>
-        
-        <View style={styles.reminderBox}>
-          <View style={{alignItems: 'center', flexDirection: 'row'}}>
-      
-            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
-              <Image source={{uri: reminder.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
-            </View>
-              
-            <View style={{flexGrow: 1}}>
-              <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
-              {//<ThemedText style={{marginRight: 35, textAlign: 'center'}}>{reminder.message}</ThemedText>}
-              }
-              <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + " בתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
-            </View>
-    
+      <View style={styles.reminderBox}>
+
+        <View style={{alignItems: 'center', flexDirection: 'row'}}>
+          {isDeleteEnabled &&
+          <Pressable onPress={()=>handleDeleteReminderButtonPress(reminder)} style={{borderWidth: 2, borderColor: "grey", marginRight: 20, justifyContent: 'center', alignContent: 'center', minHeight: 50, minWidth: 50, backgroundColor: "#da5454", borderRadius: 999}}>
+            <ThemedText style={{fontSize: 22, fontWeight: 'bold', textAlign: 'center'}}>הסר</ThemedText>
+          </Pressable>}
+
+          <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
+            <Image source={{uri: reminder.imagePath}} style={{height: 50, width: 50}} resizeMode='center'></Image>
           </View>
+            
+          <View style={{flexGrow: 1}}>
+            <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
+            <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\nבתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
+          </View>
+
         </View>
 
-      </Pressable>
+      </View>
     )
   }
 
+  const sendGetRemindersRequest = async () => {
+    if (await RequestHandler.sendRequest('getMyReminders')) {
+      setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
+    }
+  };
+
+  useEffect(()=>{
+    sendGetRemindersRequest();
+  },[screenUpdated])
+
   useFocusEffect(
     useCallback(() => {
-    
-      const sendGetRemindersRequest = async () => {
-        if (await RequestHandler.sendRequest('getMyReminders')) {
-          setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
-        }
-      };
       sendGetRemindersRequest();
 
       return () => {
@@ -82,9 +101,13 @@ const MyReminders: React.FC = () => {
         <View style={{flex: 1}}>
         {MrPillLogo(0.5)}
             <View style={styles.pagetop}> 
-                <ThemedText style={{lineHeight: 30, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
+                <ThemedText style={{lineHeight: 34, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
                     התזכורות שלי:
                 </ThemedText>
+                {myReminders.length < 1 &&
+                <ThemedText style={{color: "#d47211", lineHeight: 34, textAlign: 'center', fontSize: 20, fontWeight: 'bold', marginTop: 8}}>
+                אין תזכורות פעילות.
+                </ThemedText>}
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                   {myReminders.map((reminder, index) => renderReminder(reminder, index))}
                 </ParallaxScrollView>
@@ -92,9 +115,10 @@ const MyReminders: React.FC = () => {
         </View>
         
         <View style={styles.pagebottom}>
-            <View style={styles.row}>
-                <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תזכורת חדשה")} ButtonAction={()=>{router.navigate('/(reminders)/addreminder')}}/>
-            </View>
+          <View style={styles.row}>
+            <AppHomeButton BackgroundColor={"#da5454"} BorderColor={"grey"} ButtonContent={strFC("מחיקת תזכורת")} ButtonAction={()=>{setIsDeleteEnabled(!isDeleteEnabled)}}/>
+            <AppHomeButton BackgroundColor={"lightgreen"} BorderColor={"grey"} ButtonContent={strFC("הוסף תזכורת חדשה")} ButtonAction={()=>{router.navigate('/(reminders)/addreminder')}}/>
+          </View>
         </View>
 
     </View>
@@ -148,7 +172,8 @@ const styles = StyleSheet.create({
     alignContent: 'center',
     paddingHorizontal: 15,
     paddingVertical: 5,
-    minWidth: 300,
+    minWidth: "90%",
+    minHeight: 100
   },
   plusMinusButton: {
     minWidth: 50,
