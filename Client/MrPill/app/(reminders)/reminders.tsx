@@ -1,8 +1,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet, Alert } from 'react-native';
+
+import { View, StyleSheet, Alert, Text } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -58,7 +58,7 @@ const MyReminders: React.FC = () => {
         <View style={{alignItems: 'center', flexDirection: 'row'}}>
           {isDeleteEnabled &&
           <Pressable onPress={()=>handleDeleteReminderButtonPress(reminder)} style={{borderWidth: 2, borderColor: "grey", marginRight: 20, justifyContent: 'center', alignContent: 'center', minHeight: 50, minWidth: 50, backgroundColor: "#da5454", borderRadius: 999}}>
-            <ThemedText style={{fontSize: 22, fontWeight: 'bold', textAlign: 'center'}}>הסר</ThemedText>
+            <Text style={{fontSize: 22, fontWeight: 'bold', textAlign: 'center'}}>הסר</Text>
           </Pressable>}
 
           <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
@@ -66,8 +66,8 @@ const MyReminders: React.FC = () => {
           </View>
             
           <View style={{flexGrow: 1}}>
-            <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
-            <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\nבתאריך " + reminder.reminderTime.slice(0,10)}</ThemedText>
+            <Text style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
+            <Text style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\nבתאריך " + reminder.reminderTime.slice(0,10)}</Text>
           </View>
 
         </View>
@@ -102,13 +102,13 @@ const MyReminders: React.FC = () => {
         <View style={{flex: 1}}>
         {MrPillLogo(0.5)}
             <View style={styles.pagetop}> 
-                <ThemedText style={{lineHeight: 34, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
+                <Text style={{lineHeight: 34, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
                     התזכורות שלי:
-                </ThemedText>
+                </Text>
                 {myReminders.length < 1 &&
-                <ThemedText style={{color: "#d47211", lineHeight: 34, textAlign: 'center', fontSize: 20, fontWeight: 'bold', marginTop: 8}}>
+                <Text style={{color: "#d47211", lineHeight: 34, textAlign: 'center', fontSize: 20, fontWeight: 'bold', marginTop: 8}}>
                 אין תזכורות פעילות.
-                </ThemedText>}
+                </Text>}
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                   {myReminders.map((reminder, index) => renderReminder(reminder, index))}
                 </ParallaxScrollView>

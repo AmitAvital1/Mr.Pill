@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet, Image, ScrollView, Alert } from 'react-native';
+
+import { View, StyleSheet, Image, ScrollView, Alert, Text } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -147,8 +147,8 @@ const HomePage: React.FC = () => {
             <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100, marginRight: 30}} resizeMode='center'></Image>
 
             <View style={{flexGrow: 1}}>
-              <ThemedText style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
-              <ThemedText style={{color: "#000", fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</ThemedText>
+              <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
+              <Text style={{color: "#000", fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</Text>
             </View>
     
           </View>
@@ -168,19 +168,19 @@ const HomePage: React.FC = () => {
 
           <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, true)}}>
             <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
-              <ThemedText style={[styles.plusMinusText, {paddingTop: 19.5, color: 'green'}]}>✔</ThemedText>
+              <Text style={[styles.plusMinusText, {paddingTop: 19.5, color: 'green'}]}>✔</Text>
             </View>
           </Pressable>
 
           <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, false)}}>
             <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
-              <ThemedText style={[styles.plusMinusText, {paddingTop: 17.5}]}>❌</ThemedText>
+              <Text style={[styles.plusMinusText, {paddingTop: 17.5}]}>❌</Text>
             </View>
           </Pressable>
 
           <View style={{width: "50%", flexGrow: 1}}>
-            <ThemedText style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{notification.senderName} - 0{notification.senderPhoneNumber}</ThemedText>
-            <ThemedText style={{color: "#000", fontSize: 16, marginRight: 35, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</ThemedText>
+            <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{notification.senderName} - 0{notification.senderPhoneNumber}</Text>
+            <Text style={{color: "#000", fontSize: 16, marginRight: 35, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</Text>
           </View>
     
           </View>
@@ -197,24 +197,24 @@ const HomePage: React.FC = () => {
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
      
       <Pressable onPress={logOut} style={{minHeight: 50, minWidth: 50, backgroundColor: "#dddd", position: 'absolute', left: "85%", marginTop: "14%", borderRadius: 999, elevation: 3}}>
-          <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
+        <Text style={{lineHeight: 55, fontSize: 45}}>🚪</Text>
       </Pressable>
 
       {myNotifications.length > 0 &&
       <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}} style={{zIndex: 5, backgroundColor: "#dddd", position: 'absolute', left: "5%", marginTop: "14%", borderRadius: 999, elevation: 3}}>
-        <ThemedText style={{lineHeight: 55, fontSize: 45}}>🔔</ThemedText>
+        <Text style={{lineHeight: 55, fontSize: 45}}>🔔</Text>
         <View style={{position: 'absolute', marginLeft: "5%", marginTop: "14%", borderRadius: 999}}>
-            <ThemedText>🔴</ThemedText>
+            <Text>🔴</Text>
         </View>
       </Pressable>}
 
       {MrPillLogo(0.5, true)}
 
-      <ThemedText style={{color: "#000", lineHeight: 30, marginTop: 15, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{color: "#000", fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
+      <Text style={{color: "#000", lineHeight: 30, marginTop: 15, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <Text style={{color: "#000", fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</Text>!</Text>
       {isNotificationsOpen &&
       <View style={{flex: 1,}}>
         <View style={[styles.pagetop, {borderBottomWidth: 10, borderColor: backgroundColorLight, backgroundColor: backgroundColorAlt}]}>
-        <ThemedText style={{color: "#000", fontSize: 18, textAlign: 'center'}}>בקשות הצטרפות:</ThemedText>
+        <Text style={{color: "#000", fontSize: 18, textAlign: 'center'}}>בקשות הצטרפות:</Text>
           <ParallaxScrollView backgroundColor={backgroundColorAlt}>
               {myNotifications.map((notification, index) => renderNotification(notification, index))}
           </ParallaxScrollView>
@@ -224,7 +224,7 @@ const HomePage: React.FC = () => {
       <View style={{flex: myReminders.length > 0 ? 1 : 0}}>
         <View style={styles.pagetop}> 
 
-          <ThemedText style={styles.text}>{myReminders.length > 0 ? "תזכורות להיום:" : "אין תזכורות להיום  " + getEmoji()}</ThemedText>
+          <Text style={styles.text}>{myReminders.length > 0 ? "תזכורות להיום:" : "אין תזכורות להיום  " + getEmoji()}</Text>
  
           {myReminders.length > 0 && 
           <ParallaxScrollView backgroundColor={backgroundColorLight}>

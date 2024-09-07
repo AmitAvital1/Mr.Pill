@@ -268,8 +268,8 @@ export default {
     async sendRequest(requestType: string) {
         
         const timeNow = Date.now();
-        if (lastRequestTime && lastRequestType && lastRequestType === requestType && timeNow - lastRequestTime < 1000)
-            return; // prevent rapid repeated requests
+        if (lastRequestTime && lastRequestType && lastRequestType === requestType && timeNow - lastRequestTime < 2000)
+            {console.log("too fast!!!"); return;} // prevent rapid repeated requests
 
         lastRequestType = requestType;
         lastRequestTime = timeNow;

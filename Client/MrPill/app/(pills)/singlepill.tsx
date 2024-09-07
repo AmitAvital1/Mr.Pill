@@ -1,7 +1,7 @@
 import React from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet, Image, Pressable, Alert } from 'react-native';
+import { View, StyleSheet, Image, Pressable, Alert, Text } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -129,21 +129,21 @@ const SinglePillPage: React.FC = () => {
         </View>
         <View style={styles.pagetop}>
             
-            <View style={styles.imageContainer} onPress={handlePillImagePress}>
-            <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
-            <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
-            <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
+            <View style={styles.imageContainer}>
+              <Text style={styles.text}>{pill.hebrewName}</Text>
+                <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+              <Text style={styles.text}>{pill.hebrewDescription}</Text>
             </View>
             
             <View style={{flexDirection: 'row'}}>
               
               <Pressable style={{marginHorizontal: 10, alignItems: 'center', justifyContent: 'center', alignContent: 'center', borderColor: "#777", borderWidth: 3, backgroundColor: backgroundColorMain, minHeight: 100, minWidth: 100, borderRadius: 999}} onPress={()=>{setIsEditEnabled(!isEditEnabled); setIsDateInputEnabled(false)}}>
-                <ThemedText style={{color: "#333", fontSize: 50, lineHeight: 60, fontWeight: 'bold' }}>✏</ThemedText>
+                <Text style={{color: "#333", fontSize: 50, lineHeight: 60, fontWeight: 'bold' }}>✏</Text>
               </Pressable>
               
               <View>
-                <ThemedText style={styles.text}>מתוך ארון התרופות:{"\n"}{pill.medicineCabinetName}</ThemedText>
-                {pill.validity && <ThemedText style={styles.text}>תוקף: {pill.validity.slice(0, 10)}</ThemedText>}
+                <Text style={styles.text}>מתוך ארון התרופות:{"\n"}{pill.medicineCabinetName}</Text>
+                {pill.validity && <Text style={styles.text}>תוקף: {pill.validity.slice(0, 10)}</Text>}
               </View>
 
 
@@ -157,7 +157,7 @@ const SinglePillPage: React.FC = () => {
                 {// delete pill
                 !isDateInputEnabled &&
                 <Pressable style={{marginHorizontal: 10, justifyContent: 'center', alignContent: 'center', borderColor: "#777", borderWidth: 3, backgroundColor: redButtonColor, minHeight: 100, minWidth: 100, borderRadius: 999}} onPress={sendDeletePillRequest}>
-                  <ThemedText style={styles.text}>מחק{'\n'}תרופה</ThemedText>
+                  <Text style={styles.text}>מחק{'\n'}תרופה</Text>
                 </Pressable>}
                 
                 {// edit date inputs
@@ -165,54 +165,54 @@ const SinglePillPage: React.FC = () => {
                 <View style={{flexDirection: 'row'}}>
                   
                   <View style={{gap: 10}}>
-                    <ThemedText style={styles.text}>שנה</ThemedText>
+                    <Text style={styles.text}>שנה</Text>
                     <Pressable style={styles.greenButton} onPress={()=>changeYear(true)}>
-                      <ThemedText style={styles.text}>+</ThemedText>
+                      <Text style={styles.text}>+</Text>
                     </Pressable>
 
                     <Pressable style={styles.redButton} onPress={()=>changeYear(false)}>
-                      <ThemedText style={styles.text}>-</ThemedText>
+                      <Text style={styles.text}>-</Text>
                     </Pressable>   
 
                   </View>
                   <View style={{gap: 10}}>
-                    <ThemedText style={styles.text}>חודש </ThemedText>
+                    <Text style={styles.text}>חודש </Text>
                     <Pressable style={styles.greenButton} onPress={()=>changeMonth(true)}>
-                      <ThemedText style={styles.text}>+</ThemedText>
+                      <Text style={styles.text}>+</Text>
                     </Pressable>
 
                     <Pressable style={styles.redButton} onPress={()=>changeMonth(false)}>
-                      <ThemedText style={styles.text}>-</ThemedText>
+                      <Text style={styles.text}>-</Text>
                     </Pressable>
 
                   </View>
                   <View style={{gap: 10}}>
-                    <ThemedText style={styles.text}>יום </ThemedText>
+                    <Text style={styles.text}>יום </Text>
                     <Pressable style={styles.greenButton} onPress={()=>changeDay(true)}>
-                      <ThemedText style={styles.text}>+</ThemedText>
+                      <Text style={styles.text}>+</Text>
                     </Pressable>
 
                     <Pressable style={styles.redButton} onPress={()=>changeDay(false)}>
-                      <ThemedText style={styles.text}>-</ThemedText>
+                      <Text style={styles.text}>-</Text>
                     </Pressable>
 
                   </View>
                 </View>}
 
                 <Pressable style={[{backgroundColor: isDateInputEnabled ? greenButtonColor : backgroundColorMain}, {marginHorizontal: 10, justifyContent: 'center', alignContent: 'center', borderColor: "#777", borderWidth: 3, backgroundColor: backgroundColorMain, minHeight: 100, minWidth: 100, borderRadius: 999}]} onPress={handleDateButtonPress}>
-                  <ThemedText style={styles.text}>{isDateInputEnabled ? "אישור\nהתוקף\nהחדש" : "עדכן\nתוקף"}</ThemedText>
+                  <Text style={styles.text}>{isDateInputEnabled ? "אישור\nהתוקף\nהחדש" : "עדכן\nתוקף"}</Text>
                 </Pressable>
 
             </View>}
 
             {isEditEnabled && isDateInputEnabled &&
-              <ThemedText style={[styles.text, {color: "#581d22"}]}>התוקף החדש: {newDate.slice(0,10)}</ThemedText>
+              <Text style={[styles.text, {color: "#581d22"}]}>התוקף החדש: {newDate.slice(0,10)}</Text>
             }
 
             {!isEditEnabled && <View style={{flex: 1}}/>}
 
             {!isDateInputEnabled &&
-            <ThemedText style={styles.text}>מספר התרופות שנותרו:  <ThemedText style={[styles.text, {lineHeight: 50, fontSize: 40, color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "yellow" : "green")}]}>{pill.numberOfPills}</ThemedText></ThemedText>
+            <Text style={styles.text}>מספר התרופות שנותרו:  <Text style={[styles.text, {lineHeight: 50, fontSize: 40, color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "yellow" : "green")}]}>{pill.numberOfPills}</Text></Text>
             }
         </View>
         

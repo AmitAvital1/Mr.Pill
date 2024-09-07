@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -58,25 +58,25 @@ const MyCabinets: React.FC = () => {
               {/*  */}
               <Pressable onPress={()=>{DataHandler.setState("showFromCabinet", cabinet.medicineCabinetName); router.navigate("/(pills)/mypills");}}>
                 <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                  <ThemedText style={[styles.plusMinusText, {paddingTop: 13.5}]}>💊</ThemedText>
+                  <Text style={[styles.plusMinusText, {paddingTop: 3.5}]}>💊</Text>
                 </View>
               </Pressable>
 
               {/*  */}
               <Pressable onPress={()=>{DataHandler.set('cabinet', cabinet); router.navigate("/(cabinet)/cabinetmembers");}}>
                 <View style={[styles.plusMinusButton, {backgroundColor: "#90e665"}]}>
-                  <ThemedText style={[styles.plusMinusText, {paddingTop: 15.5}]}>{getFamilyEmoji()}</ThemedText>
+                  <Text style={[styles.plusMinusText, {paddingTop: 5.5}]}>{getFamilyEmoji()}</Text>
                 </View>
               </Pressable> 
               
               {/*  */}
               <View style={{flexGrow: 1}}>
                 {cabinet.isCreator &&
-                <Pressable onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}>
-                  <ThemedText style={[styles.plusMinusText, {alignSelf: 'flex-end', paddingTop: 5}]}>➕</ThemedText>
+                <Pressable style={{justifyContent: 'center'}} onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}>
+                  <Text style={[styles.plusMinusText, {alignSelf: 'flex-end' }]}>➕</Text>
                 </Pressable>
                 }
-                <ThemedText style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</ThemedText>
+                <Text style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</Text>
               </View>
       
             </View>
@@ -95,14 +95,14 @@ const MyCabinets: React.FC = () => {
           <View style={styles.pagetop}>
 
             {/* page title */}
-            <ThemedText style={{lineHeight: 35, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
+            <Text style={{lineHeight: 35, textAlign: 'center', fontSize: 24, textDecorationLine: 'underline', fontWeight: 'bold', marginTop: 8}}>
               ארונות תרופות שלי:
-            </ThemedText>
+            </Text>
 
             {/* cabinet list */}
             <ParallaxScrollView backgroundColor={backgroundColorLight}>
               {myCabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
-              {myCabinets.length == 0 && <ThemedText style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</ThemedText>}
+              {myCabinets.length == 0 && <Text style={{fontSize: 20, color: "#FF0000"}}>אין ארונות תרופות. נא הוסף תחילה ארון.</Text>}
             </ParallaxScrollView>
 
           </View>

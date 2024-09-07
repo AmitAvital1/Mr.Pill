@@ -34,7 +34,7 @@ const MyPills: React.FC = () => {
 
   const [myPills, setMyPills] = useState<Pill[]>([]);
   const [dropDownItems, setDropDownItems] = useState<String[]>([]);
-  const [cabinetName, setCabinetName] = useState<string>(DataHandler.getState("showFromCabinet") || "");
+  const [cabinetName, setCabinetName] = useState<string>(DataHandler.getState("showFromCabinet", true) || "");
   const [dropdownVisible, setDropdownVisible] = useState(false);
   
 

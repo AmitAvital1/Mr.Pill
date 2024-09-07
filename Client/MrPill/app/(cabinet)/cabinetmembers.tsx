@@ -1,12 +1,11 @@
 import React, { useCallback, useEffect } from 'react';
 import { router } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet, Alert } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
 import ParallaxScrollView from "@/components/ParallaxScrollView";
-import { Pressable } from 'react-native';
+import { Pressable, Text } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import RequestHandler from '@/RequestHandler';
 import DataHandler from '@/DataHandler';
@@ -73,7 +72,7 @@ const CabinetMembersPage: React.FC = () => {
 
             {isDeleteEnabled && !memberIsTheUser &&
             <Pressable onPress={()=>handleDeleteMemberButtonPress(member)} style={{borderWidth: 2, borderColor: "grey", marginRight: 20, justifyContent: 'center', alignContent: 'center', minHeight: 50, minWidth: 50, backgroundColor: "#da5454", borderRadius: 999}}>
-              <ThemedText style={{fontSize: 22, fontWeight: 'bold', textAlign: 'center'}}>הסר</ThemedText>
+              <Text style={{fontSize: 22, fontWeight: 'bold', textAlign: 'center'}}>הסר</Text>
             </Pressable>}
 
             <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#90e665"}]}>
@@ -81,8 +80,8 @@ const CabinetMembersPage: React.FC = () => {
               
             <View style={{flexGrow: 1}}>
               
-              <ThemedText style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{memberIsTheUser ? "אני" : `${member.firstName} ${member.lastName}`}</ThemedText>
-              {!memberIsTheUser && <ThemedText style={{marginRight: 35, textAlign: 'center'}}>0{member.phoneNumber}</ThemedText>}
+              <Text style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{memberIsTheUser ? "אני" : `${member.firstName} ${member.lastName}`}</Text>
+              {!memberIsTheUser && <Text style={{marginRight: 35, textAlign: 'center'}}>0{member.phoneNumber}</Text>}
             </View>
     
           </View>
@@ -98,9 +97,9 @@ const CabinetMembersPage: React.FC = () => {
         <View style={{flex: 1, marginBottom: 20}}>
         {MrPillLogo(0.5)}
             <View style={styles.pagetop}> 
-                <ThemedText style={{lineHeight: 30, textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 8}}>
+                <Text style={{lineHeight: 30, textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 8}}>
                     חברי ארון התרופות:{"\n\"" + cabinet.medicineCabinetName}" 
-                </ThemedText>
+                </Text>
                 <ParallaxScrollView backgroundColor={backgroundColorLight}>
                   {members.map((member, index) => renderMember(member, index))}
                 </ParallaxScrollView>

@@ -115,9 +115,9 @@ const AddPillScreen = () => {
       <Pressable key={position} onPress={() => { setCabSelection(position); }}>
         <View style={[styles.reminderBox, { backgroundColor: color, minHeight: 50 }]}>
           <View style={{ flexDirection: 'row' }}>
-            <ThemedText style={{ fontSize: 22, marginHorizontal: 20, textAlign: 'center' }}>
+            <Text style={{ fontSize: 22, marginHorizontal: 20, textAlign: 'center' }}>
               {cabinet.medicineCabinetName}
-            </ThemedText>
+            </Text>
           </View>
         </View>
       </Pressable>
@@ -141,9 +141,9 @@ const AddPillScreen = () => {
         </View>
       )}
 
-      <ThemedText style={{ lineHeight: 30, textAlign: 'center', fontSize: 18, fontWeight: 'bold', marginHorizontal: 30, marginTop: 5, }}>
+      <Text style={{ lineHeight: 30, textAlign: 'center', fontSize: 18, fontWeight: 'bold', marginHorizontal: 30, marginTop: 5, }}>
         הכנס ידנית מספר ברקוד של תרופה או לחץ בכדי לסרוק באמצעות המצלמה.
-      </ThemedText>
+      </Text>
 
       <TextInput
         style={[styles.input, { backgroundColor: scanned ? 'lightgreen' : backgroundColorLight }]}
@@ -163,13 +163,13 @@ const AddPillScreen = () => {
 
       <View style={{ flexGrow: 1, minHeight: 160 }}>
         <View style={styles.pagetop}>
-          <ThemedText style={{ lineHeight: 30, textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>
+          <Text style={{ lineHeight: 30, textAlign: 'center', fontSize: 24, fontWeight: 'bold', marginTop: 10 }}>
            בחר ארון להוספת התרופה:
-          </ThemedText>
+          </Text>
           {cabinets.length < 1 &&
-          <ThemedText style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000" }}>
+          <Text style={{ textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000" }}>
               לא נמצאו ארונות למשתמש. אנא הוסף תחילה ארון אחד לפחות.{"\n"}
-          </ThemedText>
+          </Text>
           }
           <ParallaxScrollView backgroundColor={backgroundColorLight}>
             {cabinets.map((cabinet, index) => renderCabinet(cabinet, index))}
