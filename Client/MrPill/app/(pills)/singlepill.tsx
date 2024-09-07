@@ -130,8 +130,11 @@ const SinglePillPage: React.FC = () => {
         <View style={styles.pagetop}>
             
             <View style={styles.imageContainer}>
+              <Pressable style={{alignSelf: 'center', minHeight: 50, minWidth: 50, maxWidth: 250}} onPress={handlePillImagePress}>
+                <Text style={styles.plusMinusText}>💾</Text>
+              </Pressable>
               <Text style={styles.text}>{pill.hebrewName}</Text>
-                <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+                <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="stretch"/>
               <Text style={styles.text}>{pill.hebrewDescription}</Text>
             </View>
             
@@ -296,6 +299,13 @@ const styles = StyleSheet.create({
     color: '#000',
     textAlign: 'center',
   },
+  plusMinusText: {
+    lineHeight: 54,
+    fontSize: 44,
+    fontWeight: 'bold',
+    color: '#000',
+    textAlign: 'center',
+  },
   plusMinusButton: {
     minWidth: 50,
     minHeight: 50,
@@ -310,8 +320,8 @@ const styles = StyleSheet.create({
   image: {
     flex: 1,
     alignSelf: "center",
-    height: "100%",
-    width: "100%",
+    height: "90%",
+    width: "90%",
   }, 
   imageContainer: {
     margin: 8,
