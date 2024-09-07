@@ -76,8 +76,27 @@ const SinglePillPage: React.FC = () => {
   }
 
   const handlePillImagePress = () => {
-    DataHandler.setState("pdfURL", pill.brochurePath);
-    router.push("/(pills)/pillbrochure");
+
+    Alert.alert(
+        "הורדת עלון תרופה", //title
+        "האם ברצונך להוריד את עלון התרופה?", // message
+        [
+          {
+            text: "ביטול",
+            onPress: () => {},
+            style: "cancel", 
+          },
+          {
+            text: "אישור",
+            onPress: () => {
+                DataHandler.setState("pdfURL", pill.brochurePath);
+                router.push("/(pills)/pillbrochure");
+            },
+          }
+        ],
+        { cancelable: true } 
+      );
+
   }
 
   const handleDateButtonPress = () => {
@@ -124,20 +143,19 @@ const SinglePillPage: React.FC = () => {
   // MAIN PAGE LAYOUT
   return (    
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
-        <View style={{minHeight: "10%", margin: -10}}>
+        <View style={{minHeight: "10%", marginTop: 5}}>
           {MrPillLogo(0.3)}
+          <Pressable style={{alignSelf: 'flex-start', marginLeft: 15, minHeight: 50, minWidth: 100, maxWidth: 250}} onPress={handlePillImagePress}>
+            <Text style={styles.plusMinusText}>💾</Text>
+          </Pressable>
         </View>
+        
         <View style={styles.pagetop}>
-            
             <View style={styles.imageContainer}>
-              <Pressable style={{alignSelf: 'center', minHeight: 50, minWidth: 50, maxWidth: 250}} onPress={handlePillImagePress}>
-                <Text style={styles.plusMinusText}>💾</Text>
-              </Pressable>
               <Text style={styles.text}>{pill.hebrewName}</Text>
                 <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="stretch"/>
               <Text style={styles.text}>{pill.hebrewDescription}</Text>
             </View>
-            
             <View style={{flexDirection: 'row'}}>
               
               <Pressable style={{marginHorizontal: 10, alignItems: 'center', justifyContent: 'center', alignContent: 'center', borderColor: "#777", borderWidth: 3, backgroundColor: backgroundColorMain, minHeight: 100, minWidth: 100, borderRadius: 999}} onPress={()=>{setIsEditEnabled(!isEditEnabled); setIsDateInputEnabled(false)}}>
@@ -148,8 +166,6 @@ const SinglePillPage: React.FC = () => {
                 <Text style={styles.text}>מתוך ארון התרופות:{"\n"}{pill.medicineCabinetName}</Text>
                 {pill.validity && <Text style={styles.text}>תוקף: {pill.validity.slice(0, 10)}</Text>}
               </View>
-
-
             </View>
 
 
@@ -239,7 +255,7 @@ const SinglePillPage: React.FC = () => {
 const styles = StyleSheet.create({
   pagetop: {
     flex: 1,
-    marginTop: 20,
+    marginTop: 5,
     justifyContent: 'flex-start',
     alignItems: 'center',
     backgroundColor: backgroundColorLight,

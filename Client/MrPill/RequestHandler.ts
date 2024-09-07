@@ -1,9 +1,11 @@
 import axios, { AxiosResponse } from "axios";
 import DataHandler from "./DataHandler";
 
-// change if need
+// change if need 
 const BASE_URL = "http://20.217.66.65:"
 const SERVER_AND_CLIENT_ON_SAME_MACHINE = false;
+const COOLDOWN_PERIOD = 1500 // time in MS user has to wait between requests of the same type.
+const COOLDOWN_MULTIPLIER = 3; // if the user sends consequtive requests of DIFFERENT types, they can send them COOLDOWN_MULTIPLIER times faster.
 
 // do not change
 const BASE_URL_LOCAL = "http://10.0.2.2:" // android emulator and server running on same machine
@@ -16,8 +18,8 @@ let request = {
     data: {}
 };
 
-let lastRequestTime: number;
-let lastRequestType: string;
+let lastRequestTime: number = 0;
+let lastRequestType: string = "NOSUCHREQUEST";
 
 let response: AxiosResponse<any, any>;
 let parsedResponse: any;
@@ -266,14 +268,19 @@ function createRequest(requestType: string) {
 
 export default {
     async sendRequest(requestType: string) {
-        
+
+        // handle spammed requests
         const timeNow = Date.now();
-        if (lastRequestTime && lastRequestType && lastRequestType === requestType && timeNow - lastRequestTime < 2000)
-            {console.log("too fast!!!"); return;} // prevent rapid repeated requests
+        const deltaTime = timeNow - lastRequestTime;
+        if (lastRequestTime && lastRequestType && 
+          (deltaTime < COOLDOWN_PERIOD / COOLDOWN_MULTIPLIER) || 
+          (lastRequestType === requestType && deltaTime < COOLDOWN_PERIOD))
+            return; // prevent rapid repeated requests
 
         lastRequestType = requestType;
         lastRequestTime = timeNow;
-
+        
+        // send request
         try {
             axios.defaults.validateStatus = function () {
                 return true;

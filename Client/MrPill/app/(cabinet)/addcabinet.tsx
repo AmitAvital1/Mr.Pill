@@ -48,7 +48,7 @@ const AddCabinetScreen = () => {
         </Text>
       </View>
 
-      <View style={{flex: 1}}>
+      <View style={{flex: 1, marginTop: 30}}>
       <TextInput
         style={styles.input}
         onChangeText={(text)=>{setCabinetName(text); setIsNameTaken(false)}}

@@ -88,8 +88,8 @@ const HomePage: React.FC = () => {
   const logOut = () => {
     
     Alert.alert(
-        "התנתקות משתמש", // Title of the alert
-        "האם ברצונך להתנתק מהמשתמש?", // Message in the alert
+        "התנתקות משתמש", //title
+        "האם ברצונך להתנתק מהמשתמש?", // message
         [
           {
             text: "ביטול",

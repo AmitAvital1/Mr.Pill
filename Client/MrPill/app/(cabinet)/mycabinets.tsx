@@ -76,7 +76,7 @@ const MyCabinets: React.FC = () => {
                   <Text style={[styles.plusMinusText, {alignSelf: 'flex-end' }]}>➕</Text>
                 </Pressable>
                 }
-                <Text style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName}</Text>
+                <Text style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName.slice(0,25) + (cabinet.medicineCabinetName.length > 25 ? "..." : "")}</Text>
               </View>
       
             </View>
