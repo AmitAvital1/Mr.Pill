@@ -16,6 +16,9 @@ let request = {
     data: {}
 };
 
+let lastRequestTime: number;
+let lastRequestType: string;
+
 let response: AxiosResponse<any, any>;
 let parsedResponse: any;
 
@@ -263,6 +266,13 @@ function createRequest(requestType: string) {
 
 export default {
     async sendRequest(requestType: string) {
+        
+        const timeNow = Date.now();
+        if (lastRequestTime && lastRequestType && lastRequestType === requestType && timeNow - lastRequestTime < 1000)
+            return; // prevent rapid repeated requests
+
+        lastRequestType = requestType;
+        lastRequestTime = timeNow;
 
         try {
             axios.defaults.validateStatus = function () {

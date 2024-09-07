@@ -2,7 +2,7 @@ import React, { useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
-import { View, StyleSheet, Image, ScrollView } from 'react-native';
+import { View, StyleSheet, Image, ScrollView, Alert } from 'react-native';
 import { AppHomeButton } from "@/components/AppHomeButton";
 import { MrPillLogo } from '@/components/MrPillLogo';
 import { strFC } from "@/components/strFC";
@@ -73,7 +73,6 @@ const HomePage: React.FC = () => {
   const sendGetRemindersRequest = async () => {
               
     if (await RequestHandler.sendRequest('getMyRemindersToday')) {
-      console.log(RequestHandler.getResponse().request._response)
       setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
     }
   }
@@ -87,8 +86,26 @@ const HomePage: React.FC = () => {
   }
 
   const logOut = () => {
-    DataHandler.reset();
-    DataHandler.expireSession();
+    
+    Alert.alert(
+        "התנתקות משתמש", // Title of the alert
+        "האם ברצונך להתנתק מהמשתמש?", // Message in the alert
+        [
+          {
+            text: "ביטול",
+            onPress: () => {},
+            style: "cancel", 
+          },
+          {
+            text: "אישור",
+            onPress: () => {
+                DataHandler.reset();
+                DataHandler.expireSession();
+            },
+          }
+        ],
+        { cancelable: true } 
+      );
   }
 
   const updateNotifications = async ()=> {
@@ -130,8 +147,8 @@ const HomePage: React.FC = () => {
             <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100, marginRight: 30}} resizeMode='center'></Image>
 
             <View style={{flexGrow: 1}}>
-              <ThemedText style={{fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
-              <ThemedText style={{fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</ThemedText>
+              <ThemedText style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</ThemedText>
+              <ThemedText style={{color: "#000", fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</ThemedText>
             </View>
     
           </View>
@@ -162,8 +179,8 @@ const HomePage: React.FC = () => {
           </Pressable>
 
           <View style={{width: "50%", flexGrow: 1}}>
-            <ThemedText style={{fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{notification.senderName} - 0{notification.senderPhoneNumber}</ThemedText>
-            <ThemedText style={{fontSize: 16, marginRight: 35, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</ThemedText>
+            <ThemedText style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{notification.senderName} - 0{notification.senderPhoneNumber}</ThemedText>
+            <ThemedText style={{color: "#000", fontSize: 16, marginRight: 35, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</ThemedText>
           </View>
     
           </View>
@@ -179,29 +196,25 @@ const HomePage: React.FC = () => {
   return (
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
      
-      <Pressable onPress={logOut}>
-      <View style={{backgroundColor: "#ddd9", position: 'absolute', left: "5%", marginTop: "7%", borderRadius: 999, elevation: 3}}>
-        <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
-      </View>
+      <Pressable onPress={logOut} style={{minHeight: 50, minWidth: 50, backgroundColor: "#dddd", position: 'absolute', left: "85%", marginTop: "14%", borderRadius: 999, elevation: 3}}>
+          <ThemedText style={{lineHeight: 55, fontSize: 45}}>🚪</ThemedText>
       </Pressable>
 
       {myNotifications.length > 0 &&
-      <Pressable style={{zIndex: 5}}onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}}>
-      <View style={{backgroundColor: "#ddd9", position: 'absolute', marginLeft: "5%", marginTop: "27%", borderRadius: 999, elevation: 3}}>
+      <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}} style={{zIndex: 5, backgroundColor: "#dddd", position: 'absolute', left: "5%", marginTop: "14%", borderRadius: 999, elevation: 3}}>
         <ThemedText style={{lineHeight: 55, fontSize: 45}}>🔔</ThemedText>
-      </View>
-      <View style={{position: 'absolute', marginLeft: "5%", marginTop: "27%", borderRadius: 999}}>
-        <ThemedText>🔴</ThemedText>
-      </View>
+        <View style={{position: 'absolute', marginLeft: "5%", marginTop: "14%", borderRadius: 999}}>
+            <ThemedText>🔴</ThemedText>
+        </View>
       </Pressable>}
 
       {MrPillLogo(0.5, true)}
 
-      <ThemedText style={{lineHeight: 30, marginTop: 15, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
+      <ThemedText style={{color: "#000", lineHeight: 30, marginTop: 15, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <ThemedText style={{color: "#000", fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</ThemedText>!</ThemedText>
       {isNotificationsOpen &&
       <View style={{flex: 1,}}>
         <View style={[styles.pagetop, {borderBottomWidth: 10, borderColor: backgroundColorLight, backgroundColor: backgroundColorAlt}]}>
-        <ThemedText style={{fontSize: 18, textAlign: 'center'}}>בקשות הצטרפות:</ThemedText>
+        <ThemedText style={{color: "#000", fontSize: 18, textAlign: 'center'}}>בקשות הצטרפות:</ThemedText>
           <ParallaxScrollView backgroundColor={backgroundColorAlt}>
               {myNotifications.map((notification, index) => renderNotification(notification, index))}
           </ParallaxScrollView>

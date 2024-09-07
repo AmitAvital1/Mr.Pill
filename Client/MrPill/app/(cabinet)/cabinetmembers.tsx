@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { router } from 'expo-router';
 import { ThemedText } from '@/components/ThemedText';
 import { View, StyleSheet, Alert } from 'react-native';
@@ -26,16 +26,16 @@ const CabinetMembersPage: React.FC = () => {
   const cabinet = DataHandler.get('cabinet');
   const [members, setMembers] = React.useState<[Member?]>([]);
   const [isDeleteEnabled, setIsDeleteEnabled] = React.useState<boolean>(false);
+  const [screenUpdated, setScreenUpdated] = React.useState<boolean>(false);
+
+  const sendGetMembersRequest = async () => {
+    if (await RequestHandler.sendRequest('getCabinetMembers')) {
+      setMembers(JSON.parse(RequestHandler.getResponse().request._response));
+    }
+  };
 
   useFocusEffect(
     useCallback(() => {
-
-      const sendGetMembersRequest = async () => {
-        if (await RequestHandler.sendRequest('getCabinetMembers')) {
-          setMembers(JSON.parse(RequestHandler.getResponse().request._response));
-        }
-      };
-  
       sendGetMembersRequest();
 
       return () => {
@@ -43,6 +43,12 @@ const CabinetMembersPage: React.FC = () => {
       };
     }, [])
   );
+
+  useEffect(()=>{
+
+    sendGetMembersRequest();
+
+  }, [screenUpdated])
   
   const handleDeleteMemberButtonPress = async (member: Member) => {
     DataHandler.setState("targetPhone", member.phoneNumber);
@@ -50,6 +56,7 @@ const CabinetMembersPage: React.FC = () => {
     if (await RequestHandler.sendRequest("removeMember")) {
       Alert.alert("משתתף הוסר בהצלחה!");
       setIsDeleteEnabled(false);
+      setScreenUpdated(!screenUpdated);
     } else {
       Alert.alert("שגיאה בהסרת משתתף מהארון.");
     }

@@ -129,11 +129,11 @@ const SinglePillPage: React.FC = () => {
         </View>
         <View style={styles.pagetop}>
             
-            <Pressable style={styles.imageContainer} onPress={handlePillImagePress}>
-              <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
-                <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
-              <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
-            </Pressable>
+            <View style={styles.imageContainer} onPress={handlePillImagePress}>
+            <ThemedText style={styles.text}>{pill.hebrewName}</ThemedText>
+            <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
+            <ThemedText style={styles.text}>{pill.hebrewDescription}</ThemedText>
+            </View>
             
             <View style={{flexDirection: 'row'}}>
               

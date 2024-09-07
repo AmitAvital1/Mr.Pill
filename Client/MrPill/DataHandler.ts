@@ -82,7 +82,7 @@ export default {
     return user;
   },
   isEmpty() {
-    return (user.FirstName == "" || user.LastName == "" || user.PhoneNumber == "" || user.Token == "");
+    return (user.FirstName === "" || user.LastName === "" || user.PhoneNumber === "" || user.Token === "");
   },
 
   getState(key: string, dispose?: boolean) {

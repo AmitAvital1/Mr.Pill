@@ -14,7 +14,7 @@ import DataHandler from "@/DataHandler";
 import RequestHandler from "@/RequestHandler";
 
 async function handleLoginPress() {
-
+    
   if (DataHandler.isEmpty()) {
     
     router.push('/(login)/login');
@@ -27,7 +27,7 @@ async function handleLoginPress() {
 
   } else {
 
-    DataHandler.setFlag('login', await RequestHandler.sendRequest('login'));
+    DataHandler.setFlag('login', await RequestHandler.sendRequest('login') || false);
     router.push('/(login)/login');
 
   }
