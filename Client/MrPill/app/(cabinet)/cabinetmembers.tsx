@@ -46,8 +46,8 @@ const CabinetMembersPage: React.FC = () => {
   
   const handleDeleteMemberButtonPress = async (member: Member) => {
     DataHandler.setState("targetPhone", member.phoneNumber);
-    DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName);
-    if (await RequestHandler.sendRequest("deleteMember")) {
+    DataHandler.setState("cabinetId", cabinet.id.toString());
+    if (await RequestHandler.sendRequest("removeMember")) {
       Alert.alert("משתתף הוסר בהצלחה!");
       setIsDeleteEnabled(false);
     } else {
