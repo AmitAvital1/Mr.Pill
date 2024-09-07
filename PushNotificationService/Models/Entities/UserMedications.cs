@@ -16,6 +16,7 @@ public class UserMedications
     public int MedicationRepoId { get; set; }
     public  required MedicationRepo MedicationRepo { get; set; }
     public ICollection<Reminder>? Reminders { get; set; } 
+    public int NumberOfPills { get; set; } 
 }
 
 

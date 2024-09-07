@@ -141,7 +141,38 @@ public class ReminderController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occurred while setting reminder");
+            _logger.LogError(ex, "An error occurred while deleting reminder");
+            return StatusCode(500, "Internal Server Error " + ex.Message);
+        }
+    }
+
+    [HttpPut]
+    [Route("ApproveReminder")]
+    public IActionResult ApproveReminder([FromQuery] int Id)
+    {
+        try
+        {
+            string? token = GetAuthorizationTokenOrThrow();
+            int phoneNumber = _reminderService.GetPhoneNumberFromToken(token);
+
+            if (!_reminderService.IsUserExistInDb(phoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", phoneNumber);
+                return NotFound(new { Message = "Phone number does not exist", PhoneNumber = phoneNumber });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { Message = "Invalid model state for reminder" });
+            }
+
+            _reminderService.ApproveReminder(phoneNumber, Id);
+            
+            return Ok(new { Message = "Reminder approved successfully" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while approving reminder");
             return StatusCode(500, "Internal Server Error " + ex.Message);
         }
     }

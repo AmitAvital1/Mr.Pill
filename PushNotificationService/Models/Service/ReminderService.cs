@@ -46,6 +46,7 @@ public class ReminderService : IReminderService
                 IsRecurring = reminderDto.IsRecurring,
                 RecurrenceInterval = reminderDto.RecurrenceInterval,
                 IsActive = true,
+                numOfPills = reminderDto.numOfPills,
                 UserMedicationId = reminderDto.UserMedicationId
 
             };
@@ -86,6 +87,7 @@ public class ReminderService : IReminderService
                 IsRecurring = reminderDto.IsRecurring,
                 RecurrenceInterval = reminderDto.RecurrenceInterval,
                 IsActive = true,
+                numOfPills = reminderDto.numOfPills,
                 UserMedicationId = reminderDto.UserMedicationId
 
             };
@@ -122,6 +124,46 @@ public class ReminderService : IReminderService
         }
 
         _dbContext.Reminders.Remove(Reminder);
+        _dbContext.SaveChanges();
+    }
+
+    public void ApproveReminder(int phoneNumber, int Id)
+    {
+        var user = _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
+
+        if(user == null)
+        {
+            throw new Exception("No user found on phone number " + phoneNumber);
+        }
+        
+        var Reminder = _dbContext.Reminders
+                .Where(r => r.Id == Id)
+                .FirstOrDefault();
+
+        var medication = _dbContext?.UserMedications
+                ?.FirstOrDefault(u => u.Id == Reminder.UserMedicationId);
+            
+        if(Reminder == null)
+        {
+            throw new Exception("Invalid reminder id " + Id);
+        }
+
+        if(Reminder.UserId != user.UserId)
+        {
+            throw new Exception("Reminder not belong this user");
+        }
+        if(medication.NumberOfPills >= Reminder.numOfPills)
+        {
+            int n = (int)Reminder.numOfPills;
+            medication.NumberOfPills = medication.NumberOfPills - n;
+        }
+        else
+        {
+            _logger.LogWarning("User " + phoneNumber + " has not enogh medication. Set to 0");
+            medication.NumberOfPills = 0;
+        }
+        _logger.LogInformation("User " + phoneNumber + " approved his reminder id " + Reminder.Id);
         _dbContext.SaveChanges();
     }
 

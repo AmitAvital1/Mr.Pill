@@ -9,6 +9,7 @@ public class Reminder
     public bool IsRecurring { get; set; }
     public TimeSpan RecurrenceInterval { get; set; }
     public bool IsActive { get; set; }
+    public uint numOfPills { get; set; }
     public int UserMedicationId { get; set; }
     public UserMedications? UserMedication { get; set; }
 }
