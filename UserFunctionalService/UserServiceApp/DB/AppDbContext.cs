@@ -69,6 +69,6 @@ public class AppDbContext : DbContext
             .HasOne(r => r.UserMedication)
             .WithMany(um => um.Reminders)
             .HasForeignKey(r => r.UserMedicationId)
-            .OnDelete(DeleteBehavior.NoAction);
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
