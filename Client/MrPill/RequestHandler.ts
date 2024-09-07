@@ -3,7 +3,7 @@ import DataHandler from "./DataHandler";
 
 // change if need
 const BASE_URL = "http://20.217.66.65:"
-const SERVER_AND_CLIENT_ON_SAME_MACHINE = true;
+const SERVER_AND_CLIENT_ON_SAME_MACHINE = false;
 
 // do not change
 const BASE_URL_LOCAL = "http://10.0.2.2:" // android emulator and server running on same machine
