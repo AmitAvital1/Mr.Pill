@@ -46,6 +46,7 @@ public class ReminderService : IReminderService
                 IsRecurring = reminderDto.IsRecurring,
                 RecurrenceInterval = reminderDto.RecurrenceInterval,
                 IsActive = true,
+                Approved = false,
                 numOfPills = reminderDto.numOfPills,
                 UserMedicationId = reminderDto.UserMedicationId
 
@@ -127,7 +128,7 @@ public class ReminderService : IReminderService
         _dbContext.SaveChanges();
     }
 
-    public void ApproveReminder(int phoneNumber, int Id)
+    public void ApproveReminder(int phoneNumber, int Id, bool approved)
     {
         var user = _dbContext?.Users
                 ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
@@ -153,17 +154,25 @@ public class ReminderService : IReminderService
         {
             throw new Exception("Reminder not belong this user");
         }
-        if(medication.NumberOfPills >= Reminder.numOfPills)
+        if(!approved)
         {
-            int n = (int)Reminder.numOfPills;
-            medication.NumberOfPills = medication.NumberOfPills - n;
+            Reminder.Approved = true;
+              _logger.LogInformation("User " + phoneNumber + " decline his reminder id " + Reminder.Id);
         }
         else
         {
-            _logger.LogWarning("User " + phoneNumber + " has not enogh medication. Set to 0");
-            medication.NumberOfPills = 0;
+            if(medication.NumberOfPills >= Reminder.numOfPills)
+            {
+                int n = (int)Reminder.numOfPills;
+                medication.NumberOfPills = medication.NumberOfPills - n;
+            }
+            else
+            {
+                _logger.LogWarning("User " + phoneNumber + " has not enogh medication. Set to 0");
+                medication.NumberOfPills = 0;
+            }
+             _logger.LogInformation("User " + phoneNumber + " approved his reminder id " + Reminder.Id);
         }
-        _logger.LogInformation("User " + phoneNumber + " approved his reminder id " + Reminder.Id);
         _dbContext.SaveChanges();
     }
 
@@ -189,6 +198,7 @@ public class ReminderService : IReminderService
             dto.ReminderId = _reminder.Id;
             dto.ReminderTime = _reminder.ReminderTime;
             dto.RecurrenceInterval = _reminder.RecurrenceInterval;
+            dto.Approved = _reminder.Approved;
 
             var userMedication = _dbContext.UserMedications
                     .Where(um => um.Id == _reminder.UserMedicationId)
@@ -223,7 +233,10 @@ public class ReminderService : IReminderService
         {
             if(r.ReminderTime.Date.Equals(now.Date))
             {
-                res.Add(r);
+                if(!r.Approved ?? false)
+                {
+                    res.Add(r);
+                }
             }
         }
 

@@ -148,7 +148,7 @@ public class ReminderController : Controller
 
     [HttpPut]
     [Route("ApproveReminder")]
-    public IActionResult ApproveReminder([FromQuery] int Id)
+    public IActionResult ApproveReminder([FromQuery] int Id, bool Approve)
     {
         try
         {
@@ -166,7 +166,7 @@ public class ReminderController : Controller
                 return BadRequest(new { Message = "Invalid model state for reminder" });
             }
 
-            _reminderService.ApproveReminder(phoneNumber, Id);
+            _reminderService.ApproveReminder(phoneNumber, Id, Approve);
             
             return Ok(new { Message = "Reminder approved successfully" });
         }

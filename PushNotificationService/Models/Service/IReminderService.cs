@@ -11,6 +11,6 @@ public interface IReminderService
     public IEnumerable<UIReminderDTO> GetUserTodayReminders(int phoneNumber);
     void EditReminder(ReminderDTO reminderDto, int phoneNumber, int Id);
     void DeleteReminder(int phoneNumber, int Id);
-    void ApproveReminder(int phoneNumber, int Id);
+    void ApproveReminder(int phoneNumber, int Id, bool approved);
 
 }
