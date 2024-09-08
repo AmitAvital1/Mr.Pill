@@ -43,10 +43,11 @@ const MyPills: React.FC = () => {
   };
 
   const fetchPills = async () => {
-
+    
     if (await RequestHandler.sendRequest('getAllPills', true, true)) {
       setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
     }
+    
   };
 
   useFocusEffect(
@@ -112,9 +113,7 @@ const MyPills: React.FC = () => {
 
   return (
     <ParallaxScrollView headerHeight={130} headerImage={MrPillLogo(0.5)} backgroundColor="#fceeff">
-                <PopButton  ButtonAction={fetchPills} ButtonContent={
-            <Ionicons style={{margin: -10000}} name={'list-circle-outline'} size={cabinetName.length > 2 ? 90 : 80} color={cabinetName.length > 2 ? '#000000' : '#777777'}/>
-          }/>
+
       <View style={styles.lineContainer}>
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>הצג לפי ארון</Text>

@@ -164,8 +164,8 @@ const HomePage: React.FC = () => {
                 {id == 0 && <Text style={styles.text}> </Text>}
             </Pressable>
             
-            <View style={{flex: 0, alignItems: 'center', justifyContent: 'center'}}>
-                <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: "50%", width: "100%"}} resizeMode="center"></Image>
+            <View style={{minHeight: 130, flex: 0, alignItems: 'center', justifyContent: 'center'}}>
+                <Image source={{uri: reminder.imagePath}} style={{borderRadius: 0, height: "50%", width: "100%"}} resizeMode="center"></Image>
 
                 <View style={{flexGrow: 1, minWidth: "40%"}}>
                     <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', textAlign: 'center'}}>{reminder.drugHebrewName}</Text>

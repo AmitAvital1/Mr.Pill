@@ -310,7 +310,11 @@ export default {
 
             // parse outgoing request
             createRequest(requestType);
-            if (logging) console.log("REQUEST: " + JSON.stringify(request));
+            
+            if (logging) { 
+                console.log(requestType);
+                console.log("REQUEST: " + JSON.stringify(request))
+            };
 
             // send request
             response = await axios(request);
@@ -335,8 +339,8 @@ export default {
                     console.log(response);
                 }
                 else {
-                  console.log(requestType);
-                  console.log(response.request.status);
+                  console.log("Error at:" + requestType);
+                  console.log("Status code: " + response?.request?.status);
                 }
                 alreadyAwaitingResponse = false;
                 return false;
