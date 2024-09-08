@@ -43,8 +43,6 @@ const AddPillScreen = () => {
   }, []);
 
   useEffect(() => {
-    if (isRequestSent) return;
-    setIsRequestSent(true);
 
     const sendGetCabinetsRequest = async () => {
       if (await RequestHandler.sendRequest('getMyCabinets')) {
@@ -53,17 +51,24 @@ const AddPillScreen = () => {
     };
 
     sendGetCabinetsRequest();
-  });
+  }, []);
 
   const sendPostMedicineToCabinetRequest = async () => {
+
+    setIsRequestSent(true);
+
     DataHandler.setState('medicineCabinetName', cabinets[cabSelection].medicineCabinetName);
     DataHandler.setState('medicationBarcode', number);
     DataHandler.setFlag("privatePill", isPrivate);
 
     if (await RequestHandler.sendRequest('addPill')) {
+      setIsRequestSent(false);
       return true;
     }
+
+    setIsRequestSent(false);
     return false;
+
   };
 
   async function handleButtonPress() {
@@ -184,8 +189,9 @@ const AddPillScreen = () => {
             <Text style={styles.text}>קבוצתי</Text>
           </View>
         </Pressable>
+        
         <Pressable onPress={()=>{setIsPrivate(true);}}>
-        <View style={[styles.privacyButton, {backgroundColor: isPrivate? "#a6fda3" : backgroundColorMain}]}>
+          <View style={[styles.privacyButton, {backgroundColor: isPrivate? "#a6fda3" : backgroundColorMain}]}>
             <Text style={styles.text}>פרטי</Text>
           </View>
         </Pressable>
@@ -193,7 +199,7 @@ const AddPillScreen = () => {
 
       <View style={styles.pagebottom}>
         <View style={styles.row}>
-          <AppHomeButton BackgroundColor={backgroundColorLight} BorderColor={borderColor} ButtonContent={strFC("הוסף תרופה לארון")} ButtonAction={handleButtonPress} />
+          <AppHomeButton BackgroundColor={isRequestSent ? 'darkgrey' : 'lightgreen'} BorderColor={borderColor} ButtonContent={strFC("הוסף תרופה לארון")} ButtonAction={isRequestSent ? ()=>{} : handleButtonPress} />
         </View>
       </View>
 
