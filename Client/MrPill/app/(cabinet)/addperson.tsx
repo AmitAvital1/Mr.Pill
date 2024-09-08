@@ -32,7 +32,6 @@ const AddPersonToCabinetScreen = () => {
     
     if (response) {
       router.dismiss()
-      router.replace('/(cabinet)/mycabinets');
       Alert.alert("בקשת הצטרפות לארון נשלחה בהצלחה!");
     } else if (RequestHandler.getResponse().request.status == 400) {
       setIsAlreadyMember(true);
@@ -103,14 +102,14 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: bgc,
     marginBottom: 10,
+    minHeight: 180,
   },
   pagebottom: {
-    flex: 1,
+    flex: 2,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 20,
     marginHorizontal: 15,
-    marginVertical: 20,
     padding: 5,
   },
   

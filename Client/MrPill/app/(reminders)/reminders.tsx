@@ -66,8 +66,8 @@ const MyReminders: React.FC = () => {
           </View>
             
           <View style={{flexGrow: 1}}>
-            <Text style={{fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
-            <Text style={{marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\nבתאריך " + reminder.reminderTime.slice(0,10)}</Text>
+            <Text style={{fontSize: 25, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
+            <Text style={{fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16) + "\nבתאריך " + reminder.reminderTime.slice(0,10)}</Text>
           </View>
 
         </View>

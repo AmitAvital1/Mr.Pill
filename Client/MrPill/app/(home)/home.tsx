@@ -259,7 +259,9 @@ const HomePage: React.FC = () => {
 
 
       {// empty flex view for page layout
-      myNotifications.length < 1 && myReminders.length < 1 && <View style={{flex: 1}}/>}
+      (myNotifications.length < 1 && isNotificationsOpen) || (myReminders.length < 1 && !isNotificationsOpen)
+      && <View style={{flex: 1}}/>
+      }
               
       <View style={styles.pagebottom}>
 

@@ -281,22 +281,25 @@ function createRequest(requestType: string) {
 }
 
 export default {
-    async sendRequest(requestType: string, logging?: boolean) {
+    async sendRequest(requestType: string, logging?: boolean, requestedByUI?: boolean) {
 
-        if (alreadyAwaitingResponse) return;
-        // handle spammed requests
-        const timeNow = Date.now();
-        const deltaTime = timeNow - lastRequestTime;
+        if (!requestedByUI) { // request was made by user directly -- handle spammed requests
 
-        if (lastRequestTime && lastRequestType && 
-          //(deltaTime < COOLDOWN_PERIOD / COOLDOWN_MULTIPLIER) || // more safe but needs debugging on screen refresh -- need to implement force send request if it was made by the UI and not the user, for this line to work.
-          (lastRequestType === requestType && deltaTime < COOLDOWN_PERIOD))
-            return; // prevent rapidly repeated requests
-        
-        alreadyAwaitingResponse = true;    
-        lastRequestType = requestType;
-        lastRequestTime = timeNow;
-        
+            if (alreadyAwaitingResponse) return;
+            
+            const timeNow = Date.now();
+            const deltaTime = timeNow - lastRequestTime;
+
+            if (lastRequestTime && lastRequestType && 
+            //(deltaTime < COOLDOWN_PERIOD / COOLDOWN_MULTIPLIER) || // more safe but needs debugging on screen refresh -- need to implement force send request if it was made by the UI and not the user, for this line to work.
+            (lastRequestType === requestType && deltaTime < COOLDOWN_PERIOD))
+                return; // prevent rapidly repeated requests
+            
+            alreadyAwaitingResponse = true;    
+            lastRequestType = requestType;
+            lastRequestTime = timeNow;
+
+        }
         // send request
         try {
 

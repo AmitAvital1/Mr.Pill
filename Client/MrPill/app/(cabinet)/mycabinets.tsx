@@ -32,7 +32,7 @@ const MyCabinets: React.FC = () => {
     const [myCabinets, setMyCabinets] = React.useState<[Cabinet?]>([]);
 
     const sendGetCabinetsRequest = async () => {
-        if (await RequestHandler.sendRequest('getMyCabinets')) {
+        if (await RequestHandler.sendRequest('getMyCabinets', false, true)) {
           setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
         }
       };
@@ -70,13 +70,13 @@ const MyCabinets: React.FC = () => {
               </Pressable> 
               
               {/*  */}
-              <View style={{flexGrow: 1}}>
-                {cabinet.isCreator &&
-                <Pressable style={{justifyContent: 'center'}} onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}>
-                  <Text style={[styles.plusMinusText, {alignSelf: 'flex-end' }]}>➕</Text>
-                </Pressable>
-                }
-                <Text style={{marginRight: 35, textAlign: 'center'}}>{cabinet.medicineCabinetName.slice(0,25) + (cabinet.medicineCabinetName.length > 25 ? "..." : "")}</Text>
+              <View style={{alignContent: 'center', justifyContent: 'space-evenly', flexDirection: 'row' ,flexGrow: 1, minWidth: "50%", maxWidth: "60%"}}>
+                <Text style={styles.text}>{cabinet.medicineCabinetName.slice(0,12) + (cabinet.medicineCabinetName.length > 12 ? "..." : "")}</Text>
+                {/* deprecated ADD PERSON TO CABINET button */}
+                {/*cabinet.isCreator &&
+                <Pressable onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}>
+                  <Text style={[styles.plusMinusText]}>➕</Text>
+                </Pressable>*/}
               </View>
       
             </View>
@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   text: {
+    lineHeight: 35,
     fontSize: 20,
     color: '#000',
   },
@@ -179,8 +180,8 @@ const styles = StyleSheet.create({
   },
   plusMinusText: {
     fontSize: 25,
+    lineHeight: 35,
     fontWeight: 'bold',
-    position: 'absolute',
   }
 });
 
