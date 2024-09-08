@@ -150,6 +150,11 @@ public class ReminderService : IReminderService
             throw new Exception("Invalid reminder id " + Id);
         }
 
+        if(Reminder.Approved)
+        {
+            throw new Exception("Reminder already approved by user");
+        }
+
         if(Reminder.UserId != user.UserId)
         {
             throw new Exception("Reminder not belong this user");
