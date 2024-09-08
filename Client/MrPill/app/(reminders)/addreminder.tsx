@@ -89,7 +89,7 @@ const AddReminderScreen = () => {
     const [selectedPill, setSelectedPill] = useState<any>(null);
     const [selectedFrequency, setSelectedFrequency] = React.useState<string>("");
 
-    const [pillsPerAlert, setPillsPerAlert] = React.useState<string>("1");
+    const [pillsPerAlert, setPillsPerAlert] = React.useState<string>();
     const [userReminderMessage, setUserReminderMessage] = React.useState<string>();
 
     async function sendAddReminderRequest() {
@@ -108,6 +108,16 @@ const AddReminderScreen = () => {
 
     async function handleButtonPress() {
 
+        if (pillsPerAlert === undefined) {
+            setPillsPerAlert("1");
+        }
+        
+        if (!Number.isInteger(Number(pillsPerAlert))) {
+            Alert.alert("טעות בהזנת מינון לנטילה. אנא הכנס מספר תקין");
+            parallaxScrollViewRef.current?.scrollToChild(1);
+            return;
+        }
+        
         if (await sendAddReminderRequest()) {
             Alert.alert("תזכורת נוספה בהצלחה!");
             router.dismiss();
@@ -202,7 +212,7 @@ const AddReminderScreen = () => {
                     selectedItem={selectedDateOffset}
                     onSelect={(date: string) => {
                         setSelectedDateOffset(date); 
-                        parallaxScrollViewRef.current?.scrollToChild(2);
+                        parallaxScrollViewRef.current?.scrollToChild(3);
                     }}
                     listStyle={[styles.innerList, { }]}
                     type={"time"}
@@ -219,7 +229,7 @@ const AddReminderScreen = () => {
                         selectedItem={selectedHours}
                         onSelect={(hour: string)=> {
                             setSelectedHours(hour);
-                            if (selectedMinutes) parallaxScrollViewRef.current?.scrollToChild(3);
+                            if (selectedMinutes) parallaxScrollViewRef.current?.scrollToChild(4);
                         }}
                         listStyle={[styles.innerList, {  }]}
                         type={"time"}
@@ -231,7 +241,7 @@ const AddReminderScreen = () => {
                     selectedItem={selectedMinutes}
                     onSelect={(minute: string)=> {
                         setSelectedMinutes(minute);
-                        if (selectedHours) parallaxScrollViewRef.current?.scrollToChild(3);
+                        if (selectedHours) parallaxScrollViewRef.current?.scrollToChild(4);
                 }}
                     listStyle={[styles.innerList, {  }]}
                     type={"time"}
@@ -249,7 +259,7 @@ const AddReminderScreen = () => {
                     selectedItem={selectedFrequency}
                     onSelect={(frequency: string)=> {
                         setSelectedFrequency(frequency);
-                        parallaxScrollViewRef.current?.scrollToChild(4);
+                        parallaxScrollViewRef.current?.scrollToChild(5);
                     }}
                     listStyle={[styles.innerList, { }]}
                     type={"time"}
@@ -274,7 +284,7 @@ const AddReminderScreen = () => {
 
             <AppHomeButton
                 ButtonContent={strFC(selectedFrequency ? "הוסף התראה!" : "נא מלא פרטים")} 
-                ButtonAction={Number.isInteger(pillsPerAlert) && selectedFrequency ? handleButtonPress : ()=>{}}
+                ButtonAction={selectedFrequency ? handleButtonPress : ()=>{}}
                 BackgroundColor={selectedFrequency? "rgb(173, 255, 217)": bgc}
             />
 

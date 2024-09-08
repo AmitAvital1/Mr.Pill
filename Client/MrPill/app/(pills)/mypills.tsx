@@ -10,6 +10,7 @@ import DataHandler from "@/DataHandler";
 import RequestHandler from "@/RequestHandler";
 import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
+import { PopButton } from "@/components/PopButton";
 
 type Pill = {
   id: number;
@@ -68,13 +69,11 @@ const MyPills: React.FC = () => {
     return ( 
       <SafeAreaView key={pill.id} style={[styles.pillContainer, {backgroundColor: index % 2 == 0? "#bfbfbf" : "#d4d4d4",}]}>
         
-        <View>
-          <Pressable onPress={() => handleImagePress(pill)}>
+          <PopButton ButtonAction={() => handleImagePress(pill)} ButtonContent={
             <View style={styles.imageContainer}>
               <Image source={{uri: pill.imagePath}} style={styles.image} resizeMode="center"/>
             </View>
-          </Pressable>
-        </View>
+          } />
 
         <View style={{maxWidth: 50, minWidth: 50, marginLeft: 25}}>
           <Text style={{textAlign: 'center', fontSize: 36, fontWeight: 'bold', color: pill.numberOfPills < 6 ? "red" : (pill.numberOfPills < 11 ? "yellow" : "green")}}>{pill.numberOfPills}</Text>
@@ -108,37 +107,33 @@ const MyPills: React.FC = () => {
   }
 
   return (
-    <ParallaxScrollView headerHeight={130} headerBackgroundColor={{ light: "#fceeff", dark: "rgb(77, 52, 60)" }} headerImage={MrPillLogo(0.5)} backgroundColor="#fceeff">
+    <ParallaxScrollView headerHeight={130} headerImage={MrPillLogo(0.5)} backgroundColor="#fceeff">
       
       <View style={styles.lineContainer}>
-
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>הצג לפי ארון</Text>
-          <Pressable onPress={handleMorePillSources}>
-            <Ionicons name={'list-circle-outline'} size={cabinetName.length > 2 ? 90 : 80} color={cabinetName.length > 2 ? '#000000' : '#777777'}/>
-          </Pressable>
+          <PopButton DisableRotation={true} ButtonAction={handleMorePillSources} ButtonContent={
+            <Ionicons style={{margin: -10000}} name={'list-circle-outline'} size={cabinetName.length > 2 ? 90 : 80} color={cabinetName.length > 2 ? '#000000' : '#777777'}/>
+          }/>
         </View>
-
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>אישי בלבד</Text>
-          <Pressable onPress={()=>{setCabinetName("me"); setDropdownVisible(false)}}>
-            <Ionicons name={'person-circle-outline'} size={cabinetName === "me" ? 90 : 80} color={cabinetName === "me" ? '#000000' : '#777777'}/>
-          </Pressable>
-        </View>
-
-        <View></View>
 
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>הצג הכל</Text>
-          <Pressable onPress={()=>{setCabinetName(""); setDropdownVisible(false)}}>
-            <Ionicons name={'people-circle-outline'} size={cabinetName === "" ? 90 : 80} color={cabinetName === "" ? '#000000' : '#777777'}/>
-          </Pressable>
+          <PopButton DisableRotation={true} ButtonAction={()=>{setCabinetName("me"); setDropdownVisible(false)}} ButtonContent={
+            <Ionicons style={{margin: -10000}} name={'person-circle-outline'} size={cabinetName === "me" ? 90 : 80} color={cabinetName === "me" ? '#000000' : '#777777'}/>
+          }/>
         </View>
-
+          
+        <View style={{alignItems: 'center'}}>
+          <Text style={styles.text}>אישי</Text>
+          <PopButton DisableRotation={true} ButtonAction={()=>{setCabinetName(""); setDropdownVisible(false)}} ButtonContent={
+            <Ionicons style={{margin: -10000}} name={'people-circle-outline'} size={cabinetName === "" ? 90 : 80} color={cabinetName === "" ? '#000000' : '#777777'}/>
+          }/>
+        </View>
       </View>
 
-      <View style={[styles.lineContainer, {backgroundColor: "#fceeff",gap: 45}]}>
-        <Text style={styles.text}>    </Text>
+      <View style={{flexDirection: "row", backgroundColor: "#fceeff",gap: 45}}>
+        <View style={{minWidth: "30%"}}></View>
         <Text style={styles.text}>כמות במלאי</Text>
         <Text style={styles.text}>תרופה</Text>
       </View>
@@ -192,13 +187,16 @@ const styles = StyleSheet.create({
     width: 100,
   }, 
   lineContainer: {
+    minHeight: 120,
     flexGrow: 1,
     flexDirection: 'row',
     padding: 5,
     justifyContent: "center",
     alignItems: "center",
+    alignContent: "center",
     backgroundColor: "#ffddaa",
     borderRadius: 15,
+    gap: 20,
   },
   pillContainer: {
     flexGrow: 1,
