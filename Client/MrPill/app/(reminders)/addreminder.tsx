@@ -108,11 +108,12 @@ const AddReminderScreen = () => {
 
     async function handleButtonPress() {
 
-        if (pillsPerAlert === undefined) {
+        if (!pillsPerAlert) {
             setPillsPerAlert("1");
         }
         
         if (!Number.isInteger(Number(pillsPerAlert))) {
+            console.log("PILLS PER ALERT: " + pillsPerAlert);
             Alert.alert("טעות בהזנת מינון לנטילה. אנא הכנס מספר תקין");
             parallaxScrollViewRef.current?.scrollToChild(1);
             return;

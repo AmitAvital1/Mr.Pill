@@ -61,14 +61,18 @@ const HomePage: React.FC = () => {
   const [isNotificationsOpen, setIsNotificationsOpen] = React.useState<boolean>(false);
   const [screenUpdated, setScreenUpdated] = React.useState<boolean>();
 
+  const respondToReminder = async (reminderId: number, userResponse: boolean) => {
+    DataHandler.setState("reminderId", reminderId.toString());
+    await RequestHandler.sendRequest("approveReminder");
+    setScreenUpdated(!screenUpdated);
+  }
+
   const respondToJoinCabinetRequest = async (notification: Notification, userResponse: boolean) => {
     DataHandler.setFlag("userResponse", userResponse);
     DataHandler.set("notification", notification);
-
     await RequestHandler.sendRequest("respondToJoinCabinetRequest");
     setIsNotificationsOpen(myNotifications.length > 0);
     setScreenUpdated(!screenUpdated);
-
   }
 
   const sendGetRemindersRequest = async () => {
@@ -109,14 +113,9 @@ const HomePage: React.FC = () => {
       );
   }
 
-  const updateNotifications = async ()=> {
-    await sendGetNotificationsRequest();
-  }
-
   useEffect(() => {
     if (screenUpdated === undefined) return;
 
-    setIsNotificationsOpen(false);
     sendGetRemindersRequest();
     sendGetNotificationsRequest();
 
@@ -145,13 +144,20 @@ const HomePage: React.FC = () => {
         <View style={styles.reminderBox}>
           <View style={{alignItems: 'center', flexDirection: 'row'}}>
 
+            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, true)}}>
+                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
+                    <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
+                </View>
+            </Pressable>
+
             <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100, marginRight: 30}} resizeMode='center'></Image>
 
             <View style={{flexGrow: 1}}>
               <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
               <Text style={{color: "#000", fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</Text>
             </View>
-    
+
+            
           </View>
         </View>
 
@@ -196,9 +202,9 @@ const HomePage: React.FC = () => {
   // MAIN LAYOUT
   return (
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
-
+        
         <View style={[styles.topButtons, {left: "85%"}]}>
-            <PopButton DisableRotation={true} ButtonAction={logOut} ButtonContent= {
+            <PopButton  ButtonAction={logOut} ButtonContent= {
                 <Text style={{textAlign: 'center', lineHeight: 55, fontSize: 45}}>🚪</Text>
             }/>
         </View>
@@ -215,15 +221,17 @@ const HomePage: React.FC = () => {
       {MrPillLogo(0.5, true)}
 
       <Text style={{color: "#000", lineHeight: 30, marginTop: 15, fontSize: 20, textAlign: 'center'}}>{helloMessage()} <Text style={{color: "#000", fontSize: 18, fontWeight: 'bold',}}>{user.FirstName + " " + user.LastName}</Text>!</Text>
+      
       {isNotificationsOpen &&
       <View style={{flex: 1,}}>
         <View style={[styles.pagetop, {borderBottomWidth: 10, borderColor: backgroundColorLight, backgroundColor: backgroundColorAlt}]}>
-        <Text style={{color: "#000", fontSize: 18, textAlign: 'center'}}>בקשות הצטרפות:</Text>
+        <Text style={styles.text}>בקשות הצטרפות:</Text>
           <ParallaxScrollView backgroundColor={backgroundColorAlt}>
               {myNotifications.map((notification, index) => renderNotification(notification, index))}
           </ParallaxScrollView>
         </View>
       </View>}
+
       {!isNotificationsOpen && 
       <View style={{flex: myReminders.length > 0 ? 1 : 0}}>
         <View style={styles.pagetop}> 
@@ -324,7 +332,7 @@ const styles = StyleSheet.create({
   plusMinusButton: {
     minWidth: 75,
     minHeight: 75,
-    borderRadius: 25,
+    borderRadius: 999,
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,

@@ -5,7 +5,9 @@ import DataHandler from "./DataHandler";
 const BASE_URL = "http://20.217.66.65:"
 const SERVER_AND_CLIENT_ON_SAME_MACHINE = false;
 const COOLDOWN_PERIOD = 1500 // time in MS user has to wait between requests of the same type.
-const COOLDOWN_MULTIPLIER = 3; // if the user sends consequtive requests of DIFFERENT types, they can send them COOLDOWN_MULTIPLIER times faster.
+
+// currently unused
+// const COOLDOWN_MULTIPLIER = 3; // if the user sends consequtive requests of DIFFERENT types, they can send them COOLDOWN_MULTIPLIER times faster.
 
 // do not change
 const BASE_URL_LOCAL = "http://10.0.2.2:" // android emulator and server running on same machine
@@ -161,6 +163,18 @@ function createRequest(requestType: string) {
             
             }; return;
 
+        case "approveReminder":
+            request = {
+                method: 'post',
+                url: URL + "5195/ApproveReminder?Id=" + DataHandler.getState("reminderId"),
+                headers: {
+                    "Authorization": "Bearer " + user.Token,
+                },
+                data: {},
+            
+            }; return;
+
+
         case "addPersonToCabinet":
             request = {
                 method: 'post',
@@ -275,29 +289,38 @@ export default {
         if (lastRequestTime && lastRequestType && 
           //(deltaTime < COOLDOWN_PERIOD / COOLDOWN_MULTIPLIER) || // more safe but needs debugging on screen refresh -- need to implement force send request if it was made by the UI and not the user, for this line to work.
           (lastRequestType === requestType && deltaTime < COOLDOWN_PERIOD))
-            return; // prevent rapid repeated requests
+            return; // prevent rapidly repeated requests
 
         lastRequestType = requestType;
         lastRequestTime = timeNow;
         
         // send request
         try {
+
+            // prevent axios from throwing errors on non-OK status codes recieved
             axios.defaults.validateStatus = function () {
                 return true;
             };
 
+            // parse outgoing request
             createRequest(requestType);
 
+            // send request
             response = await axios(request);
             
+            // parse response
             if (response.request.status == 200) {
+
                 parsedResponse = JSON.parse(response.request._response);
                 return true;
+
             } else if (response.request.status == 401) {
+
                 if (requestType != "verifySignup" && requestType != "verifyLogin") {
                     DataHandler.expireSession();
                 }
                 return false;
+
             } else {
                 console.log(response.request.status);
                 return false;

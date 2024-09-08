@@ -112,21 +112,21 @@ const MyPills: React.FC = () => {
       <View style={styles.lineContainer}>
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>הצג לפי ארון</Text>
-          <PopButton DisableRotation={true} ButtonAction={handleMorePillSources} ButtonContent={
+          <PopButton  ButtonAction={handleMorePillSources} ButtonContent={
             <Ionicons style={{margin: -10000}} name={'list-circle-outline'} size={cabinetName.length > 2 ? 90 : 80} color={cabinetName.length > 2 ? '#000000' : '#777777'}/>
           }/>
         </View>
 
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>הצג הכל</Text>
-          <PopButton DisableRotation={true} ButtonAction={()=>{setCabinetName("me"); setDropdownVisible(false)}} ButtonContent={
+          <PopButton  ButtonAction={()=>{setCabinetName("me"); setDropdownVisible(false)}} ButtonContent={
             <Ionicons style={{margin: -10000}} name={'person-circle-outline'} size={cabinetName === "me" ? 90 : 80} color={cabinetName === "me" ? '#000000' : '#777777'}/>
           }/>
         </View>
           
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>אישי</Text>
-          <PopButton DisableRotation={true} ButtonAction={()=>{setCabinetName(""); setDropdownVisible(false)}} ButtonContent={
+          <PopButton  ButtonAction={()=>{setCabinetName(""); setDropdownVisible(false)}} ButtonContent={
             <Ionicons style={{margin: -10000}} name={'people-circle-outline'} size={cabinetName === "" ? 90 : 80} color={cabinetName === "" ? '#000000' : '#777777'}/>
           }/>
         </View>

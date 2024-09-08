@@ -26,7 +26,7 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
   };
 
   return (
-    <PopButton DisableRotation={true} ButtonContent={
+    <PopButton  ButtonContent={
         <View style={[style.button, {backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
             {Type && <Text style={{fontSize: 72, position: 'absolute', color: "#FFFFFF88"}}>{emojis[Type]}</Text>}
             {ButtonContent}

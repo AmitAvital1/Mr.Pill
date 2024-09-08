@@ -8,10 +8,10 @@ type PopButtonProps = {
   BackgroundColor?: string;
   ButtonScale?: number;
   Position?: "absolute" | "relative" | "static";
-  DisableRotation?: boolean;
+  EnableRotation?: boolean;
 };
 
-export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonAction, ButtonScale, Position, DisableRotation }) => {
+export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonAction, ButtonScale, Position, EnableRotation }) => {
   const animatedScale = useRef(new Animated.Value(0)).current;
   const animatedRotation = useRef(new Animated.Value(0)).current;
 
@@ -39,7 +39,7 @@ export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonActio
         useNativeDriver: true,
       }),
       Animated.timing(animatedRotation, {
-        toValue: DisableRotation ? 0 : Math.random() * 0.02 * (Math.random() < 0.5 ? -1: 1),
+        toValue: !EnableRotation ? 0 : Math.random() * 0.02 * (Math.random() < 0.5 ? -1: 1),
         duration: 400,
         useNativeDriver: true,
       }),
