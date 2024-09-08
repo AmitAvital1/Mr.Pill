@@ -53,7 +53,7 @@ const MyReminders: React.FC = () => {
   function renderReminder(reminder?: Reminder, id?: number) {
     if (!reminder) return;
     return (
-      <View style={styles.reminderBox}>
+      <View key ={id} style={styles.reminderBox}>
 
         <View style={{alignItems: 'center', flexDirection: 'row'}}>
           {isDeleteEnabled &&

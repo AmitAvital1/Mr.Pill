@@ -38,15 +38,16 @@ const MyPills: React.FC = () => {
   const [cabinetName, setCabinetName] = useState<string>(DataHandler.getState("showFromCabinet", true) || "");
   const [dropdownVisible, setDropdownVisible] = useState(false);
   
-
   const toggleDropdown = () => {
     setDropdownVisible(!dropdownVisible);
   };
 
   const fetchPills = async () => {
-    if (await RequestHandler.sendRequest('getAllPills')) {
+    
+    if (await RequestHandler.sendRequest('getAllPills', true, true)) {
       setMyPills(JSON.parse(RequestHandler.getResponse().request._response).medications);
     }
+    
   };
 
   useFocusEffect(
@@ -88,16 +89,20 @@ const MyPills: React.FC = () => {
       </SafeAreaView>
     );
   };
-
-  const renderPillItems = () => {
   
+  /*
+  const renderPillItems = () => {
+    
     let pillItems = [];
     for (let i = 0; i < myPills.length; i++) {
       if (cabinetName === "" || cabinetName === myPills[i].medicineCabinetName || (cabinetName === "me" && myPills[i].isPrivate))
         pillItems.push(renderPill(myPills[i], i));
     }
     return pillItems;
+    
   };
+  */
+
 
   const handleMorePillSources = () => {
     if (!dropdownVisible) {
@@ -108,7 +113,7 @@ const MyPills: React.FC = () => {
 
   return (
     <ParallaxScrollView headerHeight={130} headerImage={MrPillLogo(0.5)} backgroundColor="#fceeff">
-      
+
       <View style={styles.lineContainer}>
         <View style={{alignItems: 'center'}}>
           <Text style={styles.text}>הצג לפי ארון</Text>
@@ -149,7 +154,8 @@ const MyPills: React.FC = () => {
       )}
       
       <View style={{gap: 5}}>
-        {renderPillItems()}
+        {myPills.filter((pill, index)=>(cabinetName === "" || cabinetName === pill.medicineCabinetName || (cabinetName === "me" && pill.isPrivate)))
+                .map((pill, index)=>renderPill(pill, index))}
       </View>
   </ParallaxScrollView>
   );

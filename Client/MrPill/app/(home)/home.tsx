@@ -64,14 +64,18 @@ const HomePage: React.FC = () => {
   const respondToReminder = async (reminderId: number, userResponse: boolean) => {
     DataHandler.setState("reminderId", reminderId.toString());
     DataHandler.setFlag("approveReminder", userResponse);
-    await RequestHandler.sendRequest("approveReminder", true);
+    if (!await RequestHandler.sendRequest("approveReminder", true)) {
+        Alert.alert("שגיאה בעת אישור\\ביטול התראה");
+    }
     setScreenUpdated(!screenUpdated);
   }
 
   const respondToJoinCabinetRequest = async (notification: Notification, userResponse: boolean) => {
     DataHandler.setFlag("userResponse", userResponse);
     DataHandler.set("notification", notification);
-    await RequestHandler.sendRequest("respondToJoinCabinetRequest");
+    if (!await RequestHandler.sendRequest("respondToJoinCabinetRequest")) {
+        Alert.alert("שגיאה מספר: " + RequestHandler.getStatusCode() + "\nשגיאה בעת אישור\\דחיית בקשה")
+    }
     setIsNotificationsOpen(myNotifications.length > 0);
     setScreenUpdated(!screenUpdated);
   }
@@ -147,7 +151,7 @@ const HomePage: React.FC = () => {
             <Pressable onPress={()=>{respondToReminder(reminder.reminderId, false)}}>
                 {id == 0 && <Text style={[styles.text,{marginBottom: 10}]}>שכחתי</Text>}
                 <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
-                    <Text style={[styles.plusMinusText, {color: 'green'}]}>❌</Text>
+                    <Text style={[styles.plusMinusText, {color: 'red'}]}>❌</Text>
                 </View>
                 {id == 0 && <Text style={styles.text}> </Text>}
             </Pressable>
@@ -160,8 +164,8 @@ const HomePage: React.FC = () => {
                 {id == 0 && <Text style={styles.text}> </Text>}
             </Pressable>
             
-            <View style={{flex: 0, alignItems: 'center', justifyContent: 'center'}}>
-                <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: "50%", width: "100%"}} resizeMode="center"></Image>
+            <View style={{minHeight: 130, flex: 0, alignItems: 'center', justifyContent: 'center'}}>
+                <Image source={{uri: reminder.imagePath}} style={{borderRadius: 0, height: "50%", width: "100%"}} resizeMode="center"></Image>
 
                 <View style={{flexGrow: 1, minWidth: "40%"}}>
                     <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', textAlign: 'center'}}>{reminder.drugHebrewName}</Text>

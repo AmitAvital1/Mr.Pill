@@ -620,6 +620,7 @@ public class UserService : IUserService
         try
         {
             var user = _dbContext?.Users
+                ?.AsNoTracking()
                     ?.Include(u => u.MedicineCabinetUsersList!)
                         ?.ThenInclude(mcu => mcu.MedicineCabinet)
                             ?.ThenInclude(mc => mc.Medications)

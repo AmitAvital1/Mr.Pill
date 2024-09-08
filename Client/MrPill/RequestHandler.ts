@@ -3,7 +3,7 @@ import DataHandler from "./DataHandler";
 
 // change if need 
 const BASE_URL = "http://20.217.66.65:"
-const SERVER_AND_CLIENT_ON_SAME_MACHINE = true;
+const SERVER_AND_CLIENT_ON_SAME_MACHINE = false;
 const COOLDOWN_PERIOD = 1500 // time in MS user has to wait between requests of the same type.
 
 // currently unused
@@ -310,7 +310,11 @@ export default {
 
             // parse outgoing request
             createRequest(requestType);
-            if (logging) console.log("REQUEST: " + JSON.stringify(request));
+            
+            if (logging) { 
+                console.log(requestType);
+                console.log("REQUEST: " + JSON.stringify(request))
+            };
 
             // send request
             response = await axios(request);
@@ -335,8 +339,8 @@ export default {
                     console.log(response);
                 }
                 else {
-                  console.log(requestType);
-                  console.log(response.request.status);
+                  console.log("Error at:" + requestType);
+                  console.log("Status code: " + response?.request?.status);
                 }
                 alreadyAwaitingResponse = false;
                 return false;
@@ -358,5 +362,8 @@ export default {
     },
     getParsedResponse() {
         return parsedResponse;
+    },
+    getStatusCode() {
+        return response?.request?.status;
     }
 };
