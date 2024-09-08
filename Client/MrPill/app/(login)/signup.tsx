@@ -55,24 +55,27 @@ const SignUpScreen = () => {
   const [isVerifyClicked, setIsVerifyClicked] = React.useState(false);
   const [isNumberInSystem, setIsNumberInSystem] = React.useState(false);
 
-  function isValidData (phoneNumber: string, firstName: string, lastName: string) {
+  function isValidData () {
+
+    if (isValidPhoneNumber(phoneNumber) && !isSignupClicked)
+        return true;
 
     if (!firstName || !lastName || firstName == "" || lastName == "") return false;
     if (!isValidPhoneNumber(phoneNumber)) return false;
     if (!isValidCodeModelCorrect(validationCode)) return false;
-
     return true;
 
   }
 
   async function handleSubmit() {
-
+    
     if (!await sendSignupRequest(phoneNumber)) return false;
     
     const statusCode = RequestHandler.getResponse().request.status
 
     if (statusCode == 200) {
       setIsSignupClicked(true);
+      setIsButtonDisabled(true);
     } else if (statusCode == 409) {
       setIsNumberInSystem(true);
     } else {
@@ -114,14 +117,14 @@ const SignUpScreen = () => {
   }
 
   function updateButton() {
-    setIsButtonDisabled(!isValidData(phoneNumber, firstName, lastName))
+    setIsButtonDisabled(!isValidData())
     setIsNumberInSystem(false);
     setIsVerifyClicked(false);
   }
 
   useEffect(() => {
-    setIsButtonDisabled(!isValidPhoneNumber(phoneNumber));
-  }, [phoneNumber]);
+    updateButton();
+  }, [phoneNumber, firstName, lastName, validationCode]);
 
   return (
     <SafeAreaView style={{backgroundColor: bgc, flex: 1}}>
@@ -138,7 +141,7 @@ const SignUpScreen = () => {
         placeholder="מספר טלפון"
         keyboardType="numeric"
         textAlign="right"
-        onEndEditing={updateButton}
+        editable={!isSignupClicked}
       />
 
       {isNumberInSystem && <Text style={{textAlign: 'center', fontSize: 20, fontWeight: 'bold', color: "#FF0000"}}>המספר כבר קיים במערכת</Text>}
@@ -158,30 +161,27 @@ const SignUpScreen = () => {
       {isSignupClicked && <View>
       <TextInput
         style={styles.input}
-        onChangeText={(input: any) => {onChangeFirstName(input); updateButton()}}
+        onChangeText={onChangeFirstName}
         placeholder="שם פרטי"
         value={firstName}
         textAlign="right"
-        onEndEditing={updateButton}
       />
 
       <TextInput
         style={styles.input}
-        onChangeText={(input: any) => {onChangeLastName(input); updateButton()}}
+        onChangeText={onChangeLastName}
         placeholder="שם משפחה"
         value={lastName}
         textAlign="right"
-        onEndEditing={updateButton}
       />
 
       <TextInput
         style={styles.input}
-        onChangeText={(input: any) => {onChangeValidationCode(input); updateButton()}}
+        onChangeText={onChangeValidationCode}
         value={validationCode}
         placeholder="קוד"
         keyboardType="numeric"
         textAlign="right"
-        onEndEditing={updateButton}
       />
       </View>}
 

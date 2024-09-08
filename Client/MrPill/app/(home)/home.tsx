@@ -158,7 +158,7 @@ const HomePage: React.FC = () => {
 
             <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100, marginRight: 30}} resizeMode='center'></Image>
 
-            <View style={{flexGrow: 1}}>
+            <View style={{flexGrow: 1, minWidth: "40%"}}>
               <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
               <Text style={{color: "#000", fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</Text>
             </View>
