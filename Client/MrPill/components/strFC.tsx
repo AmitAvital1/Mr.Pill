@@ -5,10 +5,10 @@ export const strFC = (str: string, size?: number) => {
     const words = str.split(" ")
     size = size ? size : 26;
     
-    function renderWord(word: string) {
-        return <Text style={[styles.text, {fontSize: size}]}>{word}</Text>
+    function renderWord(word: string, index: number) {
+        return <Text key={index} style={[styles.text, {fontSize: size}]}>{word}</Text>
     }
-    return <View style={{gap: 10, alignContent: 'center', justifyContent: 'center',}}>{words.map((word) => renderWord(word))}</View>
+    return <View style={{gap: 10, alignContent: 'center', justifyContent: 'center',}}>{words.map((word, index) => renderWord(word, index))}</View>
 };
 
 const styles = StyleSheet.create({

@@ -63,7 +63,8 @@ const HomePage: React.FC = () => {
 
   const respondToReminder = async (reminderId: number, userResponse: boolean) => {
     DataHandler.setState("reminderId", reminderId.toString());
-    await RequestHandler.sendRequest("approveReminder");
+    DataHandler.setFlag("approveReminder", userResponse);
+    await RequestHandler.sendRequest("approveReminder", true);
     setScreenUpdated(!screenUpdated);
   }
 
@@ -86,7 +87,6 @@ const HomePage: React.FC = () => {
               
     if (await RequestHandler.sendRequest('getNotifications')) {
       setNotifications(JSON.parse(RequestHandler.getResponse().request._response).data);
-      console.log(RequestHandler.getResponse().request._response)
     }
   }
 
@@ -147,6 +147,12 @@ const HomePage: React.FC = () => {
             <Pressable onPress={()=>{respondToReminder(reminder.reminderId, true)}}>
                 <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
                     <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
+                </View>
+            </Pressable>
+
+            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, true)}}>
+                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
+                    <Text style={[styles.plusMinusText, {color: 'green'}]}>❌</Text>
                 </View>
             </Pressable>
 

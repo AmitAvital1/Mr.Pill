@@ -118,14 +118,14 @@ const MyPills: React.FC = () => {
         </View>
 
         <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>הצג הכל</Text>
+          <Text style={styles.text}>אישי</Text>
           <PopButton  ButtonAction={()=>{setCabinetName("me"); setDropdownVisible(false)}} ButtonContent={
             <Ionicons style={{margin: -10000}} name={'person-circle-outline'} size={cabinetName === "me" ? 90 : 80} color={cabinetName === "me" ? '#000000' : '#777777'}/>
           }/>
         </View>
           
         <View style={{alignItems: 'center'}}>
-          <Text style={styles.text}>אישי</Text>
+          <Text style={styles.text}>הצג הכל</Text>
           <PopButton  ButtonAction={()=>{setCabinetName(""); setDropdownVisible(false)}} ButtonContent={
             <Ionicons style={{margin: -10000}} name={'people-circle-outline'} size={cabinetName === "" ? 90 : 80} color={cabinetName === "" ? '#000000' : '#777777'}/>
           }/>

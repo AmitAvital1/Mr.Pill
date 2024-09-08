@@ -3,14 +3,14 @@ import DataHandler from "./DataHandler";
 
 // change if need 
 const BASE_URL = "http://20.217.66.65:"
-const SERVER_AND_CLIENT_ON_SAME_MACHINE = false;
+const SERVER_AND_CLIENT_ON_SAME_MACHINE = true;
 const COOLDOWN_PERIOD = 1500 // time in MS user has to wait between requests of the same type.
 
 // currently unused
 // const COOLDOWN_MULTIPLIER = 3; // if the user sends consequtive requests of DIFFERENT types, they can send them COOLDOWN_MULTIPLIER times faster.
 
 // do not change
-const BASE_URL_LOCAL = "http://10.0.2.2:" // android emulator and server running on same machine
+const BASE_URL_LOCAL = "http://192.168.50.207:" // android emulator and server running on same machine
 const URL = SERVER_AND_CLIENT_ON_SAME_MACHINE ? BASE_URL_LOCAL : BASE_URL;
 
 let request = {
@@ -25,6 +25,7 @@ let lastRequestType: string = "NOSUCHREQUEST";
 
 let response: AxiosResponse<any, any>;
 let parsedResponse: any;
+let alreadyAwaitingResponse: boolean;
 
 function createRequest(requestType: string) {
 
@@ -165,15 +166,14 @@ function createRequest(requestType: string) {
 
         case "approveReminder":
             request = {
-                method: 'post',
-                url: URL + "5195/ApproveReminder?Id=" + DataHandler.getState("reminderId"),
+                method: 'put',
+                url: URL + "5195/ApproveReminder?Id=" + DataHandler.getState("reminderId") + "&Approve=" + DataHandler.getFlag("approveReminder"),
                 headers: {
                     "Authorization": "Bearer " + user.Token,
                 },
                 data: {},
             
             }; return;
-
 
         case "addPersonToCabinet":
             request = {
@@ -281,16 +281,19 @@ function createRequest(requestType: string) {
 }
 
 export default {
-    async sendRequest(requestType: string) {
+    async sendRequest(requestType: string, logging?: boolean) {
 
+        if (alreadyAwaitingResponse) return;
         // handle spammed requests
         const timeNow = Date.now();
         const deltaTime = timeNow - lastRequestTime;
+
         if (lastRequestTime && lastRequestType && 
           //(deltaTime < COOLDOWN_PERIOD / COOLDOWN_MULTIPLIER) || // more safe but needs debugging on screen refresh -- need to implement force send request if it was made by the UI and not the user, for this line to work.
           (lastRequestType === requestType && deltaTime < COOLDOWN_PERIOD))
             return; // prevent rapidly repeated requests
-
+        
+        alreadyAwaitingResponse = true;    
         lastRequestType = requestType;
         lastRequestTime = timeNow;
         
@@ -304,14 +307,16 @@ export default {
 
             // parse outgoing request
             createRequest(requestType);
+            if (logging) console.log("REQUEST: " + JSON.stringify(request));
 
             // send request
             response = await axios(request);
             
-            // parse response
+            // parse response on OK
             if (response.request.status == 200) {
-
                 parsedResponse = JSON.parse(response.request._response);
+                if (logging) console.log("RESPONSE: " + response.request._response);
+                alreadyAwaitingResponse = false;
                 return true;
 
             } else if (response.request.status == 401) {
@@ -319,16 +324,25 @@ export default {
                 if (requestType != "verifySignup" && requestType != "verifyLogin") {
                     DataHandler.expireSession();
                 }
+                alreadyAwaitingResponse = false;
                 return false;
 
-            } else {
-                console.log(response.request.status);
+            } else { // other bad error code
+                if (logging) {
+                    console.log(response);
+                }
+                else {
+                  console.log(requestType);
+                  console.log(response.request.status);
+                }
+                alreadyAwaitingResponse = false;
                 return false;
             }
             
         } catch (error) {
             console.error("Error fetching data:", error);
             response = {} as AxiosResponse<any,any>
+            alreadyAwaitingResponse = false;
             return false;
         }
     },

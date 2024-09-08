@@ -12,7 +12,7 @@ const borderColor = "#c1e9ff";
 const bgc = "#ffcbcb";
 
 // abstract list react component
-const ChooseList = ({ items, selectedItem, onSelect, listStyle, type, scrollRef }: any) => {
+const ChooseList = ({ items, selectedItem, onSelect, listStyle, type }: any) => {
     items = items || [];
     const renderItem = ({ item }: any) => (
         <TouchableOpacity
@@ -48,14 +48,19 @@ const ChooseList = ({ items, selectedItem, onSelect, listStyle, type, scrollRef 
                 showsVerticalScrollIndicator={true}
                 contentContainerStyle={[styles.listContainer, listStyle]}
                 style={styles.list}
-                ref={scrollRef}
             />}
         </>
     );
 };
 
-const hoursArr = ["00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23"];
-const minutesArr = ["00", "15", "30", "45"];
+const generateNumberArray = (length: number): string[] => 
+    Array.from({ length }, (_, i) => i < 10 ? `0${i}` : `${i}`);
+  
+  
+  
+
+const hoursArr = generateNumberArray(24);
+const minutesArr = generateNumberArray(60);
 const frequenciesArr = ["פעם אחת בלבד", "פעם בשבוע", "פעם ביומיים", "פעם ביום", "כל 12 שעות", "כל 6 שעות", "כל 4 שעות", "כל 3 שעות"];
 const intervalsArr = [undefined, "07:00:00", "02:00:00", "01:00:00", "00:12:00", "00:06:00", "00:04:00", "00:03:00"];
 const datesArr = ["היום", "מחר", "בעוד יומיים", "בעוד שלושה ימים", "בעוד ארבעה ימים", "בעוד חמישה ימים", "בעוד שישה ימים", "בעוד שבוע"];
@@ -99,11 +104,11 @@ const AddReminderScreen = () => {
             "Message": userReminderMessage || "עליך לקחת את התרופה " + selectedPill.hebrewName,
             "IsRecurring": !(selectedFrequency === "פעם אחת בלבד"),
             "RecurrenceInterval": intervalsArr[frequenciesArr.indexOf(selectedFrequency)],
-            "numOfPills": pillsPerAlert,
+            "numOfPills": Number(pillsPerAlert),
             "UserMedicationId": selectedPill.id,
         })
 
-        return await RequestHandler.sendRequest("addReminder");
+        return await RequestHandler.sendRequest("addReminder", true);
     }
 
     async function handleButtonPress() {
@@ -128,6 +133,7 @@ const AddReminderScreen = () => {
     }
 
     async function selectCabinet(selection: string) {
+
         setSelectedCabinet(selection);
 
         const requestType = selection === "הצג הכל" ? "getAllPills" : "getPills";
@@ -164,7 +170,6 @@ const AddReminderScreen = () => {
     },[])
 
     return (
-
         <ParallaxScrollView ref={parallaxScrollViewRef} backgroundColor='#ffdae0' headerImage={MrPillLogo(0.5)} headerHeight={120}>
             <View style={styles.selectionTextContainer}>
                 <Text style={styles.selectionText}>{selectedCabinet ? "הארון שנבחר:" : "בחר ארון תרופות:"}</Text>
@@ -224,7 +229,7 @@ const AddReminderScreen = () => {
             <View style={[styles.pageBottomContainer]}>
                 <Text style={styles.selectionText}>{selectedHours && selectedMinutes ? "השעה שנבחרה: " + selectedHours + ":" + selectedMinutes : "בחר שעת התראה:"}</Text>
                 <View style={{flexDirection: 'row', margin: 5}}>
-                <ScrollView nestedScrollEnabled={true} style={{flex: 1,  height: 305}}>
+                <ScrollView nestedScrollEnabled={true} style={{flex: 1,  height: 320}}>
                     <ChooseList
                         items={hoursArr}
                         selectedItem={selectedHours}
@@ -346,7 +351,6 @@ const styles = StyleSheet.create({
     innerList: {
         borderRadius: 15,
         backgroundColor: "#c1e9ff",
-
         elevation: 5,
     },
     item: {
