@@ -358,5 +358,8 @@ export default {
     },
     getParsedResponse() {
         return parsedResponse;
+    },
+    getStatusCode() {
+        return response?.request?.status;
     }
 };

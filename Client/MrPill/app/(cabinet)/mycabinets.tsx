@@ -36,10 +36,11 @@ const MyCabinets: React.FC = () => {
           setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
         }
       };
-
+      
     useFocusEffect(
+        
       useCallback(() => {
-    
+
         sendGetCabinetsRequest();
   
         return () => {

@@ -106,7 +106,7 @@ const LogInScreen = () => {
         setIsPhoneValid(true);
         return true;
 
-      } else if (RequestHandler.getResponse().request.status == 404) {
+      } else if (RequestHandler.getResponse()?.request?.status == 404) {
 
         setIsNumberInSystem(false);
 
