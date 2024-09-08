@@ -16,6 +16,10 @@ public class LoginController : Controller
         _loginService = loginService;
     }
 
+
+//////////////////// -> ANONYMOUS ////////////////////
+
+
     [AllowAnonymous]
     [HttpGet]
     [Route("Health")]
@@ -217,6 +221,10 @@ public class LoginController : Controller
         }
     }
 
+
+//////////////////// -> GET ////////////////////
+
+
     [HttpGet]
     [Route("get-notifications")]
     public IActionResult GetNotifications()
@@ -243,6 +251,74 @@ public class LoginController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while getting notifications.");
         }
     }
+
+//////////////////// -> POST ////////////////////
+
+    [HttpPost]
+    [Route("joined-new-house")]
+    public async Task<IActionResult> JoinedToNewHouse([FromQuery] int targetPhoneNumber, [FromQuery] string medicineCabinetName)
+    {
+        try
+        {
+            string token = GetTokenFromHeaders();
+            
+            string phoneNumberString  = _loginService.getPhoneNumberFromToken(token);
+            phoneNumberString = phoneNumberString.TrimStart('0');
+
+            if (!int.TryParse(phoneNumberString, out int phoneNumber))
+            {
+                _logger.LogError("Failed to parse phone number from token.");
+                return BadRequest("Invalid phone number format.");
+            }
+
+            // No Effect When There’s No Leading Zero
+            string targetPhoneNumberString = targetPhoneNumber.ToString().TrimStart('0');
+
+            if (!int.TryParse(targetPhoneNumberString, out int cleanedTargetPhoneNumber))
+            {
+                _logger.LogError("Failed to parse target phone number after removing leading zeros.");
+                return BadRequest("Invalid target phone number format.");
+            }
+
+            if (cleanedTargetPhoneNumber == phoneNumber)
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} is same as the sender phone number", targetPhoneNumber);
+                return BadRequest("Cannot send request to yourself.");
+            }
+
+            if (!_loginService.PhoneNumberExistInDb(cleanedTargetPhoneNumber))
+            {
+                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", targetPhoneNumber);
+                return NotFound("Phone number does not exist");
+            }
+
+            if (await _loginService.AddNewHouseSuccsesfully(token, cleanedTargetPhoneNumber, medicineCabinetName))
+            {
+                _logger.LogInformation("Successfully processed request for manager {targetPhoneNumber} to join a new house.", targetPhoneNumber);
+                return Ok(new { Massage = "request to joined to another house succsesfuly" });
+            }
+            
+            else
+            {
+                _logger.LogError("Failed to process request for target Phone Number {targetPhoneNumber} to join a new house.", targetPhoneNumber);
+                return StatusCode(500, "Internal Server Error");
+            }
+        } 
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized access attempt: {Message}", ex.Message);
+            return Unauthorized(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred while processing the request for target Phone Number {targetPhoneNumber}", targetPhoneNumber);
+            return StatusCode(500, "An unexpected error occurred");
+        }
+    }
+
+
+//////////////////// -> PUT ////////////////////
+
 
     [HttpPut]
     [Route("handle-notification")]
@@ -280,52 +356,10 @@ public class LoginController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, errorResponse);
         }
     }
+    
 
-    [HttpPost]
-    [Route("joined-new-house")]
-    public async Task<IActionResult> JoinedToNewHouse([FromQuery] int targetPhoneNumber, [FromQuery] string medicineCabinetName)
-    {
-        try
-        {
-            string token = GetTokenFromHeaders();
-            
-            string phoneNumber = _loginService.getPhoneNumberFromToken(token);
+//////////////////// -> PRIVATE ////////////////////
 
-            if(targetPhoneNumber.Equals(phoneNumber))
-            {
-                _logger.LogInformation("Phone number {PhoneNumber} is same as the sender phone number", targetPhoneNumber);
-                return BadRequest("Cannot send yourself request");
-            }
-
-            if (!_loginService.PhoneNumberExistInDb(targetPhoneNumber))
-            {
-                _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", targetPhoneNumber);
-                return NotFound("Phone number does not exist");
-            }
-
-            if (await _loginService.AddNewHouseSuccsesfully(token, targetPhoneNumber, medicineCabinetName))
-            {
-                _logger.LogInformation("Successfully processed request for manager {targetPhoneNumber} to join a new house.", targetPhoneNumber);
-                return Ok(new { Massage = "request to joined to another house succsesfuly" });
-            }
-            
-            else
-            {
-                _logger.LogError("Failed to process request for target Phone Number {targetPhoneNumber} to join a new house.", targetPhoneNumber);
-                return StatusCode(500, "Internal Server Error");
-            }
-        } 
-        catch (UnauthorizedAccessException ex)
-        {
-            _logger.LogWarning(ex, "Unauthorized access attempt: {Message}", ex.Message);
-            return Unauthorized(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An unexpected error occurred while processing the request for target Phone Number {targetPhoneNumber}", targetPhoneNumber);
-            return StatusCode(500, "An unexpected error occurred");
-        }
-    }
 
     private string GetTokenFromHeaders()
     {

@@ -77,7 +77,7 @@ public class UserController : Controller
     {
         try
         {
-            if(medicineCabinetName == null)
+            if (medicineCabinetName == null)
             {
                 return StatusCode(405, "Invalid medicine cabinet name");
             }
@@ -145,6 +145,7 @@ public class UserController : Controller
     [HttpGet("user/all/medications")]
     public ActionResult<IEnumerable<MedicationDTO>> GetAllMedication()
     {
+        // the recomended endpoint
         try
         {
             string? token = GetAuthorizationTokenOrThrow();
