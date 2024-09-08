@@ -148,7 +148,7 @@ public class ReminderController : Controller
 
     [HttpPut]
     [Route("ApproveReminder")]
-    public IActionResult ApproveReminder([FromQuery] int Id, bool Approve)
+    public IActionResult ApproveReminder([FromQuery] int Id,[FromQuery] bool Approve)
     {
         try
         {
