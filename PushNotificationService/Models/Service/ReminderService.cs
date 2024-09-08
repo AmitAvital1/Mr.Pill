@@ -171,7 +171,8 @@ public class ReminderService : IReminderService
                 _logger.LogWarning("User " + phoneNumber + " has not enogh medication. Set to 0");
                 medication.NumberOfPills = 0;
             }
-             _logger.LogInformation("User " + phoneNumber + " approved his reminder id " + Reminder.Id);
+            Reminder.Approved = true;
+            _logger.LogInformation("User " + phoneNumber + " approved his reminder id " + Reminder.Id);
         }
         _dbContext.SaveChanges();
     }
