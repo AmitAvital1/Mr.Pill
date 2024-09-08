@@ -142,27 +142,32 @@ const HomePage: React.FC = () => {
       <Pressable key={id} onPress={()=>{console.log('y')}}>
         
         <View style={styles.reminderBox}>
-          <View style={{alignItems: 'center', flexDirection: 'row'}}>
+          <View style={{gap: 15, alignItems: 'center', flexDirection: 'row'}}>
 
-            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, true)}}>
-                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
-                    <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
-                </View>
-            </Pressable>
-
-            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, true)}}>
+            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, false)}}>
+                {id == 0 && <Text style={[styles.text,{marginBottom: 10}]}>שכחתי</Text>}
                 <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
                     <Text style={[styles.plusMinusText, {color: 'green'}]}>❌</Text>
                 </View>
+                {id == 0 && <Text style={styles.text}> </Text>}
             </Pressable>
 
-            <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: 100, width: 100, marginRight: 30}} resizeMode='center'></Image>
+            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, true)}}>
+                {id == 0 && <Text style={[styles.text,{marginBottom: 10}]}>לקחתי</Text>}
+                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
+                    <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
+                </View>
+                {id == 0 && <Text style={styles.text}> </Text>}
+            </Pressable>
+            
+            <View style={{flex: 0, alignItems: 'center', justifyContent: 'center'}}>
+                <Image source={{uri: reminder.imagePath}} style={{borderRadius: 25, height: "50%", width: "100%"}} resizeMode="center"></Image>
 
-            <View style={{flexGrow: 1, minWidth: "40%"}}>
-              <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
-              <Text style={{color: "#000", fontSize: 20, marginRight: 35, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</Text>
+                <View style={{flexGrow: 1, minWidth: "40%"}}>
+                    <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
+                    <Text style={{color: "#000", fontSize: 20, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</Text>
+                </View>
             </View>
-
             
           </View>
         </View>
@@ -317,6 +322,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   text: {
+    textAlign: 'center',
     lineHeight: 35,
     fontSize: 25,
     fontWeight: 'bold',
@@ -341,7 +347,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    margin: 5,
     elevation: 3,
   },
   plusMinusText: {

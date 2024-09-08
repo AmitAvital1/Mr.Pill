@@ -19,7 +19,8 @@ const ChooseList = ({ items, selectedItem, onSelect, listStyle, type }: any) => 
             key={item} 
             style={[
                 styles.item,
-                selectedItem === item && styles.selectedItem
+                selectedItem === item && styles.selectedItem,
+                //{borderWidth: 2}
             ]}
             onPress={() => onSelect(item)}
         >
@@ -35,29 +36,29 @@ const ChooseList = ({ items, selectedItem, onSelect, listStyle, type }: any) => 
     );
 
     return (
-        <>
-            {items.length < 1 &&
-                <Text style={{textAlign: 'center', fontSize: 28, color: "#FF0000"}}>לא נמצאו {type == "pill" ? "תרופות בארון" : "ארונות"}</Text> 
-            }
+<>
+    {items.length < 1 &&
+        <Text style={{ textAlign: 'center', fontSize: 28, color: "#FF0000" }}>
+            לא נמצאו {type === "pill" ? "תרופות בארון" : "ארונות"}
+        </Text>
+    }
 
-            {items.length >= 1 &&
-            <FlatList
-                data={items}
-                renderItem={renderItem}
-                keyExtractor={(item) => item}
-                showsVerticalScrollIndicator={true}
-                contentContainerStyle={[styles.listContainer, listStyle]}
-                style={styles.list}
-            />}
-        </>
+    {items.length >= 1 &&
+        <View style={[styles.listContainer, listStyle]}>
+            {items.map((item: any, index: number) => (
+                <View key={index}>
+                    {renderItem({ item })}
+                </View>
+            ))}
+        </View>
+    }
+</>
+
     );
 };
 
 const generateNumberArray = (length: number): string[] => 
     Array.from({ length }, (_, i) => i < 10 ? `0${i}` : `${i}`);
-  
-  
-  
 
 const hoursArr = generateNumberArray(24);
 const minutesArr = generateNumberArray(60);
@@ -97,6 +98,11 @@ const AddReminderScreen = () => {
     const [pillsPerAlert, setPillsPerAlert] = React.useState<string>();
     const [userReminderMessage, setUserReminderMessage] = React.useState<string>();
 
+    const scrollViewRefHours = useRef<ScrollView>(null);
+    const scrollViewRefMinutes = useRef<ScrollView>(null);
+    const [minuteHeight, setMinuteHeight] = useState<number>(0);
+    const [hourHeight, setHourHeight] = useState<number>(0);
+
     async function sendAddReminderRequest() {
         
         DataHandler.set('reminder', {
@@ -118,7 +124,6 @@ const AddReminderScreen = () => {
         }
         
         if (!Number.isInteger(Number(pillsPerAlert))) {
-            console.log("PILLS PER ALERT: " + pillsPerAlert);
             Alert.alert("טעות בהזנת מינון לנטילה. אנא הכנס מספר תקין");
             parallaxScrollViewRef.current?.scrollToChild(1);
             return;
@@ -197,7 +202,7 @@ const AddReminderScreen = () => {
                 />
             </View>}
 
-            <View style={{minHeight: 100}}>
+            {selectedPill && <View style={{minHeight: 100}}>
                 <Text style={styles.selectionText}>מינון התרופה בכל נטילה (ביחידות)</Text>
                 <TextInput
                     style={styles.input}
@@ -205,31 +210,52 @@ const AddReminderScreen = () => {
                     value={pillsPerAlert}
                     placeholder="1"
                     keyboardType="numeric"
-                    textAlign="right"
+                    textAlign="center"
                     onEndEditing={()=>{}}
                 />
-            </View>
+            </View>}
 
-            {selectedPill && 
+            {pillsPerAlert && 
             <View style={styles.selectionTextContainer}>
                 <Text style={styles.selectionText}>{selectedDateOffset ? "היום שבחר:" : "בחר יום להתראה ראשונה:"}</Text>
                 <ChooseList
                     items={datesArr}
                     selectedItem={selectedDateOffset}
-                    onSelect={(date: string) => {
-                        setSelectedDateOffset(date); 
+                    onSelect={(dateOffset: string) => {
+
+                        // scroll main page to hour-minute selection first to start animation
                         parallaxScrollViewRef.current?.scrollToChild(3);
+                        
+                        // save reminder starting date
+                        setSelectedDateOffset(dateOffset);
+
+                        // scroll hour-minute picker to current time
+                        const timeNow = new Date();
+                        timeNow.setHours(timeNow.getUTCHours() + 3); // offset to GMT+3
+                        console.log(timeNow.getHours());
+                        console.log(timeNow.getMinutes());
+                        scrollViewRefHours.current?.scrollTo({
+                            y: hourHeight * ((timeNow.getHours() - 2) / 24),
+                            animated: true,
+                        });
+                        scrollViewRefMinutes.current?.scrollTo({
+                            y: minuteHeight * ((timeNow.getMinutes() - 2) / 60),
+                            animated: true,
+                        });
+                        
                     }}
                     listStyle={[styles.innerList, { }]}
                     type={"time"}
                 />
             </View>}
 
-            {selectedPill &&
-            <View style={[styles.pageBottomContainer]}>
+            {pillsPerAlert &&
+            <View style={[styles.pageBottomContainer, !selectedDateOffset ? {opacity: 0} : {}]}>
                 <Text style={styles.selectionText}>{selectedHours && selectedMinutes ? "השעה שנבחרה: " + selectedHours + ":" + selectedMinutes : "בחר שעת התראה:"}</Text>
+
                 <View style={{flexDirection: 'row', margin: 5}}>
-                <ScrollView nestedScrollEnabled={true} style={{flex: 1,  height: 320}}>
+                    
+                <ScrollView scrollEnabled={!!selectedDateOffset} onContentSizeChange={(width, height) => setHourHeight(height)} ref={scrollViewRefHours} nestedScrollEnabled={true} style={{flex: 1,  height: 320}}>
                     <ChooseList
                         items={hoursArr}
                         selectedItem={selectedHours}
@@ -241,17 +267,18 @@ const AddReminderScreen = () => {
                         type={"time"}
                     />
                 </ScrollView>
-                <ScrollView nestedScrollEnabled={true} style={{flex: 1, height: 320}}>
-                <ChooseList
-                    items={minutesArr}
-                    selectedItem={selectedMinutes}
-                    onSelect={(minute: string)=> {
-                        setSelectedMinutes(minute);
-                        if (selectedHours) parallaxScrollViewRef.current?.scrollToChild(4);
-                }}
-                    listStyle={[styles.innerList, {  }]}
-                    type={"time"}
-                />
+
+                <ScrollView scrollEnabled={!!selectedDateOffset} onContentSizeChange={(width, height) => setMinuteHeight(height)} ref={scrollViewRefMinutes} nestedScrollEnabled={true} style={{flex: 1, height: 320}}>
+                    <ChooseList
+                        items={minutesArr}
+                        selectedItem={selectedMinutes}
+                        onSelect={(minute: string)=> {
+                            setSelectedMinutes(minute);
+                            if (selectedHours) parallaxScrollViewRef.current?.scrollToChild(4);
+                    }}
+                        listStyle={[styles.innerList, {  }]}
+                        type={"time"}
+                    />
                 </ScrollView>
                 </View> 
             </View>
@@ -280,9 +307,9 @@ const AddReminderScreen = () => {
                     style={styles.input}
                     onChangeText={setUserReminderMessage}
                     value={userReminderMessage}
-                    placeholder="ההתראה שלי לתרופה"
+                    placeholder="ההתראה שלי לתרופה (לא חובה)"
                     keyboardType="default"
-                    textAlign="right"
+                    textAlign="center"
                     onEndEditing={()=>{}}
                 />
             </View>
@@ -340,11 +367,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     listContainer: {
-        borderRadius: 10,
-        paddingVertical: 10,
+        borderRadius: 15,
+        margin: 5,
+        gap: 10,
     },
     list: {
         flex: 1,
+        flexDirection: 'column',
         marginHorizontal: 5,
         padding: 5,
     },
@@ -358,7 +387,6 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ccc',
         borderRadius: 15,
-        marginHorizontal: 10,
     },
     itemText: {
         fontSize: 28,
