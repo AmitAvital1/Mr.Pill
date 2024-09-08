@@ -56,6 +56,7 @@ public class ReminderNotificationService : IHostedService, IDisposable
                     else
                     {
                         reminder.ReminderTime = reminder.ReminderTime.Add(reminder.RecurrenceInterval);
+                        reminder.Approved = false;
                     }
                 }
 
