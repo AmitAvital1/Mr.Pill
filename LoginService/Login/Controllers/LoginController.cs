@@ -272,7 +272,13 @@ public class LoginController : Controller
             if (_loginService.IsSameUser(targetPhoneNumber, phoneNumberString))
             {
                 _logger.LogInformation("User is attempting to send a request to themselves. TargetPhoneNumber: {TargetPhoneNumber}, PhoneNumberFromToken: {PhoneNumberString}", targetPhoneNumber, phoneNumberString);
-                return BadRequest("You cannot send a request to yourself.");
+    
+                return BadRequest(new 
+                { 
+                    Message = $"You cannot send a request to yourself. Your phone number ({phoneNumberString}) is the same as the target phone number ({targetPhoneNumber}).", 
+                    UserPhoneNumber = phoneNumberString, 
+                    TargetPhoneNumber = targetPhoneNumber 
+                });
             }
 
             if (await _loginService.AddNewHouseSuccsesfully(token, targetPhoneNumber, medicineCabinetName))
