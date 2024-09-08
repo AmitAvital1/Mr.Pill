@@ -10,6 +10,7 @@ import ParallaxScrollView from "@/components/ParallaxScrollView";
 import DataHandler from "@/DataHandler";
 import { Pressable } from 'react-native';
 import RequestHandler from '@/RequestHandler';
+import { PopButton } from '@/components/PopButton';
 
 const backgroundColorLight = "#c9c9ff"
 const backgroundColorAlt = "#ffe3e3"
@@ -71,9 +72,9 @@ const HomePage: React.FC = () => {
   }
 
   const sendGetRemindersRequest = async () => {
-              
+    
     if (await RequestHandler.sendRequest('getMyRemindersToday')) {
-      setMyReminders(JSON.parse(RequestHandler.getResponse().request._response));
+      setMyReminders(JSON.parse(RequestHandler.getResponse().request._response).reverse());
     }
   }
 
@@ -168,13 +169,13 @@ const HomePage: React.FC = () => {
 
           <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, true)}}>
             <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
-              <Text style={[styles.plusMinusText, {paddingTop: 19.5, color: 'green'}]}>✔</Text>
+              <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
             </View>
           </Pressable>
 
           <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, false)}}>
             <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
-              <Text style={[styles.plusMinusText, {paddingTop: 17.5}]}>❌</Text>
+              <Text style={[styles.plusMinusText, {color: 'red'}]}>❌</Text>
             </View>
           </Pressable>
 
@@ -195,18 +196,21 @@ const HomePage: React.FC = () => {
   // MAIN LAYOUT
   return (
     <View style={{backgroundColor: backgroundColorMain, flex: 1}}>
-     
-      <Pressable onPress={logOut} style={{minHeight: 50, minWidth: 50, backgroundColor: "#dddd", position: 'absolute', left: "85%", marginTop: "14%", borderRadius: 999, elevation: 3}}>
-        <Text style={{lineHeight: 55, fontSize: 45}}>🚪</Text>
-      </Pressable>
 
-      {myNotifications.length > 0 &&
-      <Pressable onPress={()=>{setIsNotificationsOpen(!isNotificationsOpen)}} style={{zIndex: 5, backgroundColor: "#dddd", position: 'absolute', left: "5%", marginTop: "14%", borderRadius: 999, elevation: 3}}>
-        <Text style={{lineHeight: 55, fontSize: 45}}>🔔</Text>
-        <View style={{position: 'absolute', marginLeft: "5%", marginTop: "14%", borderRadius: 999}}>
-            <Text>🔴</Text>
+        <View style={[styles.topButtons, {left: "85%"}]}>
+            <PopButton DisableRotation={true} ButtonAction={logOut} ButtonContent= {
+                <Text style={{textAlign: 'center', lineHeight: 55, fontSize: 45}}>🚪</Text>
+            }/>
         </View>
-      </Pressable>}
+            
+      {myNotifications.length > 0 &&
+      <View style={[styles.topButtons, {left: "5%",}]}>
+        <PopButton ButtonAction={()=>{setIsNotificationsOpen(!isNotificationsOpen)}} ButtonContent={
+        <>
+        <Text style={{minWidth: 60, textAlign: 'center', lineHeight: 55, fontSize: 45}}>🔔</Text>
+        <Text style={{position: 'absolute', top: "-15%", left: "-25%", lineHeight: 25, fontSize: 15}}>🔴</Text>
+        </>}/>
+      </View>}
 
       {MrPillLogo(0.5, true)}
 
@@ -271,6 +275,16 @@ const styles = StyleSheet.create({
     padding: 5,
     elevation: 5,
   },
+  topButtons: {
+    zIndex: 5,
+    minHeight: 50,
+    minWidth: 50,
+    backgroundColor: "#dddd",
+    position: 'absolute',
+    marginTop: "14%",
+    borderRadius: 999,
+    elevation: 3
+  },
   pagebottom: {
     flex: 1,
     justifyContent: 'center',
@@ -295,7 +309,7 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   reminderBox: {
-    backgroundColor: "#dadadadf",
+    backgroundColor: "#dadada",
     //borderWidth: 2,
     borderColor: borderColor,
     borderRadius: 12,
@@ -318,6 +332,7 @@ const styles = StyleSheet.create({
   },
   plusMinusText: {
     fontSize: 35,
+    lineHeight: 45,
     fontWeight: 'bold',
     position: 'absolute',
   }

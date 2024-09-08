@@ -23,8 +23,7 @@ const AddCabinetScreen = () => {
     
     if (response) {
       Alert.alert("נוצר ארון תרופות חדש בהצלחה!");
-      router.dismiss()
-      router.replace('/(cabinet)/mycabinets');
+      router.dismiss();
     } else if (RequestHandler.getResponse().request.status == 400) {
       setIsNameTaken(true);
     }
@@ -57,6 +56,7 @@ const AddCabinetScreen = () => {
         keyboardType="default"
         textAlign='right'
       />
+
       {isNameTaken && <Text style={{textAlign: 'center', fontSize: 28, color: "#FF0000"}}>כבר קיים ארון בשם זה, אנא בחר שם אחר.</Text>}
       </View>
       <View style={styles.pagebottom}>

@@ -1,5 +1,6 @@
 import React from 'react';
 import {View, StyleSheet, Pressable, Text} from 'react-native';
+import { PopButton } from './PopButton';
 
 type AppHomeButtonProps = {
   ButtonContent: React.JSX.Element | React.JSX.Element[];
@@ -25,12 +26,13 @@ export const AppHomeButton: React.FC<AppHomeButtonProps> = ({ ButtonContent, But
   };
 
   return (
-    <Pressable key={Type} onPress={handleOnPress}>
-      <View style={[style.button, {backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
-          {Type && <Text style={{fontSize: 72, position: 'absolute', color: "#FFFFFF88"}}>{emojis[Type]}</Text>}
-          {ButtonContent}
-      </View>
-    </Pressable>
+    <PopButton DisableRotation={true} ButtonContent={
+        <View style={[style.button, {backgroundColor: BackgroundColor, borderColor: BorderColor, borderWidth: BorderWidth}]}>
+            {Type && <Text style={{fontSize: 72, position: 'absolute', color: "#FFFFFF88"}}>{emojis[Type]}</Text>}
+            {ButtonContent}
+        </View>
+    } ButtonAction={handleOnPress}>
+    </PopButton>
   );
 };
 

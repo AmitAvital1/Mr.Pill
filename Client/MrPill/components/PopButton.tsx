@@ -8,9 +8,10 @@ type PopButtonProps = {
   BackgroundColor?: string;
   ButtonScale?: number;
   Position?: "absolute" | "relative" | "static";
+  DisableRotation?: boolean;
 };
 
-export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonAction, ButtonScale, Position }) => {
+export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonAction, ButtonScale, Position, DisableRotation }) => {
   const animatedScale = useRef(new Animated.Value(0)).current;
   const animatedRotation = useRef(new Animated.Value(0)).current;
 
@@ -38,7 +39,7 @@ export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonActio
         useNativeDriver: true,
       }),
       Animated.timing(animatedRotation, {
-        toValue: Math.random() * 0.02 * (Math.random() < 0.5 ? -1: 1),
+        toValue: DisableRotation ? 0 : Math.random() * 0.02 * (Math.random() < 0.5 ? -1: 1),
         duration: 400,
         useNativeDriver: true,
       }),
@@ -51,7 +52,6 @@ export const PopButton: React.FC<PopButtonProps> = ({ ButtonContent, ButtonActio
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'], // Rotate from 0 to 360 degrees
   });
-
 
   return (
     <View style={[style.container, {maxHeight: 180 * ButtonScale, position: Position}]}>

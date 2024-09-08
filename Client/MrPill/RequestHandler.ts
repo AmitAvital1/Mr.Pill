@@ -273,7 +273,7 @@ export default {
         const timeNow = Date.now();
         const deltaTime = timeNow - lastRequestTime;
         if (lastRequestTime && lastRequestType && 
-          (deltaTime < COOLDOWN_PERIOD / COOLDOWN_MULTIPLIER) || 
+          //(deltaTime < COOLDOWN_PERIOD / COOLDOWN_MULTIPLIER) || // more safe but needs debugging on screen refresh -- need to implement force send request if it was made by the UI and not the user, for this line to work.
           (lastRequestType === requestType && deltaTime < COOLDOWN_PERIOD))
             return; // prevent rapid repeated requests
 

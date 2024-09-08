@@ -31,14 +31,14 @@ const MyCabinets: React.FC = () => {
 
     const [myCabinets, setMyCabinets] = React.useState<[Cabinet?]>([]);
 
+    const sendGetCabinetsRequest = async () => {
+        if (await RequestHandler.sendRequest('getMyCabinets')) {
+          setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
+        }
+      };
+
     useFocusEffect(
       useCallback(() => {
-
-        const sendGetCabinetsRequest = async () => {
-          if (await RequestHandler.sendRequest('getMyCabinets')) {
-            setMyCabinets(JSON.parse(RequestHandler.getResponse().request._response));
-          }
-        };
     
         sendGetCabinetsRequest();
   

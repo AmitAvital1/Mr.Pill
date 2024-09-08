@@ -6,7 +6,7 @@ import DataHandler from '@/DataHandler';
 import RequestHandler from '@/RequestHandler';
 import { router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, StyleSheet, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, FlatList, StyleSheet, ScrollView, TextInput, Alert } from 'react-native';
 
 const borderColor = "#c1e9ff";
 const bgc = "#ffcbcb";
@@ -62,19 +62,14 @@ const datesArr = ["היום", "מחר", "בעוד יומיים", "בעוד של�
 
 function getDateISO(offsetDays?: number) {
 
-    const currentDateTime = new Date();
+    const result = new Date();
+    result.setHours(result.getUTCHours() + 3); // offset to GMT+3
 
     if (offsetDays) {
-
-        const futureDateTime = new Date(currentDateTime.getTime() + offsetDays * 24 * 60 * 60 * 1000);
-        return futureDateTime.toISOString().slice(0, 11);
-
-    } else {
-
-        return currentDateTime.toISOString().slice(0, 11);
-
+        result.setDate(result.getDate() + offsetDays);
     }
 
+    return result.toISOString().slice(0, 11);
 }
 
 const AddReminderScreen = () => {  
@@ -82,7 +77,7 @@ const AddReminderScreen = () => {
     const parallaxScrollViewRef = useRef<{ scrollToChild: (index: number) => void }>(null);
 
     const [isRequestSent, setIsRequestSent] = React.useState<boolean>(false);
-    const [isAddReminderError, setIsAddReminderError] = React.useState<boolean>(false);
+
     const [myCabinets, setMyCabinets] = React.useState<string[]>();
     const [myPills, setMyPills] = React.useState<any>();
 
@@ -94,6 +89,7 @@ const AddReminderScreen = () => {
     const [selectedPill, setSelectedPill] = useState<any>(null);
     const [selectedFrequency, setSelectedFrequency] = React.useState<string>("");
 
+    const [pillsPerAlert, setPillsPerAlert] = React.useState<string>("1");
     const [userReminderMessage, setUserReminderMessage] = React.useState<string>();
 
     async function sendAddReminderRequest() {
@@ -103,28 +99,20 @@ const AddReminderScreen = () => {
             "Message": userReminderMessage || "עליך לקחת את התרופה " + selectedPill.hebrewName,
             "IsRecurring": !(selectedFrequency === "פעם אחת בלבד"),
             "RecurrenceInterval": intervalsArr[frequenciesArr.indexOf(selectedFrequency)],
+            "numOfPills": pillsPerAlert,
             "UserMedicationId": selectedPill.id,
         })
 
-        if (await RequestHandler.sendRequest("addReminder")) {
-            
-            console.log(RequestHandler.getResponse().request._response);
-            return true;
-
-        } else {
-            console.log(RequestHandler.getRequest());
-            console.log(RequestHandler.getResponse().request._response);
-            return false;
-        }
-
+        return await RequestHandler.sendRequest("addReminder");
     }
 
     async function handleButtonPress() {
 
         if (await sendAddReminderRequest()) {
+            Alert.alert("תזכורת נוספה בהצלחה!");
             router.dismiss();
         } else {
-            setIsAddReminderError(true);
+            Alert.alert("שגיאה ביצירת התזכורת");
         }
     }
 
@@ -192,6 +180,19 @@ const AddReminderScreen = () => {
                     type={"pill"}
                 />
             </View>}
+
+            <View style={{minHeight: 100}}>
+                <Text style={styles.selectionText}>מינון התרופה בכל נטילה (ביחידות)</Text>
+                <TextInput
+                    style={styles.input}
+                    onChangeText={setPillsPerAlert}
+                    value={pillsPerAlert}
+                    placeholder="1"
+                    keyboardType="numeric"
+                    textAlign="right"
+                    onEndEditing={()=>{}}
+                />
+            </View>
 
             {selectedPill && 
             <View style={styles.selectionTextContainer}>
@@ -273,7 +274,7 @@ const AddReminderScreen = () => {
 
             <AppHomeButton
                 ButtonContent={strFC(selectedFrequency ? "הוסף התראה!" : "נא מלא פרטים")} 
-                ButtonAction={selectedFrequency ? handleButtonPress : ()=>{}}
+                ButtonAction={Number.isInteger(pillsPerAlert) && selectedFrequency ? handleButtonPress : ()=>{}}
                 BackgroundColor={selectedFrequency? "rgb(173, 255, 217)": bgc}
             />
 
