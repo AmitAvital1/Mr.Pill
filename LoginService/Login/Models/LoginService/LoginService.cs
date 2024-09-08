@@ -79,6 +79,49 @@ public class LoginService : ILoginService
         return false;
     }
 
+   public bool IsSameUser(int targetPhoneNumber, string phoneNumber)
+    {
+        _logger.LogInformation("Checking if the phone numbers {TargetPhoneNumber} and {PhoneNumber} belong to the same user.", targetPhoneNumber, phoneNumber);
+
+        if (int.TryParse(phoneNumber, out int parsedPhoneNumber))
+        {
+            _logger.LogInformation("Parsed phone number {ParsedPhoneNumber} from the input string.", parsedPhoneNumber);
+
+            var targetUser = _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == targetPhoneNumber);
+
+            var parsedUser = _dbContext?.Users
+                ?.FirstOrDefault(u => u.PhoneNumber == parsedPhoneNumber);
+
+            if (targetUser == null)
+            {
+                _logger.LogWarning("No user found with the target phone number {TargetPhoneNumber}.", targetPhoneNumber);
+            }
+
+            if (parsedUser == null)
+            {
+                _logger.LogWarning("No user found with the parsed phone number {ParsedPhoneNumber}.", parsedPhoneNumber);
+            }
+
+            if (targetUser != null && parsedUser != null && targetUser.UserId == parsedUser.UserId)
+            {
+                _logger.LogInformation("The target phone number {TargetPhoneNumber} and parsed phone number {ParsedPhoneNumber} belong to the same user with ID {UserId}.", targetPhoneNumber, parsedPhoneNumber, targetUser.UserId);
+                return true;
+            }
+            else
+            {
+                _logger.LogInformation("The target phone number {TargetPhoneNumber} and parsed phone number {ParsedPhoneNumber} do not belong to the same user.", targetPhoneNumber, parsedPhoneNumber);
+            }
+        }
+        else
+        {
+            _logger.LogError("Failed to parse the phone number {PhoneNumber} into an integer.", phoneNumber);
+        }
+
+        return false;
+    }
+
+
     public string GenerateUserToken(string phoneNumber)
     {
         var claims = new[]

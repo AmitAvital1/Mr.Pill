@@ -12,7 +12,7 @@ public class ReminderService : IReminderService
     private readonly AppDbContext _dbContext;
     private readonly ILogger _logger;
 
-       public ReminderService(AppDbContext dbContext, ILogger<ReminderService> logger)
+    public ReminderService(AppDbContext dbContext, ILogger<ReminderService> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
@@ -23,17 +23,18 @@ public class ReminderService : IReminderService
         var user = _dbContext?.Users
                 ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
 
-        if(user == null)
+        if (user == null)
         {
             throw new Exception("No user found on phone number " + phoneNumber);
         }
         
         var medicationRepoId = _dbContext?.UserMedications
                 ?.FirstOrDefault(u => u.Id == reminderDto.UserMedicationId).MedicationRepoId;
+        
         var medicationRepo = _dbContext?.MedicationRepos
                 ?.FirstOrDefault(u => u.Id == medicationRepoId);
             
-        if(medicationRepo == null)
+        if (medicationRepo == null)
         {
             throw new Exception("Invalid user medication id " + reminderDto.UserMedicationId);
         }
@@ -61,7 +62,7 @@ public class ReminderService : IReminderService
         var user = _dbContext?.Users
                 ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
 
-        if(user == null)
+        if (user == null)
         {
             throw new Exception("No user found on phone number " + phoneNumber);
         }
@@ -70,12 +71,12 @@ public class ReminderService : IReminderService
                 .Where(r => r.Id == Id)
                 .FirstOrDefault();
             
-        if(Reminder == null)
+        if (Reminder == null)
         {
             throw new Exception("Invalid reminder id " + Id);
         }
 
-        if(Reminder.UserId != user.UserId)
+        if (Reminder.UserId != user.UserId)
         {
             throw new Exception("Reminder not belong this user");
         }
@@ -105,7 +106,7 @@ public class ReminderService : IReminderService
         var user = _dbContext?.Users
                 ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
 
-        if(user == null)
+        if (user == null)
         {
             throw new Exception("No user found on phone number " + phoneNumber);
         }
@@ -114,12 +115,12 @@ public class ReminderService : IReminderService
                 .Where(r => r.Id == Id)
                 .FirstOrDefault();
             
-        if(Reminder == null)
+        if (Reminder == null)
         {
             throw new Exception("Invalid reminder id " + Id);
         }
 
-        if(Reminder.UserId != user.UserId)
+        if (Reminder.UserId != user.UserId)
         {
             throw new Exception("Reminder not belong this user");
         }
@@ -133,7 +134,7 @@ public class ReminderService : IReminderService
         var user = _dbContext?.Users
                 ?.FirstOrDefault(u => u.PhoneNumber == phoneNumber);
 
-        if(user == null)
+        if (user == null)
         {
             throw new Exception("No user found on phone number " + phoneNumber);
         }
@@ -145,28 +146,28 @@ public class ReminderService : IReminderService
         var medication = _dbContext?.UserMedications
                 ?.FirstOrDefault(u => u.Id == Reminder.UserMedicationId);
             
-        if(Reminder == null)
+        if (Reminder == null)
         {
             throw new Exception("Invalid reminder id " + Id);
         }
 
-        if(Reminder.Approved)
+        if (Reminder.Approved)
         {
             throw new Exception("Reminder already approved by user");
         }
 
-        if(Reminder.UserId != user.UserId)
+        if (Reminder.UserId != user.UserId)
         {
             throw new Exception("Reminder not belong this user");
         }
-        if(!approved)
+        if (!approved)
         {
             Reminder.Approved = true;
-              _logger.LogInformation("User " + phoneNumber + " decline his reminder id " + Reminder.Id);
+            _logger.LogInformation("User " + phoneNumber + " decline his reminder id " + Reminder.Id);
         }
         else
         {
-            if(medication.NumberOfPills >= Reminder.numOfPills)
+            if (medication.NumberOfPills >= Reminder.numOfPills)
             {
                 int n = (int)Reminder.numOfPills;
                 medication.NumberOfPills = medication.NumberOfPills - n;
@@ -176,9 +177,11 @@ public class ReminderService : IReminderService
                 _logger.LogWarning("User " + phoneNumber + " has not enogh medication. Set to 0");
                 medication.NumberOfPills = 0;
             }
+
             Reminder.Approved = true;
             _logger.LogInformation("User " + phoneNumber + " approved his reminder id " + Reminder.Id);
         }
+
         _dbContext.SaveChanges();
     }
 
@@ -226,7 +229,6 @@ public class ReminderService : IReminderService
         }
 
        return res;
-
     }
 
     public IEnumerable<UIReminderDTO> GetUserTodayReminders(int phoneNumber)
@@ -235,7 +237,7 @@ public class ReminderService : IReminderService
         var res = new List<UIReminderDTO>();
         var now = DateTime.UtcNow.AddHours(3);
 
-        foreach(var r in reminders)
+        foreach (var r in reminders)
         {
             if(r.ReminderTime.Date.Equals(now.Date))
             {
@@ -249,7 +251,7 @@ public class ReminderService : IReminderService
        return res;
     }
 
-       public int GetPhoneNumberFromToken(string? token)
+    public int GetPhoneNumberFromToken(string? token)
     {
         if (token == null)
         {
@@ -259,7 +261,7 @@ public class ReminderService : IReminderService
         return int.Parse(getPhoneNumberFromToken(token));
     }
 
-   private string getPhoneNumberFromToken(string token)
+    private string getPhoneNumberFromToken(string token)
     {
         _logger.LogInformation("Extracting phone number from token: {Token}", token);
 

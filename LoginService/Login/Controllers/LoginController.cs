@@ -261,43 +261,26 @@ public class LoginController : Controller
         try
         {
             string token = GetTokenFromHeaders();
-            
             string phoneNumberString  = _loginService.getPhoneNumberFromToken(token);
-            phoneNumberString = phoneNumberString.TrimStart('0');
-
-            if (!int.TryParse(phoneNumberString, out int phoneNumber))
-            {
-                _logger.LogError("Failed to parse phone number from token.");
-                return BadRequest("Invalid phone number format.");
-            }
-
-            // No Effect When There’s No Leading Zero
-            string targetPhoneNumberString = targetPhoneNumber.ToString().TrimStart('0');
-
-            if (!int.TryParse(targetPhoneNumberString, out int cleanedTargetPhoneNumber))
-            {
-                _logger.LogError("Failed to parse target phone number after removing leading zeros.");
-                return BadRequest("Invalid target phone number format.");
-            }
-
-            if (cleanedTargetPhoneNumber == phoneNumber)
-            {
-                _logger.LogInformation("Phone number {PhoneNumber} is same as the sender phone number", targetPhoneNumber);
-                return BadRequest("Cannot send request to yourself.");
-            }
-
-            if (!_loginService.PhoneNumberExistInDb(cleanedTargetPhoneNumber))
+            
+            if (!_loginService.PhoneNumberExistInDb(targetPhoneNumber))
             {
                 _logger.LogInformation("Phone number {PhoneNumber} does not exist in the database", targetPhoneNumber);
                 return NotFound("Phone number does not exist");
             }
 
-            if (await _loginService.AddNewHouseSuccsesfully(token, cleanedTargetPhoneNumber, medicineCabinetName))
+            if (_loginService.IsSameUser(targetPhoneNumber, phoneNumberString))
+            {
+                _logger.LogInformation("User is attempting to send a request to themselves. TargetPhoneNumber: {TargetPhoneNumber}, PhoneNumberFromToken: {PhoneNumberString}", targetPhoneNumber, phoneNumberString);
+                return BadRequest("You cannot send a request to yourself.");
+            }
+
+            if (await _loginService.AddNewHouseSuccsesfully(token, targetPhoneNumber, medicineCabinetName))
             {
                 _logger.LogInformation("Successfully processed request for manager {targetPhoneNumber} to join a new house.", targetPhoneNumber);
-                return Ok(new { Massage = "request to joined to another house succsesfuly" });
+                return Ok(new { Message = "request to joined to another house succsesfuly" });
             }
-            
+
             else
             {
                 _logger.LogError("Failed to process request for target Phone Number {targetPhoneNumber} to join a new house.", targetPhoneNumber);
