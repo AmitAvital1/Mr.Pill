@@ -23,7 +23,6 @@ let map = new Map<string, any>();
 let stateMap = new Map<string, string>();
 let flagMap = new Map<string, boolean>();
 flagMap.set('sessionAlive', true);
-let disposable: any = undefined;
 
 export default {
 
@@ -34,8 +33,6 @@ export default {
     stateMap = new Map<string, string>;
     flagMap = new Map<string, boolean>();
     flagMap.set('sessionAlive', true);
-    disposable = undefined;
-
   },
   resetUser() {
     user = {
@@ -54,9 +51,7 @@ export default {
   get(key: string, dispose?: boolean) {
     const result = map.get(key);
 
-    if (dispose) {
-      map.delete(key);
-    }
+    if (dispose) map.delete(key);
 
     return result;
   },
@@ -107,11 +102,16 @@ export default {
     router.push('/(login)/welcome');
   },
 
-  getFlag(key: string) {
-    return flagMap.get(key);
+  getFlag(key: string, dispose?: boolean) {
+    const result = flagMap.get(key);
+    if (dispose) flagMap.delete(key);
+    return result;
   },
   setFlag(key: string, value: boolean) {
     return flagMap.set(key, value);
+  },
+  toggleFlag(key: string) {
+    return flagMap.set(key, !flagMap.get(key));
   },
   
   async saveDataToStorage(key: string, value: string) {
@@ -121,54 +121,44 @@ export default {
       console.error(e);
     }
   },
-
   async loadDataFromStorage(key: string) {
     try {
-
       const value = await AsyncStorage.getItem(key);
-
       if (value !== null) {
         return value;
       }
-
     } catch (e) {
-
       console.error(e);
-
     }
   },
-  
   async loadUserFromStorage() {
     try {
-
       user = {
         FirstName: await AsyncStorage.getItem('userFirstName') || "",
         LastName: await AsyncStorage.getItem('userLastName') || "",
         PhoneNumber: await AsyncStorage.getItem('userPhoneNumber') || "",
         Token: await AsyncStorage.getItem('userToken') || "",
       }
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+
+    return !this.isEmpty();
+  },
+  async saveUserToStorage() {
+    try {
+        
+      this.saveDataToStorage('userFirstName', user.FirstName);
+      this.saveDataToStorage('userLastName', user.LastName);
+      this.saveDataToStorage('userPhoneNumber', user.PhoneNumber);
+      this.saveDataToStorage('userToken', user.Token);
+      return true;
 
     } catch (e) {
 
       console.error(e);
       return false;
-
-    }
-
-    return true;
-  },
-
-  async saveUserToStorage() {
-    try {
-
-      this.saveDataToStorage('userFirstName', user.FirstName);
-      this.saveDataToStorage('userLastName', user.LastName);
-      this.saveDataToStorage('userPhoneNumber', user.PhoneNumber);
-      this.saveDataToStorage('userToken', user.Token);
-
-    } catch (e) {
-
-      console.error(e);
 
     }
   },

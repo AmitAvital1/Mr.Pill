@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 5,
-    gap: 3,
+    gap: 6,
     overflow: 'hidden',
   },
 });

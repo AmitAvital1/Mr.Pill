@@ -4,8 +4,8 @@ import DataHandler from "./DataHandler";
 // change if need 
 const BASE_URL = "http://20.217.66.65:"
 const SERVER_AND_CLIENT_ON_SAME_MACHINE = false;
-const COOLDOWN_PERIOD = 1500 // time in MS user has to wait between requests of the same type.
-
+const COOLDOWN_PERIOD = 1500; // time in MS user has to wait between requests of the same type.
+const DEFAULT_SLEEP_TIME = 1000;
 // currently unused
 // const COOLDOWN_MULTIPLIER = 3; // if the user sends consequtive requests of DIFFERENT types, they can send them COOLDOWN_MULTIPLIER times faster.
 
@@ -339,8 +339,7 @@ export default {
                     console.log(response);
                 }
                 else {
-                  console.log("Error at:" + requestType);
-                  console.log("Status code: " + response?.request?.status);
+                  console.log("Error at: " + requestType + "with status code: " + response?.request?.status);
                 }
                 alreadyAwaitingResponse = false;
                 return false;
@@ -365,7 +364,7 @@ export default {
     getStatusCode() {
         return response?.request?.status;
     },
-    async sleep(ms: number) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+    async sleep(ms?: number) {
+        return new Promise((resolve) => setTimeout(resolve, ms || DEFAULT_SLEEP_TIME));
     },
 };

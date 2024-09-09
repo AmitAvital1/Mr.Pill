@@ -137,8 +137,8 @@ const MyPills: React.FC = () => {
         </View>
       </View>
 
-      <View style={{flexDirection: "row", backgroundColor: "#fceeff",gap: 45}}>
-        <View style={{minWidth: "30%"}}></View>
+      <View style={{flexDirection: "row", backgroundColor: "#fceeff", justifyContent: "space-between"}}>
+        <Text style={styles.text}> </Text>
         <Text style={styles.text}>כמות במלאי</Text>
         <Text style={styles.text}>תרופה</Text>
       </View>

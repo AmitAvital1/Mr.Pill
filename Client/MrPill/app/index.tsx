@@ -4,19 +4,16 @@ import React, { useEffect } from 'react';
 
 export default function IndexScreen() {
 
-    const [isUserLoaded, setIsUserLoaded] = React.useState<boolean>(false);
-
     useEffect(()=>{
 
-        if (isUserLoaded) return;
-        setIsUserLoaded(true);
-
         const loadUser = async () => {
-            await DataHandler.loadUserFromStorage();
+            if (await DataHandler.loadUserFromStorage()) {
+                DataHandler.setFlag("hasOpenedApp", true);
+            }
         }
-
         loadUser();
-    })
+
+    }, [])
 
     return <Redirect href={"/(login)/welcome"}/>;
 }

@@ -78,7 +78,7 @@ const HomePage: React.FC = () => {
     } else {
         Alert.alert("שגיאה מספר: " + RequestHandler.getStatusCode() + "\nשגיאה בעת אישור\\דחיית בקשה");
     }
-
+    RequestHandler.sleep(1000);
     setScreenUpdated(!screenUpdated);
   }
 
@@ -147,40 +147,40 @@ const HomePage: React.FC = () => {
   function renderReminder(reminder?: Reminder, id?: number) {
     if (!reminder) return;
     return (
-      <Pressable key={id} onPress={()=>{console.log('y')}}>
-        
-        <View style={styles.reminderBox}>
-          <View style={{gap: 15, alignItems: 'center', flexDirection: 'row'}}>
-
-            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, false)}}>
-                {id == 0 && <Text style={[styles.text,{marginBottom: 10}]}>שכחתי</Text>}
-                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
-                    <Text style={[styles.plusMinusText, {color: 'red'}]}>❌</Text>
-                </View>
-                {id == 0 && <Text style={styles.text}> </Text>}
-            </Pressable>
-
-            <Pressable onPress={()=>{respondToReminder(reminder.reminderId, true)}}>
-                {id == 0 && <Text style={[styles.text,{marginBottom: 10}]}>לקחתי</Text>}
-                <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
-                    <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
-                </View>
-                {id == 0 && <Text style={styles.text}> </Text>}
-            </Pressable>
+        <View key={id} style={styles.reminderBox}>
+            <View style={{width: "20%", marginLeft: 10}}>
+                {id == 0 && <Text style={[styles.text]}>שכחתי</Text>}
+                <PopButton 
+                    ButtonAction={()=>{respondToReminder(reminder.reminderId, false)}}
+                    ButtonContent={ 
+                        <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
+                            <Text style={[styles.plusMinusText, {color: 'red'}]}>❌</Text>
+                        </View>
+                    }
+                />
+            </View>
             
-            <View style={{width: "50%", minHeight: 130, flex: 0, alignItems: 'center', justifyContent: 'center'}}>
+            <View style={{width: "20%"}}>
+                {id == 0 && <Text style={[styles.text]}>לקחתי</Text>}
+                <PopButton 
+                    ButtonAction={()=>{respondToReminder(reminder.reminderId, true)}}
+                    ButtonContent={ 
+                        <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#fdfdfd"}]}>
+                            <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
+                        </View>
+                    }
+                />
+            </View>
+            
+            <View style={{maxWidth: "60%", minWidth: "50%", height: "100%", flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                 <Image source={{uri: reminder.imagePath}} style={{borderRadius: 0, height: "50%", width: "100%"}} resizeMode="center"></Image>
 
-                <View style={{flexGrow: 1, minWidth: "40%"}}>
+                <View>
                     <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', textAlign: 'center'}}>{reminder.drugHebrewName}</Text>
                     <Text style={{color: "#000", fontSize: 20, textAlign: 'center'}}>{"בשעה " + reminder.reminderTime.slice(11,16)}</Text>
                 </View>
             </View>
-            
-          </View>
         </View>
-
-      </Pressable>
     )
   }
 
@@ -190,21 +190,31 @@ const HomePage: React.FC = () => {
       <Pressable key={id} onPress={()=>{console.log('y')}}>
         
         <View style={styles.reminderBox}>
-          <View style={{alignItems: 'center', flexDirection: 'row'}}>
+          <View style={{alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'}}>
 
-          <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, true)}}>
-            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
-              <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
+            <View style={{width: "20%", marginLeft: 10}}>
+                <PopButton 
+                    ButtonAction={()=>{respondToJoinCabinetRequest(notification, true)}}
+                    ButtonContent={
+                    <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
+                        <Text style={[styles.plusMinusText, {color: 'green'}]}>✔</Text>
+                    </View>
+                    }
+                />
             </View>
-          </Pressable>
-
-          <Pressable onPress={()=>{respondToJoinCabinetRequest(notification, false)}}>
-            <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
-              <Text style={[styles.plusMinusText, {color: 'red'}]}>❌</Text>
+            
+            <View style={{width: "20%"}}>
+                <PopButton
+                    ButtonAction={()=>{respondToJoinCabinetRequest(notification, false)}}
+                    ButtonContent={
+                    <View style={[styles.plusMinusButton, {elevation: 5, backgroundColor: "#FFF"}]}>
+                        <Text style={[styles.plusMinusText, {color: 'red'}]}>❌</Text>
+                    </View>    
+                    }
+                />
             </View>
-          </Pressable>
 
-          <View style={{width: "50%", flexGrow: 1}}>
+          <View style={{maxWidth: "60%", flexGrow: 1}}>
             <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{notification.senderName} - 0{notification.senderPhoneNumber}</Text>
             <Text style={{color: "#000", fontSize: 16, marginRight: 35, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</Text>
           </View>
@@ -339,21 +349,22 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   reminderBox: {
+    padding: 3,
     backgroundColor: "#dadada",
-    //borderWidth: 2,
+    flexDirection: "row",
     borderColor: borderColor,
     borderRadius: 12,
+    gap: 15,
     flex: 1,
     justifyContent: 'center',
     alignContent: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    minWidth: 300,
+    minHeight: 120,
+    minWidth: "100%",
     elevation: 3,
   },
   plusMinusButton: {
-    minWidth: 75,
-    minHeight: 75,
+    width: 75,
+    height: 75,
     borderRadius: 999,
     justifyContent: 'center',
     alignItems: 'center',
