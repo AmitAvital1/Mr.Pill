@@ -246,6 +246,48 @@ public class LoginService : ILoginService
         return cabinetRequestDTOs;        
     }
 
+    public bool AlreadyExistInThisCabinet(int targetPhoneNumber, string phoneNumberString, string medicineCabinetName)
+    {
+        string logPrefix = $"[AlreadyExistInThisCabinet] TargetPhoneNumber: {targetPhoneNumber}, CreatorPhoneNumber: {phoneNumberString}, CabinetName: {medicineCabinetName}";
+
+        _logger.LogInformation($"{logPrefix} - Starting existence check.");
+
+        if (!int.TryParse(phoneNumberString, out int phoneNumber))
+        {
+            _logger.LogError($"{logPrefix} - Invalid phone number format.");
+            throw new ArgumentException("Invalid phone number format.", nameof(phoneNumberString));
+        }
+
+        _logger.LogInformation($"{logPrefix} - Successfully parsed phone number: {phoneNumber}");
+
+        var cabinet = _dbContext?.MedicineCabinets
+            ?.Include(c => c.MedicineCabinetUsers)
+            .ThenInclude(mcu => mcu.User)
+            .FirstOrDefault(c => c.MedicineCabinetName == medicineCabinetName && c.Creator.PhoneNumber == phoneNumber);
+
+        if (cabinet == null)
+        {
+            _logger.LogWarning($"{logPrefix} - No cabinet found with the provided name and creator phone number.");
+            return false;
+        }
+
+        _logger.LogInformation($"{logPrefix} - Cabinet found. Checking if user exists in the cabinet.");
+
+        var userExists = cabinet.MedicineCabinetUsers
+            .Any(mcu => mcu.User.PhoneNumber == targetPhoneNumber);
+
+        if (userExists)
+        {
+            _logger.LogInformation($"{logPrefix} - User with phone number {targetPhoneNumber} already exists in the cabinet.");
+        }
+        else
+        {
+            _logger.LogInformation($"{logPrefix} - User with phone number {targetPhoneNumber} does not exist in the cabinet.");
+        }
+
+        return userExists;
+    }
+
     private string getSenderNameByPhoneNumber(string senderPhoneNumber)
     {
         int phoneNumber = int.Parse(senderPhoneNumber);

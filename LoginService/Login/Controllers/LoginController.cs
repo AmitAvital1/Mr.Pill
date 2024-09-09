@@ -281,6 +281,22 @@ public class LoginController : Controller
                 });
             }
 
+            if (_loginService.AlreadyExistInThisCabinet(targetPhoneNumber, phoneNumberString, medicineCabinetName))
+            {
+                _logger.LogError("User with phone number {TargetPhoneNumber} already exists in the cabinet '{MedicineCabinetName}' " +
+                    "owned by user with phone number {PhoneNumberString}.", 
+                         targetPhoneNumber, medicineCabinetName, phoneNumberString);
+
+                return BadRequest(new 
+                {
+                    Message = $"User with phone number {targetPhoneNumber} already exists in the cabinet '{medicineCabinetName}' " +
+                            $"owned by the user with phone number {phoneNumberString}.",
+                    UserPhoneNumber = phoneNumberString,
+                    TargetPhoneNumber = targetPhoneNumber,
+                    CabinetName = medicineCabinetName
+                });
+            }
+
             if (await _loginService.AddNewHouseSuccsesfully(token, targetPhoneNumber, medicineCabinetName))
             {
                 _logger.LogInformation("Successfully processed request for manager {targetPhoneNumber} to join a new house.", targetPhoneNumber);

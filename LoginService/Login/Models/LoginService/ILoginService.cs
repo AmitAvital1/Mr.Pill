@@ -15,4 +15,5 @@ public interface ILoginService
     public void HandleNotification(string token, int requestId, bool approve);
     public User GetUserByPhoneNumber(int phoneNumber);
     public string getPhoneNumberFromToken(string token);
+    public bool AlreadyExistInThisCabinet(int targetPhoneNumber, string phoneNumberString, string medicineCabinetName);
 }
