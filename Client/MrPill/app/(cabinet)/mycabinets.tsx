@@ -71,8 +71,10 @@ const MyCabinets: React.FC = () => {
               </Pressable> 
               
               {/*  */}
-              <View style={{alignContent: 'center', justifyContent: 'space-evenly', flexDirection: 'row' ,flexGrow: 1, minWidth: "50%", maxWidth: "60%"}}>
+              <View style={{alignContent: 'center', justifyContent: 'space-between', flexDirection: 'row' ,flexGrow: 1, minWidth: "50%", maxWidth: "60%"}}>
+                <Text> </Text>
                 <Text style={styles.text}>{cabinet.medicineCabinetName.slice(0,12) + (cabinet.medicineCabinetName.length > 12 ? "..." : "")}</Text>
+                <Text style={[styles.text]}>{cabinet.isCreator ? "👑" : "  "}</Text>
                 {/* deprecated ADD PERSON TO CABINET button */}
                 {/*cabinet.isCreator &&
                 <Pressable onPress={()=>{DataHandler.setState("medicineCabinetName", cabinet.medicineCabinetName); router.navigate("/(cabinet)/addperson");}}>
@@ -153,6 +155,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   text: {
+    textAlign: 'right',
     lineHeight: 35,
     fontSize: 20,
     color: '#000',

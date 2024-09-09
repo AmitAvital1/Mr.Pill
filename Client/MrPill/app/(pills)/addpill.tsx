@@ -154,7 +154,7 @@ const AddPillScreen = () => {
         onChangeText={onChangeNumber}
         value={number}
         placeholder="מספר ברקוד של תרופה"
-        keyboardType="default"
+        keyboardType="numeric"
         textAlign='center'
         editable={!scanned} // Allow manual input if barcode is not scanned
       />

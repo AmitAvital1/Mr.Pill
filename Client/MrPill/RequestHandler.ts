@@ -321,6 +321,7 @@ export default {
             
             // parse response on OK
             if (response.request.status == 200) {
+                
                 parsedResponse = JSON.parse(response.request._response);
                 if (logging) console.log("RESPONSE: " + response.request._response);
                 alreadyAwaitingResponse = false;
@@ -339,7 +340,7 @@ export default {
                     console.log(response);
                 }
                 else {
-                  console.log("Error at: " + requestType + "with status code: " + response?.request?.status);
+                  console.log("Error at: '" + requestType + "' with status code: " + response?.request?.status);
                 }
                 alreadyAwaitingResponse = false;
                 return false;

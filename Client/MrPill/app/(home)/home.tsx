@@ -172,7 +172,7 @@ const HomePage: React.FC = () => {
                 />
             </View>
             
-            <View style={{maxWidth: "60%", minWidth: "50%", height: "100%", flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+            <View style={{maxWidth: "60%", minWidth: "40%", height: "100%", flex: 1, alignItems: 'center', justifyContent: 'center'}}>
                 <Image source={{uri: reminder.imagePath}} style={{borderRadius: 0, height: "50%", width: "100%"}} resizeMode="center"></Image>
 
                 <View>
@@ -187,12 +187,9 @@ const HomePage: React.FC = () => {
   function renderNotification(notification?: Notification, id?: number) {
     if (!notification) return;
     return (
-      <Pressable key={id} onPress={()=>{console.log('y')}}>
         
         <View style={styles.reminderBox}>
-          <View style={{alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between'}}>
-
-            <View style={{width: "20%", marginLeft: 10}}>
+            <View style={{minWidth: "20%", marginLeft: 10}}>
                 <PopButton 
                     ButtonAction={()=>{respondToJoinCabinetRequest(notification, true)}}
                     ButtonContent={
@@ -202,8 +199,8 @@ const HomePage: React.FC = () => {
                     }
                 />
             </View>
-            
-            <View style={{width: "20%"}}>
+
+            <View style={{minWidth: "20%"}}>
                 <PopButton
                     ButtonAction={()=>{respondToJoinCabinetRequest(notification, false)}}
                     ButtonContent={
@@ -214,15 +211,11 @@ const HomePage: React.FC = () => {
                 />
             </View>
 
-          <View style={{maxWidth: "60%", flexGrow: 1}}>
-            <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', marginRight: 35, textAlign: 'center'}}>{notification.senderName} - 0{notification.senderPhoneNumber}</Text>
-            <Text style={{color: "#000", fontSize: 16, marginRight: 35, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</Text>
-          </View>
-    
+          <View style={{borderWidth: 2, flex: 1}}>
+            <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', textAlign: 'center'}}>{notification.senderName}{"\n"}0{notification.senderPhoneNumber}</Text>
+            <Text style={{color: "#000", fontSize: 16, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</Text>
           </View>
         </View>
-
-      </Pressable>
     )
   }
 
@@ -354,10 +347,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderColor: borderColor,
     borderRadius: 12,
+    //borderWidth: 2,
     gap: 15,
     flex: 1,
-    justifyContent: 'center',
-    alignContent: 'center',
+    justifyContent: "space-between",
+    alignItems: "center",
     minHeight: 120,
     minWidth: "100%",
     elevation: 3,
