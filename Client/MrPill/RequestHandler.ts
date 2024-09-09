@@ -353,7 +353,6 @@ export default {
             return false;
         }
     },
-
     getRequest() {
         return request;
     },
@@ -365,5 +364,8 @@ export default {
     },
     getStatusCode() {
         return response?.request?.status;
-    }
+    },
+    async sleep(ms: number) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    },
 };

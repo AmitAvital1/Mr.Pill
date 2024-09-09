@@ -80,7 +80,6 @@ const AddPillScreen = () => {
       router.replace('/(home)/home');
     } else {
       Alert.alert("שגיאה בהוספת התרופה.");
-      setIsRequestSent(true);
     }
   }
 

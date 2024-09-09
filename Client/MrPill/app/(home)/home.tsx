@@ -73,23 +73,25 @@ const HomePage: React.FC = () => {
   const respondToJoinCabinetRequest = async (notification: Notification, userResponse: boolean) => {
     DataHandler.setFlag("userResponse", userResponse);
     DataHandler.set("notification", notification);
-    if (!await RequestHandler.sendRequest("respondToJoinCabinetRequest")) {
-        Alert.alert("שגיאה מספר: " + RequestHandler.getStatusCode() + "\nשגיאה בעת אישור\\דחיית בקשה")
+    if (await RequestHandler.sendRequest("respondToJoinCabinetRequest", true)) {
+        setIsNotificationsOpen(myNotifications.length > 1);    
+    } else {
+        Alert.alert("שגיאה מספר: " + RequestHandler.getStatusCode() + "\nשגיאה בעת אישור\\דחיית בקשה");
     }
-    setIsNotificationsOpen(myNotifications.length > 0);
+
     setScreenUpdated(!screenUpdated);
   }
 
   const sendGetRemindersRequest = async () => {
     
-    if (await RequestHandler.sendRequest('getMyRemindersToday')) {
+    if (await RequestHandler.sendRequest('getMyRemindersToday', false, true)) {
       setMyReminders(JSON.parse(RequestHandler.getResponse().request._response).reverse());
     }
   }
 
   const sendGetNotificationsRequest = async () => {
               
-    if (await RequestHandler.sendRequest('getNotifications')) {
+    if (await RequestHandler.sendRequest('getNotifications', false, true)) {
       setNotifications(JSON.parse(RequestHandler.getResponse().request._response).data);
     }
   }
@@ -121,6 +123,7 @@ const HomePage: React.FC = () => {
     if (screenUpdated === undefined) return;
 
     sendGetRemindersRequest();
+    RequestHandler.sleep(1000);
     sendGetNotificationsRequest();
 
   }, [screenUpdated])
@@ -131,6 +134,7 @@ const HomePage: React.FC = () => {
 
       setIsNotificationsOpen(false);
       sendGetRemindersRequest();
+      RequestHandler.sleep(1000);
       sendGetNotificationsRequest();
       
       return () => {
@@ -164,7 +168,7 @@ const HomePage: React.FC = () => {
                 {id == 0 && <Text style={styles.text}> </Text>}
             </Pressable>
             
-            <View style={{minHeight: 130, flex: 0, alignItems: 'center', justifyContent: 'center'}}>
+            <View style={{width: "50%", minHeight: 130, flex: 0, alignItems: 'center', justifyContent: 'center'}}>
                 <Image source={{uri: reminder.imagePath}} style={{borderRadius: 0, height: "50%", width: "100%"}} resizeMode="center"></Image>
 
                 <View style={{flexGrow: 1, minWidth: "40%"}}>
