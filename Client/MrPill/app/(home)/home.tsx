@@ -211,7 +211,7 @@ const HomePage: React.FC = () => {
                 />
             </View>
 
-          <View style={{borderWidth: 2, flex: 1}}>
+          <View style={{borderLeftWidth: 1, flex: 1}}>
             <Text style={{color: "#000", fontSize: 20, fontWeight: 'bold', textAlign: 'center'}}>{notification.senderName}{"\n"}0{notification.senderPhoneNumber}</Text>
             <Text style={{color: "#000", fontSize: 16, textAlign: 'center'}}>שלח לך בקשת הצטרפות לארון</Text>
           </View>
