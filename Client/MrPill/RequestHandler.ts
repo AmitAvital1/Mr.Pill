@@ -10,7 +10,7 @@ const DEFAULT_SLEEP_TIME = 1000;
 // const COOLDOWN_MULTIPLIER = 3; // if the user sends consequtive requests of DIFFERENT types, they can send them COOLDOWN_MULTIPLIER times faster.
 
 // do not change
-const BASE_URL_LOCAL = "http://192.168.50.207:" // android emulator and server running on same machine
+const BASE_URL_LOCAL = "http://10.0.2.2:" // android emulator and server running on same machine
 const URL = SERVER_AND_CLIENT_ON_SAME_MACHINE ? BASE_URL_LOCAL : BASE_URL;
 
 let request = {

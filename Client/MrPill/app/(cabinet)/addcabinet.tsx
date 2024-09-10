@@ -1,5 +1,5 @@
 import React from 'react';
-import {SafeAreaView, StyleSheet, TextInput, View, Text, Alert} from 'react-native';
+import {ScrollView, StyleSheet, TextInput, View, Text, Alert} from 'react-native';
 
 import { router } from 'expo-router';
 
@@ -38,16 +38,16 @@ const AddCabinetScreen = () => {
   }
 
   return (    
-    <SafeAreaView style={{flex: 1, backgroundColor: bgc }}>
+    <ScrollView style={{flex: 1, backgroundColor: bgc }}>
   
       <View style={styles.pagetop}>
         {MrPillLogo(0.5)}
-        <Text style={{textAlign: 'center', fontSize: 40, flex:1, marginTop: 50}}>
+        <Text style={{textAlign: 'center', lineHeight: 50, fontSize: 40, flex:1, marginTop: 50}}>
           הוספת ארון חדש
         </Text>
       </View>
 
-      <View style={{flex: 1, marginTop: 30}}>
+      <View style={{flexGrow: 1, marginTop: 30}}>
       <TextInput
         style={styles.input}
         onChangeText={(text)=>{setCabinetName(text); setIsNameTaken(false)}}
@@ -67,7 +67,7 @@ const AddCabinetScreen = () => {
             ButtonAction={cabinetName.length < 4 ? ()=>{} : handleButtonPress} />
       </View>
 
-    </SafeAreaView>
+    </ScrollView>
   );
 };
 
@@ -84,11 +84,10 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   pagetop: {
-    height: 180,
-    padding: 10,
+    height: "30%",
+    padding: 0,
     backgroundColor: bgc,
-    marginBottom: 10,
-    marginTop: 8
+    margin: 30,
   },
   pagebottom: {
     flex: 1,
@@ -98,8 +97,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 15,
     marginVertical: 20,
     padding: 5,
-    minHeight: 180,
-    maxHeight: 180,
+    height: "25%",
   },
   
 });

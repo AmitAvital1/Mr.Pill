@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { SafeAreaView, StyleSheet, TextInput, View, Text, Pressable, Alert, TouchableOpacity, ScrollView } from 'react-native';
+import { StyleSheet, TextInput, View, Text, Pressable, Alert, TouchableOpacity, ScrollView } from 'react-native';
 
 import DataHandler from '@/DataHandler';
 import { router } from 'expo-router';
 import { MrPillLogo } from '@/components/MrPillLogo';
-import { ThemedText } from '@/components/ThemedText';
 import ParallaxScrollView from '@/components/ParallaxScrollView';
 import { AppHomeButton } from '@/components/AppHomeButton';
 import { strFC } from '@/components/strFC';
@@ -131,8 +130,9 @@ const AddPillScreen = () => {
   return (
     <ScrollView style={{ backgroundColor: backgroundColorMain, flex: 1 }}>
       <View style={{justifyContent: 'center', minHeight: 90, marginBottom: 10}}> 
-      {MrPillLogo(0.5)}
+        {MrPillLogo(0.5)}
       </View>
+
       {cameraVisible && (
         <View style={styles.cameraContainer}>
           <BarCodeScanner
@@ -194,6 +194,7 @@ const AddPillScreen = () => {
             <Text style={styles.text}>פרטי</Text>
           </View>
         </Pressable>
+
       </View>
 
       <View style={styles.pagebottom}>
